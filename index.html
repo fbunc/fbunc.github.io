@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,9 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.js"></script>
 
     <style>
         body {
@@ -150,6 +153,39 @@
                             <option value="generic">Generic Filter</option>
                         </select>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="formulaSetRadio" id="formulaSetFactorization" value="Factorization in 2D">
+                        <label class="form-check-label" for="formulaSetFactorization">Factorization in 2D</label>
+                    </div>
+                    <div id="factorization-options" style="display: none; margin-left: 20px; margin-top: 5px;">
+                        <label for="factorization-type-select" style="font-size: 0.9rem;">Function Type:</label>
+                        <select id="factorization-type-select" class="form-select form-select-sm mb-2">
+                            <option value="s_n" selected>s_n (Multiplicity)</option>
+                            <option value="s_dot_n">ṡ_n (Distinct primes)</option>
+                            <option value="s_ddot_n">s̈_n (Prime powers p^e)</option>
+                        </select>
+                        <label for="factorization-custom-wn-input" style="font-size: 0.85rem;">Custom w_n (value or expression in n):</label>
+                        <input type="text" id="factorization-custom-wn-input" class="form-control form-control-sm mb-2" placeholder="e.g. 0, n/10, Math.log2(n), s_n(n).real">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="factorization-w0-check">
+                            <label class="form-check-label" for="factorization-w0-check" style="font-size: 0.85rem;">Set w_n = 0 (exact complex plane)</label>
+                        </div>
+                        <label style="font-size: 0.85rem;">T₀ controls ω = e^(2πi/T₀). Use T₀=10 for mod 10 (golden ratio φ), T₀=6 for mod 6 (√3).</label>
+                        <div class="input-group-slider mt-1">
+                            <label for="factorization-to-slider" style="font-size: 0.85rem;">T₀ (Modulus Period):</label>
+                            <input type="range" class="form-range" id="factorization-to-slider" min="0.01" max="20000000" step="0.01" value="10">
+                            <input type="text" id="factorization-to-input" value="10" placeholder="e.g. 10, phi, pi, sqrt2">
+                        </div>
+                        <div class="d-flex gap-1 mt-1">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="factorization-to-phi-btn">φ</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="factorization-to-pi-btn">π</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="factorization-to-sqrt2-btn">√2</button>
+                        </div>
+                        <div class="mt-1" style="font-size: 0.8rem; color: #888;">
+                            <span>Z_n = s(n) = Σ ω^(factor_k). If custom w_n is empty: w_n = 0 (checkbox) or log₂|s(n)|.</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-info mt-2 w-100" id="factorization-tools-button">Factorization Explanation + Export Tools</button>
+                    </div>
                 </div>
                 <hr>
 
@@ -162,7 +198,11 @@
                 </div>
                 <hr>
                 <div class="input-group-slider">
-                    <label for="num-points-slider">N Points:</label>
+                    <label for="start-index-input">Start Index (n):</label>
+                    <input type="number" id="start-index-input" min="0" value="0" step="1" style="width: 100%; border-radius: 0.25rem;">
+                </div>
+                <div class="input-group-slider">
+                    <label for="num-points-slider">N Points (Count):</label>
                     <input type="range" class="form-range" id="num-points-slider" min="10" max="10000" step="10">
                     <input type="number" id="num-points-input" min="10" max="10000" step="10">
                 </div>
@@ -200,7 +240,12 @@
                     <div class="input-group-slider">
                         <label for="to-period-slider">T₀ (Omega Period):</label>
                         <input type="range" class="form-range" id="to-period-slider" min="0.1" max="50.0" step="0.01">
-                        <input type="number" id="to-period-input" step="any">
+                        <input type="text" id="to-period-input" placeholder="e.g. 1.618, phi, pi, sqrt2">
+                    </div>
+                    <div class="d-flex gap-1 mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="main-to-phi-btn">φ</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="main-to-pi-btn">π</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="main-to-sqrt2-btn">√2</button>
                     </div>
                     <div class="mb-2">
                         <label style="font-size: 0.9rem;">Or T₀ as fraction T/T_s:</label>
@@ -220,12 +265,16 @@
                         <div class="mb-2">
                             <label style="font-size: 0.85rem;">Function for Z_n (use n as variable):</label>
                             <textarea id="custom-zn-function" class="form-control form-control-sm" rows="2" placeholder="e.g., n * np.exp(1j * n / 7)" style="font-family: monospace; font-size: 0.85rem;"></textarea>
-                            <small class="text-muted" style="font-size: 0.75rem;">Available: n, np.sin, np.cos, np.exp, np.sqrt, np.log, np.abs, 1j (imaginary unit)</small>
+                            <small class="text-muted" style="font-size: 0.75rem;">Available: n, np.sin, np.cos, np.exp, np.sqrt, np.log, np.abs, 1j, s_n(n), s_dot_n(n), s_ddot_n(n)</small>
                         </div>
                         <div class="mb-2">
                             <label style="font-size: 0.85rem;">Or polar: r(n), theta(n):</label>
-                            <input type="text" id="custom-r-function" class="form-control form-control-sm mb-1" placeholder="e.g., n * 0.1" style="font-family: monospace; font-size: 0.85rem;">
-                            <input type="text" id="custom-theta-function" class="form-control form-control-sm" placeholder="e.g., 2 * np.pi * n / 13" style="font-family: monospace; font-size: 0.85rem;">
+                            <input type="text" id="custom-r-function" class="form-control form-control-sm mb-1" placeholder="r(n) e.g., n * 0.1" style="font-family: monospace; font-size: 0.85rem;">
+                            <input type="text" id="custom-theta-function" class="form-control form-control-sm" placeholder="theta(n) e.g., 2 * np.pi * n / 13" style="font-family: monospace; font-size: 0.85rem;">
+                        </div>
+                        <div class="mb-2">
+                             <label style="font-size: 0.85rem;">Optional: w_n (Z-axis height):</label>
+                             <input type="text" id="custom-wn-function" class="form-control form-control-sm" placeholder="e.g., np.log(n) or s_n(n).real" style="font-family: monospace; font-size: 0.85rem;">
                         </div>
                         <button type="button" class="btn btn-sm btn-primary w-100" id="apply-custom-function-btn">Apply Custom Function</button>
                     </div>
@@ -243,7 +292,7 @@
                     <label>Visuals:</label>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="highlight-primes-check">
-                        <label class="form-check-label" for="highlight-primes-check">Highlight Primes (n+1)</label>
+                        <label class="form-check-label" for="highlight-primes-check">Highlight Primes</label>
                     </div>
                     <div class="mb-2" id="prime-marker-controls" style="display: none; margin-left: 20px;">
                         <label style="font-size: 0.85rem;">Prime Marker:</label>
@@ -274,6 +323,10 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="prime-lines-color-by-source-check">
                             <label class="form-check-label" for="prime-lines-color-by-source-check" style="font-size: 0.85rem;">Color by Source (Red&rarr;Blue)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="prime-lines-color-by-angle-check">
+                            <label class="form-check-label" for="prime-lines-color-by-angle-check" style="font-size: 0.85rem;">Color by Angle (Arg(ΔZ))</label>
                         </div>
                     </div>
                     <div class="form-check">
@@ -319,8 +372,14 @@
                     <input type="number" id="line-width-input" step="any">
                 </div>
             </div>
-            <div class="col-lg-9 col-md-8 plot-container">
+            <div class="col-lg-9 col-md-8 plot-container" style="position: relative;">
                 <div id="plotDiv"></div>
+                <div id="prime-table-overlay" style="position: absolute; top: 10px; right: 10px; background-color: #22252a !important; border: 1px solid #454545; border-radius: 5px; padding: 5px; display: none; font-size: 0.8rem; font-family: monospace; z-index: 1000; pointer-events: none; color: #ffffff !important;">
+                    <h6 style="margin: 0; text-align: center; color: #00bc8c; font-size: 0.9rem;">Last 48 Primes</h6>
+                    <table class="table table-sm table-borderless mb-0" style="background-color: transparent !important; color: #ffffff !important;">
+                        <tbody id="prime-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -333,6 +392,134 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="infoModalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="factorizationToolsModal" tabindex="-1" aria-labelledby="factorizationToolsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="factorizationToolsModalLabel">Factorization in 2D: Explanation + Export Tools</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- ── Notation explanation (hardcoded, always visible) ── -->
+                    <div id="factorization-notation-content" style="margin-bottom: 1rem;">
+                        <h6 style="color:#00bc8c;">Notation &amp; What We Are Plotting</h6>
+                        <div style="max-height: 55vh; overflow-y: auto; border: 1px solid #454545; border-radius: 0.25rem; padding: 1rem; font-size: 0.92rem; line-height: 1.6;">
+
+                            <p>Every integer $n \geq 2$ has a unique factorization into prime powers. We write it keeping track of the <strong>distinct</strong> primes and their exponents:</p>
+                            $$n = \prod_{k=1}^{m_n} d_k^{e_k}$$
+                            <table class="table table-sm table-dark table-bordered" style="font-size:0.85rem;">
+                                <thead><tr><th>Symbol</th><th>Meaning</th></tr></thead>
+                                <tbody>
+                                    <tr><td>$d_k$</td><td>Distinct prime factors of $n$, sorted ascending</td></tr>
+                                    <tr><td>$e_k$</td><td>Exponent of $d_k$ in the factorization</td></tr>
+                                    <tr><td>$m_n$</td><td>Number of <em>distinct</em> prime factors — little omega $\omega(n)$</td></tr>
+                                    <tr><td>$M_n = \displaystyle\sum e_k$</td><td>Total prime factors counting multiplicity — big omega $\Omega(n)$</td></tr>
+                                </tbody>
+                            </table>
+                            <p><strong>Example — $n = 60 = 2^2 \cdot 3^1 \cdot 5^1$:</strong> $\{d_k\}=\{2,3,5\}$, $\{e_k\}=\{2,1,1\}$, $m_{60}=3$, $M_{60}=4$.</p>
+
+                            <hr style="border-color:#454545;">
+                            <p>We pick a period $T_o \in \mathbb{Q}$ and define the primitive phase unit:</p>
+                            $$\omega = e^{2\pi i / T_o}$$
+                            <p>Each prime factor $d_k$ is mapped to a direction on the unit circle via $\omega^{d_k}$. Only $d_k \bmod T_o$ matters for the angle, so small integer $T_o$ collapses many primes to the same few directions.</p>
+
+                            <hr style="border-color:#454545;">
+                            <h6 style="color:#00d2ac;">The three sequences</h6>
+                            <table class="table table-sm table-dark table-bordered" style="font-size:0.85rem;">
+                                <thead><tr><th>Sequence</th><th>Definition</th><th>Description</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td>$s_n$</td>
+                                        <td>$\displaystyle\sum_{k=1}^{m_n} e_k\, \omega^{d_k}$</td>
+                                        <td>Each prime $d_k$ contributes once <em>per multiplicity</em> — if $d_k$ appears $e_k$ times it adds $e_k$ copies of $\omega^{d_k}$</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$\dot{s}_n$</td>
+                                        <td>$\displaystyle\sum_{k=1}^{m_n} \omega^{d_k}$</td>
+                                        <td>Each <em>distinct</em> prime contributes exactly one unit vector, regardless of how many times it appears</td>
+                                    </tr>
+                                    <tr>
+                                        <td>$\ddot{s}_n$</td>
+                                        <td>$\displaystyle\sum_{k=1}^{m_n} \omega^{e_k^{d_k}}$</td>
+                                        <td>Each distinct prime contributes one unit vector at angle index $d_k^{e_k}$ — encoding both the prime and its exponent together</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p><strong>Example — $n = 60$:</strong></p>
+                            $$s_{60} = 2\,\omega^{2} + \omega^3 + \omega^5 \qquad \dot{s}_{60} = \omega^2 + \omega^3 + \omega^5 \qquad \ddot{s}_{60} = \omega^{4} + \omega^3 + \omega^5$$
+                            <p><strong>Primes are always unit vectors:</strong> for any prime $p$, $s_p = \dot{s}_p = \omega^p$, so $|s_p|=1$. All primes land on the unit circle — they are sieved out naturally by their modulus.</p>
+
+                            <hr style="border-color:#454545;">
+                            <h6 style="color:#00d2ac;">The 2D scatter plot</h6>
+                            <p>Each $n$ is placed at $\bigl(\operatorname{Re}(s_n),\, \operatorname{Im}(s_n)\bigr)$. Color encodes $n \bmod M_c$.</p>
+                            <p><strong>$T_o = 10$</strong> — only the last decimal digit of $p$ matters. Primes (except 2 and 5) end in 1, 3, 7, 9. The geometry is shaped by the golden ratio $\varphi = \frac{1+\sqrt{5}}{2}$, since $\cos(36°) = \varphi/2$.</p>
+                            <p><strong>$T_o = 6$</strong> — primes (except 2 and 3) are always $\equiv 1$ or $5 \pmod{6}$, landing at $\pm 60°$. The geometry is hexagonal, shaped by $\sqrt{3}$.</p>
+                            <p>For large $T_o$ the angles spread continuously and the scatter becomes a dense cloud rather than a discrete lattice.</p>
+
+                            <hr style="border-color:#454545;">
+                            <h6 style="color:#00d2ac;">The 3D plot — choosing the $z$-axis</h6>
+                            <p>A third coordinate $w_n$ lifts each point out of the plane. Natural choices:</p>
+                            <table class="table table-sm table-dark table-bordered" style="font-size:0.85rem;">
+                                <thead><tr><th>$w_n$</th><th>Meaning</th></tr></thead>
+                                <tbody>
+                                    <tr><td>$w_n = n$</td><td>The "time" axis — how the pattern grows as we count</td></tr>
+                                    <tr><td>$w_n = M_n$</td><td>The "mass" axis — total prime factors with multiplicity</td></tr>
+                                    <tr><td>$w_n = m_n$</td><td>The "diversity" axis — number of distinct prime factors</td></tr>
+                                </tbody>
+                            </table>
+
+                            <hr style="border-color:#454545;">
+                            <h6 style="color:#00d2ac;">The coupon-collector question</h6>
+                            <p>As we count $n = 2, 3, \ldots, N$, how many <strong>distinct</strong> positions in the complex plane do we visit? Imagine drawing numbers out of a box: before factorizing $n$ we ask — will it land on a position we have already seen, or will it need a new one? The <strong>occupancy probability</strong> tracks, as a running fraction, what proportion of all $n$ so far landed on a previously visited position.</p>
+                            <ul style="font-size:0.85rem;">
+                                <li>Small integer $T_o$: few possible angles → positions reused very quickly.</li>
+                                <li>Large or irrational $T_o$: new positions keep appearing for longer before repetitions dominate.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <h6>Mod 6 &amp; Mod 10 Analysis <small class="text-muted" style="font-size:0.75rem;">(loads counting_and_geometry.md)</small></h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary mb-2" id="factorization-refresh-explanation-btn">Load / Reload Analysis</button>
+                            <div id="factorization-md-content" style="max-height: 45vh; overflow-y: auto; border: 1px solid #454545; border-radius: 0.25rem; padding: 0.75rem;"></div>
+                        </div>
+                        <div class="col-lg-6">
+                            <h6>First 36 values of s_n (current T₀)</h6>
+                            <div id="factorization-sn-table" style="max-height: 45vh; overflow-y: auto; border: 1px solid #454545; border-radius: 0.25rem; padding: 0.75rem;"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-2">
+                            <label for="factorization-export-start-input">Start n</label>
+                            <input type="number" id="factorization-export-start-input" class="form-control form-control-sm" min="1" step="1" value="1">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="factorization-export-end-input">End n</label>
+                            <input type="number" id="factorization-export-end-input" class="form-control form-control-sm" min="1" step="1" value="1000">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="factorization-export-frame-step-input">Frame step</label>
+                            <input type="number" id="factorization-export-frame-step-input" class="form-control form-control-sm" min="1" step="1" value="1">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="factorization-export-fps-input">Animation FPS</label>
+                            <input type="number" id="factorization-export-fps-input" class="form-control form-control-sm" min="1" max="60" step="1" value="12">
+                        </div>
+                        <div class="col-md-4 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-success" id="factorization-download-csv-btn">Download CSV</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="factorization-download-image-btn">Download Image</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning" id="factorization-download-gif-btn">Download GIF</button>
+                            <button type="button" class="btn btn-sm btn-outline-info" id="factorization-download-zip-btn">Download ZIP Frames</button>
+                        </div>
+                    </div>
+                    <div id="factorization-export-status" class="mt-2" style="font-size: 0.9rem; color: #00bc8c;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -904,7 +1091,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
         const ATOM_CURVES = transforms.map(t => t.name);
 
         const INITIAL_PARAMS = {
-            formula_set: "User's Formulas", num_points: 500,
+            formula_set: "User's Formulas", num_points: 500, start_index: 0,
             M_r_update: 13, delta_r_initial: 0.1, T_o_period: 1.618033988749895,
             D_dimension: 4.0, M_c_color: 13,
             active_curves: [...FLOWER_CURVES],
@@ -915,6 +1102,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             prime_line_width: 2.0,
             prime_lines_color_by_distance: false,
             prime_lines_color_by_source: false,
+            prime_lines_color_by_angle: false,
             show_all_point_indices: false, 
             show_prime_point_indices: false,
             show_index_mod_mc: false,
@@ -926,6 +1114,11 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             custom_zn_function: '',
             custom_r_function: '',
             custom_theta_function: '',
+            custom_wn_function: '',
+            factorization_type: 's_n',
+            factorization_To: 10,
+            factorization_w_zero: false,
+            factorization_custom_wn: '',
         };
 
         const PRESETS = {
@@ -940,6 +1133,34 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             "User Ex4: M=1,To=Mc=3": { ...INITIAL_PARAMS, formula_set: "User's Formulas", num_points: 100, M_r_update: 1, delta_r_initial: 0.2, T_o_period: 3.0, M_c_color: 3, active_curves: [...FLOWER_CURVES], },
             "User Ex5: r_n=(n-1)/(n+1)": { ...INITIAL_PARAMS, formula_set: "User's Formulas", num_points: 1000, T_o_period: PHI, M_c_color: 13, active_curves: [...FLOWER_CURVES], use_custom_function: true, custom_r_function: '(n-1)/(n+1)', custom_theta_function: '2 * np.pi * n / ' + PHI },
             "User Ex6: Primes Mod 6 Line Color": { ...INITIAL_PARAMS, formula_set: "User's Formulas", num_points: 1000, T_o_period: PHI, M_c_color: 6, active_curves: [...FLOWER_CURVES], highlight_primes: true, prime_lines: true, prime_lines_color_by_source: true, prime_line_width: 3.0, scatter_size: 3.0, prime_size_factor: 2.0 },
+            "Factorization Mod 10 (s_n)": { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 1000, start_index: 1, T_o_period: 10.0, M_c_color: 13, active_curves: ["A"], factorization_type: 's_n', factorization_To: 10, factorization_w_zero: true },
+            "Factorization Mod 6 (s_n)": { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 1000, start_index: 1, T_o_period: 6.0, M_c_color: 6, active_curves: ["A"], factorization_type: 's_n', factorization_To: 6, factorization_w_zero: true, highlight_primes: true },
+            "Factorization Mod 10 (ṡ_n)": { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 1000, start_index: 1, T_o_period: 10.0, M_c_color: 10, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 10, factorization_w_zero: true, highlight_primes: true },
+            // ── Notebook examples: s_n, T₀ ∈ {6,10,12,100,1000,10000} ──
+            "NB s_n T₀=6":     { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 6,  active_curves: ["A"], factorization_type: 's_n', factorization_To: 6,     factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s_n T₀=10":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_n', factorization_To: 10,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s_n T₀=12":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_n', factorization_To: 12,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s_n T₀=100":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_n', factorization_To: 100,   factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB s_n T₀=1e3":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_n', factorization_To: 1000,  factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB s_n T₀=1e4":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 13, active_curves: ["A"], factorization_type: 's_n', factorization_To: 10000, factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            // ── Notebook examples: ṡ_n (distinct primes), T₀ ∈ {6,10,12,100,1000,10000} ──
+            "NB ṡ_n T₀=6":     { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 6,  active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 6,     factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB ṡ_n T₀=10":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 10,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB ṡ_n T₀=12":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 12,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB ṡ_n T₀=100":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 100,   factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB ṡ_n T₀=1e3":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 1000,  factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB ṡ_n T₀=1e4":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 13, active_curves: ["A"], factorization_type: 's_dot_n', factorization_To: 10000, factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            // ── Notebook examples: s̈_n (prime powers p^e), T₀ ∈ {6,10,12,100,1000,10000} ──
+            "NB s̈_n T₀=6":     { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 6,  active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 6,     factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s̈_n T₀=10":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 10,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s̈_n T₀=12":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 12,    factorization_w_zero: true, highlight_primes: true,  scatter_size: 3.0 },
+            "NB s̈_n T₀=100":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 10, active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 100,   factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB s̈_n T₀=1e3":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 1000,  factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            "NB s̈_n T₀=1e4":   { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 13, active_curves: ["A"], factorization_type: 's_ddot_n', factorization_To: 10000, factorization_w_zero: true, highlight_primes: false, scatter_size: 3.0 },
+            // ── Notebook examples: 3D embeddings (T₀=24, s_n, z = n / M_n / m_n) ──
+            "NB 3D s_n T₀=24 z=n":    { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_n', factorization_To: 24, factorization_w_zero: false, factorization_custom_wn: 'n',                               highlight_primes: true, scatter_size: 3.0 },
+            "NB 3D s_n T₀=24 z=Ω(n)": { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_n', factorization_To: 24, factorization_w_zero: false, factorization_custom_wn: 'getPrimeFactors(n, false).length', highlight_primes: true, scatter_size: 3.0 },
+            "NB 3D s_n T₀=24 z=ω(n)": { ...INITIAL_PARAMS, formula_set: "Factorization in 2D", num_points: 5000, start_index: 1, M_c_color: 12, active_curves: ["A"], factorization_type: 's_n', factorization_To: 24, factorization_w_zero: false, factorization_custom_wn: 'getPrimeFactors(n, true).length',  highlight_primes: true, scatter_size: 3.0 },
             "Inspirational Default": { ...INITIAL_PARAMS, formula_set: "Inspirational Formulas", num_points: 1000, D_dimension: 4.0, M_c_color: 21, active_curves: [...ATOM_CURVES], line_between_dots: false, scatter_size: 2.0, }
         };
 
@@ -1002,6 +1223,56 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
         const customRFunction = document.getElementById('custom-r-function');
         const customThetaFunction = document.getElementById('custom-theta-function');
         const applyCustomFunctionBtn = document.getElementById('apply-custom-function-btn');
+        const factorizationCustomWnInput = document.getElementById('factorization-custom-wn-input');
+        const factorizationToPhiBtn = document.getElementById('factorization-to-phi-btn');
+        const factorizationToPiBtn = document.getElementById('factorization-to-pi-btn');
+        const factorizationToSqrt2Btn = document.getElementById('factorization-to-sqrt2-btn');
+        const mainToPhiBtn = document.getElementById('main-to-phi-btn');
+        const mainToPiBtn = document.getElementById('main-to-pi-btn');
+        const mainToSqrt2Btn = document.getElementById('main-to-sqrt2-btn');
+        const factorizationToolsButton = document.getElementById('factorization-tools-button');
+        const factorizationToolsModalElement = document.getElementById('factorizationToolsModal');
+        let factorizationToolsModalInstance = null;
+
+        // --- Prime Utilities for Custom Functions ---
+        const MAX_PRECOMPUTE_PRIME = 10000000;
+        const minPrimes = new Int32Array(MAX_PRECOMPUTE_PRIME + 1);
+
+        function sieve() {
+            // Mark SPF for composite numbers
+            for (let i = 2; i * i <= MAX_PRECOMPUTE_PRIME; i++) {
+                if (minPrimes[i] === 0) {
+                    for (let j = i * i; j <= MAX_PRECOMPUTE_PRIME; j += i) {
+                        if (minPrimes[j] === 0) minPrimes[j] = i;
+                    }
+                }
+            }
+            // Mark SPF for prime numbers
+            for (let i = 2; i <= MAX_PRECOMPUTE_PRIME; i++) {
+                if (minPrimes[i] === 0) minPrimes[i] = i;
+            }
+        }
+        // Initialize sieve immediately
+        sieve();
+
+        function getPrimeFactors(n, distinct = false) {
+            if (n <= 1) return [];
+            if (n > MAX_PRECOMPUTE_PRIME) return []; // Too large
+            const factors = [];
+            let temp = n;
+            while (temp > 1) {
+                let p = minPrimes[temp];
+                if (distinct) {
+                    if (factors.length === 0 || factors[factors.length - 1] !== p) {
+                        factors.push(p);
+                    }
+                } else {
+                    factors.push(p);
+                }
+                temp = Math.floor(temp / p);
+            }
+            return factors;
+        }
 
         // Complex number support for custom functions
         class Complex {
@@ -1038,6 +1309,67 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             }
         }
 
+        // --- Factorization in 2D: s_n, ṡ_n, s̈_n functions (for Custom Z_n) ---
+        function calculateFactorizationComplex(n, sequenceType = 's_n', To = null) {
+            if (n < 1) return new Complex(0, 0);
+            if (n > MAX_PRECOMPUTE_PRIME) return new Complex(0, 0);
+            if (typeof To !== 'number') To = currentParams.T_o_period;
+
+            const twoPiOverTo = (Math.PI * 2) / To;
+            let sumRe = 0, sumIm = 0;
+
+            if (sequenceType === 's_n') {
+                const factors = getPrimeFactors(n, false);
+                for (let i = 0; i < factors.length; i++) {
+                    const theta = factors[i] * twoPiOverTo;
+                    sumRe += Math.cos(theta);
+                    sumIm += Math.sin(theta);
+                }
+            } else if (sequenceType === 's_dot_n') {
+                const factors = getPrimeFactors(n, true);
+                for (let i = 0; i < factors.length; i++) {
+                    const theta = factors[i] * twoPiOverTo;
+                    sumRe += Math.cos(theta);
+                    sumIm += Math.sin(theta);
+                }
+            } else if (sequenceType === 's_ddot_n') {
+                const factors = {};
+                let d = 2;
+                let temp = n;
+                while (d * d <= temp) {
+                    while (temp % d === 0) {
+                        factors[d] = (factors[d] || 0) + 1;
+                        temp = Math.floor(temp / d);
+                    }
+                    d++;
+                }
+                if (temp > 1) factors[temp] = (factors[temp] || 0) + 1;
+
+                for (const pStr in factors) {
+                    const p = parseInt(pStr);
+                    const e = factors[pStr];
+                    const theta = Math.pow(p, e) * twoPiOverTo;
+                    sumRe += Math.cos(theta);
+                    sumIm += Math.sin(theta);
+                }
+            }
+
+            return new Complex(sumRe, sumIm);
+        }
+
+        function calculateSn(n, To = null) {
+            return calculateFactorizationComplex(n, 's_n', To);
+        }
+
+        function calculateSdotn(n, To = null) {
+            return calculateFactorizationComplex(n, 's_dot_n', To);
+        }
+
+        // Added s_ddot_n support
+        function calculateSdotdotn(n, To = null) {
+            return calculateFactorizationComplex(n, 's_ddot_n', To);
+        }
+
         // Numpy-like math functions for custom function evaluation
         const np = {
             sin: Math.sin,
@@ -1065,36 +1397,45 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     return `new Complex(0, ${coefficient})`;
                 });
                 
-                // Create a safe evaluation context
-                const func = new Function('n', 'np', 'Math', 'Complex', `return ${processedStr}`);
-                return func(n, np, Math, Complex);
+                // Expose function aliases: s, s_dot, s_ddot
+                // Passed as arguments to new Function
+                const func = new Function('n', 'np', 'Math', 'Complex', 's_n', 's_dot_n', 's_ddot_n', 's', 'dot_s', 'dotdot_s', 'getPrimeFactors', `return ${processedStr}`);
+                
+                // Bind the aliases
+                return func(
+                    n, np, Math, Complex, 
+                    calculateSn, calculateSdotn, calculateSdotdotn, // Standard names
+                    calculateSn, calculateSdotn, calculateSdotdotn, // Aliases: s, dot_s, dotdot_s
+                    getPrimeFactors
+                );
             } catch (e) {
                 console.error('Error evaluating function:', e);
                 return NaN;
             }
         }
 
-        function computeCustomCoordinatesJS(num_points, znFunc, rFunc, thetaFunc) {
-            const n_arr = Array.from({length:num_points},(_,i)=>i);
+        function computeCustomCoordinatesJS(num_points, znFunc, rFunc, thetaFunc, start_index = 0, wnFuncStr = null) {
+            const n_arr = new Array(num_points);
             const u_b = new Array(num_points);
             const v_b = new Array(num_points);
             const w_b = new Array(num_points);
             
-            if (num_points === 0) return {n_array:n_arr, u_base:[], v_base:[], w_base:[]};
+            if (num_points === 0) return {n_array:[], u_base:[], v_base:[], w_base:[]};
             
             for (let i = 0; i < num_points; i++) {
-                const n = n_arr[i];
+                const n = i + start_index; // n matches index + start
+                n_arr[i] = n;
+                
                 let z_re, z_im, r_mag;
                 
                 if (znFunc && znFunc.trim()) {
                     // Direct Z_n function (can return complex)
-                    const result = evaluateCustomFunction(znFunc, n);
+                    let result = evaluateCustomFunction(znFunc, n); // n passed as argument
+                    
                     if (result instanceof Complex) {
-                        // Complex number object
                         z_re = result.real;
                         z_im = result.imag;
                     } else if (typeof result === 'object' && result !== null && 'real' in result) {
-                        // Legacy complex object format
                         z_re = result.real;
                         z_im = result.imag;
                     } else if (typeof result === 'number') {
@@ -1106,30 +1447,111 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     }
                     r_mag = Math.sqrt(z_re * z_re + z_im * z_im);
                 } else if (rFunc && thetaFunc) {
-                    // Polar form: r(n), theta(n)
+                    // Polar form
+                    // ... existing logic ...
                     let r = evaluateCustomFunction(rFunc, n);
                     let theta = evaluateCustomFunction(thetaFunc, n);
-                    // Ensure numeric values
-                    if (r instanceof Complex) r = r.real;
+                     if (r instanceof Complex) r = r.real;
                     if (theta instanceof Complex) theta = theta.real;
                     z_re = r * Math.cos(theta);
                     z_im = r * Math.sin(theta);
                     r_mag = Math.abs(r);
                 } else {
-                    z_re = 0;
-                    z_im = 0;
-                    r_mag = 0;
+                    z_re = 0; z_im = 0; r_mag = 0;
                 }
                 
                 u_b[i] = z_re;
                 v_b[i] = z_im;
-                w_b[i] = (r_mag > 0) ? Math.log2(r_mag) : (r_mag === 0 ? -Infinity : NaN);
+                
+                // Handle W_n (Z-axis) - Custom Functionality
+                if (wnFuncStr && wnFuncStr.trim()) {
+                     let w_val = evaluateCustomFunction(wnFuncStr, n);
+                     // If complex, take magnitude or real? Usually real for axis.
+                     if (w_val instanceof Complex) w_val = w_val.real; 
+                     w_b[i] = (typeof w_val === 'number' && !isNaN(w_val)) ? w_val : 0;
+                } else {
+                    // Default behavior
+                    w_b[i] = (r_mag > 0) ? Math.log2(r_mag) : (r_mag === 0 ? -Infinity : NaN);
+                }
             }
             
             return {n_array: n_arr, u_base: u_b, v_base: v_b, w_base: w_b};
         }
 
         function isPrime(num) { if (num < 2) return false; for (let i = 2; i * i <= num; i++) if (num % i === 0) return false; return true; }
+
+        function isFactorizationFormulaSet() {
+            return currentParams && currentParams.formula_set === "Factorization in 2D";
+        }
+
+        function getNumberValueFromPlotIndex(nVal) {
+            return isFactorizationFormulaSet() ? nVal : (nVal + 1);
+        }
+
+        function isPrimeAtPlotIndex(nVal) {
+            return isPrime(getNumberValueFromPlotIndex(nVal));
+        }
+        
+        function updatePrimeTable(n_array) {
+            const tableBody = document.getElementById('prime-table-body');
+            const overlay = document.getElementById('prime-table-overlay');
+            if (!n_array || n_array.length === 0) {
+                overlay.style.display = 'none';
+                return;
+            }
+
+            // Find primes in the current dataset using the active formula set indexing convention.
+            const primes = [];
+            for (let i = 0; i < n_array.length; i++) {
+                const val = getNumberValueFromPlotIndex(n_array[i]);
+                if (isPrime(val)) {
+                    primes.push(val);
+                }
+            }
+
+            if (primes.length === 0) {
+                 overlay.style.display = 'none';
+                 return;
+            }
+
+            overlay.style.display = 'block';
+            // Last 48 primes
+            const lastPrimes = primes.slice(-48);
+            
+            // Render 8 columns x 6 rows (or as many rows as needed)
+            // 48 / 8 = 6 rows.
+            // We want to fill it row by row or column by column? Usually row by row is easier to read.
+            // Let's do row by row.
+            
+            let html = '';
+            // Pad with empty if < 48? Or just show what we have.
+            // If we want fixed 8x6 grid:
+            const totalCells = 48;
+            const cells = new Array(totalCells).fill('');
+            
+            // Fill from end? "Last 48 primes".
+            // Usually we list them in increasing order.
+            // So if we have [2, 3, 5], we show 2, 3, 5. 
+            // If we have 100 primes, we show the last 48: p_53 ... p_100.
+            // So we just take `lastPrimes` (which is already sorted) and fill cells.
+            
+            for (let i = 0; i < lastPrimes.length; i++) {
+                cells[i] = lastPrimes[i];
+            }
+            
+            // Now build table
+            for (let r = 0; r < 6; r++) {
+                html += '<tr>';
+                for (let c = 0; c < 8; c++) {
+                    const idx = r * 8 + c;
+                    const val = cells[idx] !== '' ? cells[idx] : '';
+                    html += `<td style="padding: 2px 5px; text-align: right; color: #ffffff;">${val}</td>`;
+                }
+                html += '</tr>';
+            }
+            tableBody.innerHTML = html;
+        }
+
         function generatePointColorStrings(n_array, M_c, useSpecial, a, b) { 
             if (useSpecial) {
                 const c = []; 
@@ -1188,38 +1610,39 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                 }
             };
         }
-        function computeUserCoordinatesJS(num_points, M_r_update, delta_r_initial, T_o_period, use_custom = false, custom_zn = '', custom_r = '', custom_theta = '') { 
+        function computeUserCoordinatesJS(num_points, M_r_update, delta_r_initial, T_o_period, use_custom = false, custom_zn = '', custom_r = '', custom_theta = '', custom_wn = '', start_index = 0) {
             // If custom function enabled, use it instead
             if (use_custom && (custom_zn || (custom_r && custom_theta))) {
-                return computeCustomCoordinatesJS(num_points, custom_zn, custom_r, custom_theta);
+                return computeCustomCoordinatesJS(num_points, custom_zn, custom_r, custom_theta, start_index, custom_wn);
             }
             
             // Standard computation
-            const n_arr = Array.from({length:num_points},(_,i)=>i); 
-            const r_arr = new Array(num_points).fill(0); 
-            if(num_points===0) return {n_array:n_arr,u_base:[],v_base:[],w_base:[]}; 
-            if(M_r_update<=0)M_r_update=1; 
-            let current_r=0; 
-            if(num_points>0){
-                if(0%M_r_update===0)current_r+=delta_r_initial; 
-                r_arr[0]=current_r; 
-                for(let k=1;k<num_points;k++){
-                    if(k%M_r_update===0)current_r+=delta_r_initial; 
-                    r_arr[k]=current_r;
-                }
-            } 
-            const Omega_o=(T_o_period===0)?0:(2*Math.PI/T_o_period); 
-            const u_b=new Array(num_points),v_b=new Array(num_points),w_b=new Array(num_points); 
+            const n_arr = Array.from({length:num_points},(_,i)=>i + start_index);
+            const r_arr = new Array(num_points).fill(0);
+            if(num_points===0) return {n_array:[], u_base:[], v_base:[], w_base:[]};
+            if(M_r_update<=0)M_r_update=1;
+            
+            // Calculate starting radius based on start_index
+            // r starts at delta_r_initial for n=0 and increases every time n % M_r_update == 0
+            // So r_n = (floor(n / M_r_update) + 1) * delta_r_initial
+            
+            for(let i=0; i<num_points; i++){
+                const n = n_arr[i]; // n starts at start_index
+                r_arr[i] = (Math.floor(n / M_r_update) + 1) * delta_r_initial;
+            }
+            
+            const Omega_o=(T_o_period===0)?0:(2*Math.PI/T_o_period);
+            const u_b=new Array(num_points),v_b=new Array(num_points),w_b=new Array(num_points);
             for(let i=0;i<num_points;i++){
-                const ang=Omega_o*n_arr[i],r_v=r_arr[i]; 
+                const ang=Omega_o*n_arr[i],r_v=r_arr[i];
                 u_b[i]=r_v*Math.cos(ang);
                 v_b[i]=r_v*Math.sin(ang);
                 w_b[i]=(r_v>0)?Math.log2(r_v): (r_v === 0 ? -Infinity : NaN);
-            } 
+            }
             return {n_array:n_arr, u_base:u_b, v_base:v_b, w_base:w_b};
         }
-        function computeCompassCoordinatesJS(N, filterType) {
-            const n_arr = Array.from({length: N}, (_, i) => i);
+        function computeCompassCoordinatesJS(N, filterType, start_index = 0) {
+            const n_arr = Array.from({length: N}, (_, i) => i + start_index);
             const u_b = new Array(N), v_b = new Array(N), w_b = new Array(N);
             
             // Constants from notebook
@@ -1271,7 +1694,255 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             return { n_array: n_arr, u_base: u_b, v_base: v_b, w_base: w_b };
         }
 
-        function computeInspirationalCoordinatesJS(N,D){ const D_c=(D===0)?1e-9:parseFloat(D),r_o_c=1/D_c,sD1=(D_c-1<0)?Math.sqrt(Math.abs(D_c-1)):Math.sqrt(D_c-1),r_e_re=0.5,r_e_im=sD1/2,t_o_c=D_c+3+3+3,sD2=(D_c+1<0)?Math.sqrt(Math.abs(D_c+1)):Math.sqrt(D_c+1),T_o_i=4*Math.PI*(1+sD2),O_i=(T_o_i===0)?0:(2*Math.PI/T_o_i); const n_arr=Array.from({length:N},(_,i)=>i),u_b=new Array(N),v_b=new Array(N),w_b=new Array(N); for(let i=0;i<N;i++){const n1=n_arr[i]+1,e_a=-O_i*n1,e_re=Math.cos(e_a),e_im=Math.sin(e_a),tau_re=r_o_c*(r_e_re*e_re-r_e_im*e_im),tau_im=r_o_c*(r_e_re*e_im+r_e_im*e_re),tca=r_o_c+t_o_c-(n1/(2*(r_o_c||1e-9))),alpha=tca*tau_re,tcb=r_o_c+t_o_c-((sD1*n1)/2),beta=tcb*tau_im; u_b[i]=alpha;v_b[i]=beta;const msq=alpha*alpha+beta*beta;w_b[i]=(msq>0)?(0.5*Math.log2(msq)):(msq===0?-Infinity:NaN);} return {n_array:n_arr,u_base:u_b,v_base:v_b,w_base:w_b};}
+        // ================================================================================
+        // FACTORIZATION IN 2D - Compute s_n, ṡ_n, s̈_n as base Z_n coordinates
+        // Given ω = e^(2πi/T_o), factorization maps n → Z_n = Σ ω^(factor_k)
+        // ================================================================================
+        function computeFactorizationCoordinatesJS(num_points, factorizationType, factorizationTo, start_index = 0, forceWZero = false, customWnExpr = '') {
+            const n_arr = new Array(num_points);
+            const u_b = new Array(num_points);
+            const v_b = new Array(num_points);
+            const w_b = new Array(num_points);
+            
+            if (num_points === 0) return {n_array:[], u_base:[], v_base:[], w_base:[]};
+            
+            const To = (typeof factorizationTo === 'number') ? factorizationTo : parseFloat(factorizationTo || 10);
+            const startN = Math.max(1, start_index);
+            
+            for (let i = 0; i < num_points; i++) {
+                const n = i + startN;
+                n_arr[i] = n;
+                const zVal = calculateFactorizationComplex(n, factorizationType, To);
+                const sumRe = zVal.real;
+                const sumIm = zVal.imag;
+                
+                u_b[i] = sumRe;
+                v_b[i] = sumIm;
+                const rMag = Math.sqrt(sumRe * sumRe + sumIm * sumIm);
+
+                if (customWnExpr && customWnExpr.trim()) {
+                    let wVal;
+                    const constCandidate = Number(customWnExpr);
+                    if (Number.isFinite(constCandidate)) {
+                        wVal = constCandidate;
+                    } else {
+                        wVal = evaluateCustomFunction(customWnExpr, n);
+                        if (wVal instanceof Complex) wVal = wVal.real;
+                    }
+                    w_b[i] = (typeof wVal === 'number' && !isNaN(wVal)) ? wVal : 0;
+                } else {
+                    w_b[i] = forceWZero ? 0 : ((rMag > 0) ? Math.log2(rMag) : (rMag === 0 ? -Infinity : NaN));
+                }
+            }
+            
+            return {n_array: n_arr, u_base: u_b, v_base: v_b, w_base: w_b};
+        }
+
+        function formatFactorizationNumber(val) {
+            if (!isFinite(val)) return String(val);
+            return Number(val).toFixed(6).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+        }
+
+        function buildSnTableHtml(To, count = 36) {
+            let html = '<table class="table table-sm table-dark table-striped"><thead><tr><th>n</th><th>Prime factors</th><th>Re(s_n)</th><th>Im(s_n)</th><th>|s_n|</th></tr></thead><tbody>';
+            for (let n = 1; n <= count; n++) {
+                const factors = getPrimeFactors(n, false);
+                const z = calculateFactorizationComplex(n, 's_n', To);
+                const mag = Math.hypot(z.real, z.imag);
+                html += `<tr><td>${n}</td><td>${factors.length ? factors.join('·') : '-'}</td><td>${formatFactorizationNumber(z.real)}</td><td>${formatFactorizationNumber(z.imag)}</td><td>${formatFactorizationNumber(mag)}</td></tr>`;
+            }
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function updateFactorizationToolsTable() {
+            const tableEl = document.getElementById('factorization-sn-table');
+            if (!tableEl) return;
+            const To = parseFloat(currentParams.factorization_To || 10);
+            tableEl.innerHTML = buildSnTableHtml(To, 36);
+        }
+
+        async function loadFactorizationMarkdownIntoModal() {
+            const mdContainer = document.getElementById('factorization-md-content');
+            if (!mdContainer) return;
+            try {
+                const res = await fetch(`counting_and_geometry.md?ts=${Date.now()}`);
+                if (!res.ok) throw new Error('Unable to fetch counting_and_geometry.md');
+                const mdText = await res.text();
+                mdContainer.innerHTML = marked.parse(mdText);
+                if (typeof renderMathInElement !== 'undefined') {
+                    renderMathInElement(mdContainer, {
+                        delimiters: [
+                            {left:"$$",right:"$$",display:true},
+                            {left:"$",right:"$",display:false},
+                            {left:"\\(",right:"\\)",display:false},
+                            {left:"\\[",right:"\\]",display:true}
+                        ],
+                        throwOnError:false
+                    });
+                }
+            } catch (e) {
+                mdContainer.innerHTML = '<p>Could not load counting_and_geometry.md. Ensure app is served from a local web server.</p>';
+            }
+        }
+
+        function getFactorizationExportRange() {
+            const startInput = document.getElementById('factorization-export-start-input');
+            const endInput = document.getElementById('factorization-export-end-input');
+            const frameStepInput = document.getElementById('factorization-export-frame-step-input');
+            const fpsInput = document.getElementById('factorization-export-fps-input');
+            const startN = Math.max(1, parseInt(startInput?.value || '1'));
+            const endN = Math.max(startN, parseInt(endInput?.value || String(startN)));
+            const frameStep = Math.max(1, parseInt(frameStepInput?.value || '1'));
+            const fps = Math.max(1, Math.min(60, parseInt(fpsInput?.value || '12')));
+            return { startN, endN, frameStep, fps };
+        }
+
+        function setFactorizationExportStatus(text) {
+            const statusEl = document.getElementById('factorization-export-status');
+            if (statusEl) statusEl.textContent = text;
+        }
+
+        function dataURLToBlob(dataURL) {
+            const parts = dataURL.split(',');
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const binary = atob(parts[1]);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+            return new Blob([bytes], { type: mime });
+        }
+
+        async function captureFactorizationFrameDataUrls(startN, endN, frameStep) {
+            const numPoints = endN - startN + 1;
+            const localData = computeFactorizationCoordinatesJS(
+                numPoints,
+                currentParams.factorization_type,
+                currentParams.factorization_To,
+                startN,
+                currentParams.factorization_w_zero,
+                currentParams.factorization_custom_wn
+            );
+
+            const frames = [];
+            const lastPointCounts = [];
+            for (let k = 1; k <= numPoints; k += frameStep) lastPointCounts.push(k);
+            if (lastPointCounts[lastPointCounts.length - 1] !== numPoints) lastPointCounts.push(numPoints);
+
+            for (let idx = 0; idx < lastPointCounts.length; idx++) {
+                const k = lastPointCounts[idx];
+                setFactorizationExportStatus(`Capturing frame ${idx + 1}/${lastPointCounts.length}...`);
+                drawPlotData(
+                    localData.n_array.slice(0, k),
+                    localData.u_base.slice(0, k),
+                    localData.v_base.slice(0, k),
+                    localData.w_base.slice(0, k)
+                );
+                await new Promise(resolve => setTimeout(resolve, 25));
+                const url = await Plotly.toImage('plotDiv', { format: 'png', width: 1400, height: 900 });
+                frames.push({ url, n: localData.n_array[k - 1] });
+            }
+
+            updatePlot();
+            return frames;
+        }
+
+        async function downloadFactorizationCsv() {
+            const { startN, endN } = getFactorizationExportRange();
+            const numPoints = endN - startN + 1;
+            const data = computeFactorizationCoordinatesJS(
+                numPoints,
+                currentParams.factorization_type,
+                currentParams.factorization_To,
+                startN,
+                currentParams.factorization_w_zero,
+                currentParams.factorization_custom_wn
+            );
+
+            const rows = ['n,u_n,v_n,w_n,abs_s_n,is_prime'];
+            for (let i = 0; i < data.n_array.length; i++) {
+                const n = data.n_array[i];
+                const u = data.u_base[i];
+                const v = data.v_base[i];
+                const w = data.w_base[i];
+                const mag = Math.hypot(u, v);
+                rows.push(`${n},${u},${v},${w},${mag},${isPrime(n) ? 1 : 0}`);
+            }
+
+            const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `factorization_${currentParams.factorization_type}_To_${currentParams.factorization_To}_n_${startN}_to_${endN}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function downloadFactorizationGif() {
+            if (typeof GIF === 'undefined') {
+                alert('GIF library not loaded. Please retry after page refresh.');
+                return;
+            }
+            const { startN, endN, frameStep, fps } = getFactorizationExportRange();
+            const frames = await captureFactorizationFrameDataUrls(startN, endN, frameStep);
+            setFactorizationExportStatus('Encoding GIF...');
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1400;
+            canvas.height = 900;
+            const ctx = canvas.getContext('2d');
+            const gif = new GIF({
+                workers: 2,
+                quality: 10,
+                workerScript: 'https://cdn.jsdelivr.net/npm/gif.js.optimized/dist/gif.worker.js',
+                width: 1400,
+                height: 900
+            });
+
+            for (let i = 0; i < frames.length; i++) {
+                const img = await new Promise((resolve, reject) => {
+                    const image = new Image();
+                    image.onload = () => resolve(image);
+                    image.onerror = reject;
+                    image.src = frames[i].url;
+                });
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                gif.addFrame(canvas, { copy: true, delay: Math.round(1000 / fps) });
+            }
+
+            await new Promise((resolve) => {
+                gif.on('finished', (blob) => {
+                    saveAs(blob, `factorization_animation_${startN}_to_${endN}.gif`);
+                    resolve();
+                });
+                gif.render();
+            });
+            setFactorizationExportStatus('GIF downloaded.');
+        }
+
+        async function downloadFactorizationZipFrames() {
+            if (typeof JSZip === 'undefined') {
+                alert('JSZip library not loaded. Please retry after page refresh.');
+                return;
+            }
+            const { startN, endN, frameStep } = getFactorizationExportRange();
+            const frames = await captureFactorizationFrameDataUrls(startN, endN, frameStep);
+            setFactorizationExportStatus('Creating ZIP with frame-by-frame PNGs...');
+
+            const zip = new JSZip();
+            frames.forEach((frame, idx) => {
+                const blob = dataURLToBlob(frame.url);
+                const name = `frame_${String(idx + 1).padStart(4, '0')}_n_${frame.n}.png`;
+                zip.file(name, blob);
+            });
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            saveAs(zipBlob, `factorization_frames_${startN}_to_${endN}.zip`);
+            setFactorizationExportStatus('ZIP downloaded.');
+        }
+
+        function computeInspirationalCoordinatesJS(N,D,start_index=0){ const D_c=(D===0)?1e-9:parseFloat(D),r_o_c=1/D_c,sD1=(D_c-1<0)?Math.sqrt(Math.abs(D_c-1)):Math.sqrt(D_c-1),r_e_re=0.5,r_e_im=sD1/2,t_o_c=D_c+3+3+3,sD2=(D_c+1<0)?Math.sqrt(Math.abs(D_c+1)):Math.sqrt(D_c+1),T_o_i=4*Math.PI*(1+sD2),O_i=(T_o_i===0)?0:(2*Math.PI/T_o_i); const n_arr=Array.from({length:N},(_,i)=>i+start_index),u_b=new Array(N),v_b=new Array(N),w_b=new Array(N); for(let i=0;i<N;i++){const n1=n_arr[i]+1,e_a=-O_i*n1,e_re=Math.cos(e_a),e_im=Math.sin(e_a),tau_re=r_o_c*(r_e_re*e_re-r_e_im*e_im),tau_im=r_o_c*(r_e_re*e_im+r_e_im*e_re),tca=r_o_c+t_o_c-(n1/(2*(r_o_c||1e-9))),alpha=tca*tau_re,tcb=r_o_c+t_o_c-((sD1*n1)/2),beta=tcb*tau_im; u_b[i]=alpha;v_b[i]=beta;const msq=alpha*alpha+beta*beta;w_b[i]=(msq>0)?(0.5*Math.log2(msq)):(msq===0?-Infinity:NaN);} return {n_array:n_arr,u_base:u_b,v_base:v_b,w_base:w_b};}
         function createCurveCheckboxes(initialActiveCurves = []) { 
             curveSelectionPanel.innerHTML = '<h5>Active Curves</h5>'; 
             const groups = {}; 
@@ -1317,14 +1988,26 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             currentParams.formula_set = document.querySelector('input[name="formulaSetRadio"]:checked').value;
             const compassFilterSelect = document.getElementById('compass-filter-select');
             if (compassFilterSelect) currentParams.compass_filter = compassFilterSelect.value;
+            const factorizationTypeSelect = document.getElementById('factorization-type-select');
+            if (factorizationTypeSelect) currentParams.factorization_type = factorizationTypeSelect.value;
+            const factorizationToInput = document.getElementById('factorization-to-input');
+            if (factorizationToInput) {
+                const parsedFactorizationTo = parseFloatOrConstant(factorizationToInput.value);
+                currentParams.factorization_To = (typeof parsedFactorizationTo === 'number' && !isNaN(parsedFactorizationTo)) ? parsedFactorizationTo : 10;
+            }
+            const factorizationW0Check = document.getElementById('factorization-w0-check');
+            if (factorizationW0Check) currentParams.factorization_w_zero = factorizationW0Check.checked;
+            if (factorizationCustomWnInput) currentParams.factorization_custom_wn = factorizationCustomWnInput.value.trim();
             currentParams.num_points = parseInt(numPointsInput.value); 
+            currentParams.start_index = parseInt(document.getElementById('start-index-input').value) || 0;
             currentParams.M_c_color = parseInt(mcColorInput.value);
             currentParams.use_special_coloring = document.getElementById('use-special-coloring-check').checked;
             currentParams.color_a = parseInt(document.getElementById('color-a-input').value);
             currentParams.color_b = parseInt(document.getElementById('color-b-input').value);
             currentParams.M_r_update = parseInt(mrUpdateInput.value); 
             currentParams.delta_r_initial = parseFloat(deltaRInput.value);
-            currentParams.T_o_period = parseFloat(toPeriodInput.value); 
+            currentParams.T_o_period = parseFloatOrConstant(toPeriodInput.value); 
+            if (typeof currentParams.T_o_period !== 'number' || isNaN(currentParams.T_o_period)) currentParams.T_o_period = PHI;
             currentParams.D_dimension = parseFloat(dDimInput.value);
             currentParams.highlight_primes = highlightPrimesCheck.checked;
             currentParams.prime_marker = primeMarkerSelect.value;
@@ -1333,6 +2016,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             currentParams.prime_line_width = parseFloat(primeLineWidthInput.value);
             currentParams.prime_lines_color_by_distance = primeLinesColorByDistanceCheck.checked;
             currentParams.prime_lines_color_by_source = document.getElementById('prime-lines-color-by-source-check').checked;
+            currentParams.prime_lines_color_by_angle = document.getElementById('prime-lines-color-by-angle-check').checked;
             currentParams.show_all_point_indices = showAllPointIndicesCheck.checked;
             currentParams.show_prime_point_indices = showPrimeIndicesCheck.checked;
             currentParams.show_index_mod_mc = showIndexModMcCheck.checked;
@@ -1346,6 +2030,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             currentParams.custom_zn_function = customZnFunction.value.trim();
             currentParams.custom_r_function = customRFunction.value.trim();
             currentParams.custom_theta_function = customThetaFunction.value.trim();
+            currentParams.custom_wn_function = document.getElementById('custom-wn-function').value.trim();
         }
         
         function updatePlot() {
@@ -1363,12 +2048,23 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     currentParams.use_custom_function,
                     currentParams.custom_zn_function,
                     currentParams.custom_r_function,
-                    currentParams.custom_theta_function
+                    currentParams.custom_theta_function,
+                    currentParams.custom_wn_function, // Added wn support
+                    currentParams.start_index
                 );
             } else if (currentParams.formula_set === "Compass Numbers") {
-                fullCoordDataCache = computeCompassCoordinatesJS(currentParams.num_points, currentParams.compass_filter);
+                fullCoordDataCache = computeCompassCoordinatesJS(currentParams.num_points, currentParams.compass_filter, currentParams.start_index);
+            } else if (currentParams.formula_set === "Factorization in 2D") {
+                fullCoordDataCache = computeFactorizationCoordinatesJS(
+                    currentParams.num_points,
+                    currentParams.factorization_type,
+                    currentParams.factorization_To,
+                    currentParams.start_index,
+                    currentParams.factorization_w_zero,
+                    currentParams.factorization_custom_wn
+                );
             } else {
-                fullCoordDataCache = computeInspirationalCoordinatesJS(currentParams.num_points, currentParams.D_dimension);
+                fullCoordDataCache = computeInspirationalCoordinatesJS(currentParams.num_points, currentParams.D_dimension, currentParams.start_index);
             }
 
             if (currentParams.reverse_order && fullCoordDataCache) {
@@ -1434,7 +2130,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             const fig_data = []; 
             
             const primes_indices_in_subset = (currentParams.highlight_primes || currentParams.show_prime_point_indices) ? 
-                n_array_subset.map((n_val, i_subset) => isPrime(n_val + 1) ? i_subset : -1).filter(i => i !== -1) : [];
+                n_array_subset.map((n_val, i_subset) => isPrimeAtPlotIndex(n_val) ? i_subset : -1).filter(i => i !== -1) : [];
 
             for (const t of active_transforms) {
                 const x=[],y=[],z=[]; 
@@ -1467,9 +2163,10 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     primes_indices_in_subset.forEach(idx_in_subset => {
                         if (idx_in_subset < n_array_subset.length) {
                             const n_val = n_array_subset[idx_in_subset];
+                            const n_display = getNumberValueFromPlotIndex(n_val);
                             const display_val = currentParams.show_index_mod_mc 
-                                ? String((n_val + 1) % currentParams.M_c_color)
-                                : String(n_val + 1);
+                                ? String(n_display % currentParams.M_c_color)
+                                : String(n_display);
                             trace_text_values[idx_in_subset] = display_val;      
                             trace_text_font_colors[idx_in_subset] = point_colors_subset[idx_in_subset]; 
                             
@@ -1482,9 +2179,10 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     trace_mode += '+text';
                     apply_text_styling = true;
                     trace_text_values = n_array_subset.map(n => {
+                        const n_display = getNumberValueFromPlotIndex(n);
                         const display_val = currentParams.show_index_mod_mc 
-                            ? String((n + 1) % currentParams.M_c_color)
-                            : String(n + 1);
+                            ? String(n_display % currentParams.M_c_color)
+                            : String(n_display);
                         return display_val;
                     }); 
                     trace_text_font_colors.fill('#FFFFFF'); 
@@ -1672,10 +2370,13 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             inspFormulaSlidersDiv.style.display = (sel === "Inspirational Formulas") ? 'block' : 'none'; 
             const compassOptions = document.getElementById('compass-options');
             if (compassOptions) compassOptions.style.display = (sel === "Compass Numbers") ? 'block' : 'none';
+            const factorizationOptions = document.getElementById('factorization-options');
+            if (factorizationOptions) factorizationOptions.style.display = (sel === "Factorization in 2D") ? 'block' : 'none';
         }
         
         function updateControlsFromCurrentParams() {
             document.querySelector(`input[name="formulaSetRadio"][value="${currentParams.formula_set}"]`).checked = true;
+            document.getElementById('start-index-input').value = currentParams.start_index || 0;
             numPointsSlider.value = currentParams.num_points; numPointsInput.value = currentParams.num_points;
             mcColorSlider.value = currentParams.M_c_color; mcColorInput.value = currentParams.M_c_color;
             document.getElementById('use-special-coloring-check').checked = currentParams.use_special_coloring || false;
@@ -1700,6 +2401,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             primeLineControls.style.display = currentParams.prime_lines ? 'block' : 'none';
             primeLinesColorByDistanceCheck.checked = currentParams.prime_lines_color_by_distance || false;
             document.getElementById('prime-lines-color-by-source-check').checked = currentParams.prime_lines_color_by_source || false;
+            document.getElementById('prime-lines-color-by-angle-check').checked = currentParams.prime_lines_color_by_angle || false;
             showAllPointIndicesCheck.checked = currentParams.show_all_point_indices; 
             showPrimeIndicesCheck.checked = currentParams.show_prime_point_indices;
             showIndexModMcCheck.checked = currentParams.show_index_mod_mc || false;
@@ -1711,6 +2413,18 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             customZnFunction.value = currentParams.custom_zn_function || '';
             customRFunction.value = currentParams.custom_r_function || '';
             customThetaFunction.value = currentParams.custom_theta_function || '';
+            const factorizationTypeSelect = document.getElementById('factorization-type-select');
+            if (factorizationTypeSelect) factorizationTypeSelect.value = currentParams.factorization_type || 's_n';
+            const factorizationToSlider = document.getElementById('factorization-to-slider');
+            const factorizationToInput = document.getElementById('factorization-to-input');
+            if (factorizationToSlider && factorizationToInput) {
+                const fTo = currentParams.factorization_To || 10;
+                factorizationToSlider.value = fTo;
+                factorizationToInput.value = fTo;
+            }
+            const factorizationW0Check = document.getElementById('factorization-w0-check');
+            if (factorizationW0Check) factorizationW0Check.checked = !!currentParams.factorization_w_zero;
+            if (factorizationCustomWnInput) factorizationCustomWnInput.value = currentParams.factorization_custom_wn || '';
             const curves = currentParams.active_curves || [];
             Object.values(curveCheckboxes).forEach(cb => { if (cb) cb.checked = curves.includes(cb.value); });
             toggleFormulaSliderVisibility();
@@ -1719,12 +2433,24 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
         function applyPreset() { const presetName = presetDropdown.value; if (PRESETS[presetName]) { currentParams = { ...PRESETS[presetName] }; updateControlsFromCurrentParams(); updatePlot(); } }
         function selectCurveSet(curveNames) { Object.values(curveCheckboxes).forEach(cb => { if (cb) cb.checked = curveNames.includes(cb.value); }); currentParams.active_curves = [...curveNames]; setPresetToCustom(); updatePlot(); }
 
-        function syncSliderAndNumberInput(sliderEl, numEl, isFloat = false) {
+        function parseFloatOrConstant(rawValue) {
+            const text = String(rawValue ?? '').trim();
+            if (!text) return NaN;
+            const normalized = text.toLowerCase().replace(/\s+/g, '');
+            if (normalized === 'phi' || normalized === 'φ' || normalized === 'golden' || normalized === 'goldenratio') return PHI;
+            if (normalized === 'pi' || normalized === 'π') return Math.PI;
+            if (normalized === 'sqrt2' || normalized === '√2' || normalized === 'sqrt(2)' || normalized === 'root2') return SQRT2;
+            return parseFloat(text);
+        }
+
+        function syncSliderAndNumberInput(sliderEl, numEl, isFloat = false, allowConstants = false) {
             const commonUpdateActions = () => { setPresetToCustom(); updatePlot(); };
             const sliderUpdate = () => { numEl.value = sliderEl.value; commonUpdateActions(); };
             const numberUpdate = () => {
                 let userVal = numEl.value; 
-                let val = isFloat ? parseFloat(userVal) : parseInt(userVal);
+                let val = isFloat
+                    ? (allowConstants ? parseFloatOrConstant(userVal) : parseFloat(userVal))
+                    : parseInt(userVal);
                 const min = parseFloat(sliderEl.min), max = parseFloat(sliderEl.max);
                 
                 // Check for valid number
@@ -1753,8 +2479,17 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             };
             sliderEl.addEventListener('input', sliderUpdate); 
             numEl.addEventListener('change', numberUpdate);
-            numEl.value = sliderEl.value; 
-            if (isFloat) { numEl.step = "any"; }
+            numEl.value = sliderEl.value;
+        }
+
+        function setLinkedToValue(sliderEl, inputEl, value) {
+            if (!sliderEl || !inputEl) return;
+            const min = parseFloat(sliderEl.min);
+            const max = parseFloat(sliderEl.max);
+            inputEl.value = value;
+            sliderEl.value = Math.max(min, Math.min(max, value));
+            setPresetToCustom();
+            updatePlot();
         }
 
         function setupControls() {
@@ -1765,11 +2500,12 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             if (initPreset==="Custom"&&JSON.stringify(INITIAL_PARAMS.active_curves.sort())===JSON.stringify(FLOWER_CURVES.sort())) initPreset="Flower Set";
             presetDropdown.value = initPreset;
 
+            document.getElementById('start-index-input').addEventListener('change', () => { setPresetToCustom(); updatePlot(); });
             syncSliderAndNumberInput(numPointsSlider, numPointsInput); 
             syncSliderAndNumberInput(mcColorSlider, mcColorInput);
             syncSliderAndNumberInput(mrUpdateSlider, mrUpdateInput); 
             syncSliderAndNumberInput(deltaRSlider, deltaRInput, true);
-            syncSliderAndNumberInput(toPeriodSlider, toPeriodInput, true); 
+            syncSliderAndNumberInput(toPeriodSlider, toPeriodInput, true, true); 
             syncSliderAndNumberInput(dDimSlider, dDimInput, true);
             syncSliderAndNumberInput(scatterSizeSlider, scatterSizeInput, true); 
             syncSliderAndNumberInput(primeSizeFactorSlider, primeSizeFactorInput, true);
@@ -1807,6 +2543,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                 const znFunc = customZnFunction.value.trim();
                 const rFunc = customRFunction.value.trim();
                 const thetaFunc = customThetaFunction.value.trim();
+                const wnFunc = document.getElementById('custom-wn-function').value.trim();
                 
                 // Validate: either Z_n function OR both r(n) and theta(n)
                 if (znFunc && (rFunc || thetaFunc)) {
@@ -1821,6 +2558,7 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                 currentParams.custom_zn_function = znFunc;
                 currentParams.custom_r_function = rFunc;
                 currentParams.custom_theta_function = thetaFunc;
+                currentParams.custom_wn_function = wnFunc;
                 setPresetToCustom();
                 updatePlot();
             });
@@ -1828,6 +2566,120 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             presetDropdown.addEventListener('change', applyPreset);
             formulaSetRadios.forEach(r => r.addEventListener('change', () => { toggleFormulaSliderVisibility(); setPresetToCustom(); updatePlot(); }));
             
+            // Factorization in 2D controls
+            const factorizationTypeSelect = document.getElementById('factorization-type-select');
+            if (factorizationTypeSelect) {
+                factorizationTypeSelect.addEventListener('change', () => { setPresetToCustom(); updatePlot(); });
+            }
+            const factorizationToSlider = document.getElementById('factorization-to-slider');
+            const factorizationToInputEl = document.getElementById('factorization-to-input');
+            if (factorizationToSlider && factorizationToInputEl) {
+                syncSliderAndNumberInput(factorizationToSlider, factorizationToInputEl, true, true);
+            }
+            if (factorizationToPhiBtn) factorizationToPhiBtn.addEventListener('click', () => setLinkedToValue(factorizationToSlider, factorizationToInputEl, PHI));
+            if (factorizationToPiBtn) factorizationToPiBtn.addEventListener('click', () => setLinkedToValue(factorizationToSlider, factorizationToInputEl, Math.PI));
+            if (factorizationToSqrt2Btn) factorizationToSqrt2Btn.addEventListener('click', () => setLinkedToValue(factorizationToSlider, factorizationToInputEl, SQRT2));
+            const factorizationW0Check = document.getElementById('factorization-w0-check');
+            if (factorizationW0Check) {
+                factorizationW0Check.addEventListener('change', () => { setPresetToCustom(); updatePlot(); });
+            }
+            if (factorizationCustomWnInput) {
+                factorizationCustomWnInput.addEventListener('change', () => { setPresetToCustom(); updatePlot(); });
+            }
+
+            if (mainToPhiBtn) mainToPhiBtn.addEventListener('click', () => setLinkedToValue(toPeriodSlider, toPeriodInput, PHI));
+            if (mainToPiBtn) mainToPiBtn.addEventListener('click', () => setLinkedToValue(toPeriodSlider, toPeriodInput, Math.PI));
+            if (mainToSqrt2Btn) mainToSqrt2Btn.addEventListener('click', () => setLinkedToValue(toPeriodSlider, toPeriodInput, SQRT2));
+
+            if (factorizationToolsButton && factorizationToolsModalElement) {
+                // Render KaTeX in the hardcoded notation section on first show
+                let notationKatexRendered = false;
+                factorizationToolsModalElement.addEventListener('shown.bs.modal', () => {
+                    if (!notationKatexRendered && typeof renderMathInElement !== 'undefined') {
+                        const notationDiv = document.getElementById('factorization-notation-content');
+                        if (notationDiv) {
+                            renderMathInElement(notationDiv, {
+                                delimiters: [
+                                    {left:"$$",right:"$$",display:true},
+                                    {left:"$",right:"$",display:false}
+                                ],
+                                throwOnError: false
+                            });
+                        }
+                        notationKatexRendered = true;
+                    }
+                    updateFactorizationToolsTable();
+                });
+
+                factorizationToolsButton.addEventListener('click', async () => {
+                    if (!factorizationToolsModalInstance) {
+                        factorizationToolsModalInstance = new bootstrap.Modal(factorizationToolsModalElement);
+                    }
+                    const startInput = document.getElementById('factorization-export-start-input');
+                    const endInput = document.getElementById('factorization-export-end-input');
+                    if (startInput) startInput.value = Math.max(1, currentParams.start_index || 1);
+                    if (endInput) endInput.value = Math.max(1, (currentParams.start_index || 1) + Math.max(1, currentParams.num_points || 1) - 1);
+                    setFactorizationExportStatus('Ready.');
+                    factorizationToolsModalInstance.show();
+                });
+            }
+
+            const refreshFactorizationExplanationBtn = document.getElementById('factorization-refresh-explanation-btn');
+            if (refreshFactorizationExplanationBtn) {
+                refreshFactorizationExplanationBtn.addEventListener('click', async () => {
+                    setFactorizationExportStatus('Loading counting_and_geometry.md...');
+                    await loadFactorizationMarkdownIntoModal();
+                    updateFactorizationToolsTable();
+                    setFactorizationExportStatus('Loaded.');
+                });
+            }
+
+            const factorizationDownloadCsvBtn = document.getElementById('factorization-download-csv-btn');
+            if (factorizationDownloadCsvBtn) {
+                factorizationDownloadCsvBtn.addEventListener('click', async () => {
+                    setFactorizationExportStatus('Preparing CSV...');
+                    await downloadFactorizationCsv();
+                    setFactorizationExportStatus('CSV downloaded.');
+                });
+            }
+
+            const factorizationDownloadImageBtn = document.getElementById('factorization-download-image-btn');
+            if (factorizationDownloadImageBtn) {
+                factorizationDownloadImageBtn.addEventListener('click', () => {
+                    Plotly.downloadImage('plotDiv', {
+                        format: 'png',
+                        filename: `factorization_plot_${Date.now()}`,
+                        width: 1600,
+                        height: 900
+                    });
+                    setFactorizationExportStatus('Image download started.');
+                });
+            }
+
+            const factorizationDownloadGifBtn = document.getElementById('factorization-download-gif-btn');
+            if (factorizationDownloadGifBtn) {
+                factorizationDownloadGifBtn.addEventListener('click', async () => {
+                    try {
+                        await downloadFactorizationGif();
+                    } catch (e) {
+                        console.error(e);
+                        setFactorizationExportStatus(`GIF export failed: ${e.message || e}`);
+                    }
+                });
+            }
+
+            const factorizationDownloadZipBtn = document.getElementById('factorization-download-zip-btn');
+            if (factorizationDownloadZipBtn) {
+                factorizationDownloadZipBtn.addEventListener('click', async () => {
+                    try {
+                        await downloadFactorizationZipFrames();
+                    } catch (e) {
+                        console.error(e);
+                        setFactorizationExportStatus(`ZIP export failed: ${e.message || e}`);
+                    }
+                });
+            }
+
             // Highlight primes checkbox with marker dropdown visibility toggle
             highlightPrimesCheck.addEventListener('change', () => {
                 primeMarkerControls.style.display = highlightPrimesCheck.checked ? 'block' : 'none';
@@ -1856,6 +2708,12 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
 
             // Prime lines color by source checkbox
             document.getElementById('prime-lines-color-by-source-check').addEventListener('change', () => {
+                setPresetToCustom();
+                updatePlot();
+            });
+
+            // Prime lines color by angle checkbox
+             document.getElementById('prime-lines-color-by-angle-check').addEventListener('change', () => {
                 setPresetToCustom();
                 updatePlot();
             });
@@ -2474,6 +3332,7 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
         };
 
         function drawPlotDataWithZn(n_array_subset, u_base_subset, v_base_subset, w_base_subset) {
+            updatePrimeTable(n_array_subset);
             const plotDivEl = document.getElementById('plotDiv');
             if (!plotDivEl) return;
 
@@ -2489,7 +3348,7 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
             const fig_data = []; 
             
             const primes_indices_in_subset = (currentParams.highlight_primes || currentParams.show_prime_point_indices) ? 
-                n_array_subset.map((n_val, i_subset) => isPrime(n_val + 1) ? i_subset : -1).filter(i => i !== -1) : [];
+                n_array_subset.map((n_val, i_subset) => isPrimeAtPlotIndex(n_val) ? i_subset : -1).filter(i => i !== -1) : [];
 
             // Process original transforms
             for (const t of active_transforms) {
@@ -2526,9 +3385,10 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
                     primes_indices_in_subset.forEach(idx_in_subset => {
                         if (idx_in_subset < n_array_subset.length) {
                             const n_val = n_array_subset[idx_in_subset];
+                            const n_display = getNumberValueFromPlotIndex(n_val);
                             const display_val = currentParams.show_index_mod_mc 
-                                ? String((n_val + 1) % currentParams.M_c_color)
-                                : String(n_val + 1);
+                                ? String(n_display % currentParams.M_c_color)
+                                : String(n_display);
                             trace_text_values[idx_in_subset] = display_val;      
                             trace_text_font_colors[idx_in_subset] = point_colors_subset[idx_in_subset]; 
                             sz[idx_in_subset] = 0;      
@@ -2539,9 +3399,10 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
                     trace_mode += '+text';
                     apply_text_styling = true;
                     trace_text_values = n_array_subset.map(n => {
+                        const n_display = getNumberValueFromPlotIndex(n);
                         const display_val = currentParams.show_index_mod_mc 
-                            ? String((n + 1) % currentParams.M_c_color)
-                            : String(n + 1);
+                            ? String(n_display % currentParams.M_c_color)
+                            : String(n_display);
                         return display_val;
                     }); 
                     trace_text_font_colors.fill('#FFFFFF'); 
@@ -2623,8 +3484,52 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
                         const zLine = primeCoords.map(p => p.z);
                         
                         let lineConfig;
-                        
-                        if (currentParams.prime_lines_color_by_distance) {
+    
+                        if (currentParams.prime_lines_color_by_angle) {
+                            const segmentColors = [];
+                            const invModuli = [];
+                            const angles = [];
+
+                            // Calculate differences once
+                            for (let i = 1; i < primeCoords.length; i++) {
+                                const idx1 = primeCoords[i-1].idx;
+                                const idx2 = primeCoords[i].idx;
+                                // Complex difference Z_{n} - Z_{n-1}
+                                const du = u_base_subset[idx2] - u_base_subset[idx1];
+                                const dv = v_base_subset[idx2] - v_base_subset[idx1];
+                                
+                                const mod = Math.sqrt(du*du + dv*dv);
+                                invModuli.push(mod > 0 ? 1/mod : 0);
+                                angles.push(Math.atan2(dv, du));
+                            }
+
+                            const minInvMod = Math.min(...invModuli);
+                            const maxInvMod = Math.max(...invModuli);
+                            const rangeInvMod = maxInvMod - minInvMod;
+
+                            for (let i = 0; i < angles.length; i++) {
+                                let hue = (angles[i] * 180 / Math.PI);
+                                if (hue < 0) hue += 360;
+                                
+                                let lightness = 50;
+                                if (rangeInvMod > 0) {
+                                    const normalized = (invModuli[i] - minInvMod) / rangeInvMod;
+                                    // Map to 20%..90%
+                                    lightness = 20 + (70 * normalized);
+                                }
+                                
+                                segmentColors.push(`hsl(${hue}, 100%, ${lightness}%)`);
+                            }
+                            
+                            // Duplicate last color for vertex coloring in Plotly lines
+                            if (angles.length > 0) segmentColors.push(segmentColors[segmentColors.length - 1]);
+                            
+                            lineConfig = {
+                                width: currentParams.prime_line_width,
+                                color: segmentColors
+                            };
+                            
+                        } else if (currentParams.prime_lines_color_by_distance) {
                             const distances = [];
                             for (let i = 1; i < primeCoords.length; i++) {
                                 const dx = primeCoords[i].x - primeCoords[i-1].x;
@@ -2697,15 +3602,23 @@ This matches the notebook's \`color_atlas()\` function with \`cmap='hsv'\`.
             Plotly.react('plotDiv', fig_data, layout);
         }
 
-        // Initialize Z_n extension after DOM is ready
+        // Initialize Extensions
         document.addEventListener('DOMContentLoaded', () => {
-            // Wait a bit for main setup to complete
+             // Wait a bit for main setup to complete
             setTimeout(initZnExtension, 100);
         });
 
         // ================================================================================
         // END COMPASS NUMBERS EXTENSION
         // ================================================================================
+
+        // ================================================================================
+        // Factorization in 2D is now integrated as a proper Formula Set
+        // (s_n, ṡ_n, s̈_n computed via computeFactorizationCoordinatesJS)
+        // The factorization functions are also available in Custom Z_n as:
+        //   s_n(n), s_dot_n(n), s_ddot_n(n)
+        // ================================================================================
+
     </script>
 </body>
 </html>
