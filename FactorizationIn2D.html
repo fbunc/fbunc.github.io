@@ -1,0 +1,4227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Factorization in 2D </title>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError : false
+            });
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <style>
+        body {
+            background-color: #000;
+            color: #ccc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: row; /* Changed to row for sidebar layout */
+            height: 100vh;
+            overflow: hidden;
+        }
+        #controls {
+            background-color: #111;
+            border-right: 1px solid #333; /* Border on right for sidebar */
+            border-bottom: none;
+            padding: 10px;
+            display: flex;
+            flex-direction: column; /* Stack controls vertically */
+            width: 350px; /* Fixed width for sidebar */
+            height: 100%;
+            overflow-y: auto; /* Allow scrolling */
+            flex-shrink: 0;
+            gap: 15px;
+            align-items: flex-start;
+            z-index: 10;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap; /* Allow wrapping within group if needed */
+            gap: 5px;
+            background: #222;
+            padding: 4px 8px;
+            border-radius: 4px;
+            width: 100%; /* Full width */
+            box-sizing: border-box;
+        }
+        label {
+            font-size: 12px;
+            color: #888;
+        }
+        input[type="number"], input[type="range"] {
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        button {
+            background: #0055aa;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        button:hover { background: #0066cc; }
+        button.active { background: #0088ff; font-weight: bold; box-shadow: 0 0 5px #0088ff; }
+        button.danger { background: #aa2222; }
+        
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background: #050505;
+        }
+        
+        /* Layout Grid for multiple plots */
+        .plot-grid {
+            display: grid;
+            width: 100%;
+            height: 100%;
+        }
+        .single-view { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+        .quad-view { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+        
+        .plot-cell {
+            position: relative;
+            border: 1px solid #222;
+            overflow: hidden;
+        }
+        .plot-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+            font-size: 12px;
+            pointer-events: none;
+            border-left: 2px solid #0088ff;
+        }
+        
+        /* Ensure math equations don't overflow the sidebar */
+        .katex-display {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 5px;
+        }
+
+        /* Explanation Modal */
+        #explanation-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            overflow: auto;
+            padding: 20px;
+        }
+        #explanation-overlay.visible { display: block; }
+        #explanation-content {
+            background: #111;
+            border: 1px solid #444;
+            border-radius: 8px;
+            max-width: 95vw;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        #explanation-content h2 {
+            color: #00bc8c;
+            margin-top: 0;
+        }
+        #explanation-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px 10px;
+        }
+        #explanation-close:hover { color: #fff; }
+        .sym-table-wrap {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .sym-table {
+            border-collapse: collapse;
+            font-size: 13px;
+            width: 100%;
+            min-width: 900px;
+        }
+        .sym-table th {
+            background: #222;
+            color: #0af;
+            padding: 8px 10px;
+            border: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            text-align: left;
+        }
+        .sym-table td {
+            padding: 6px 10px;
+            border: 1px solid #222;
+            color: #ccc;
+            vertical-align: top;
+        }
+        .sym-table tr:nth-child(even) td { background: #0a0a0a; }
+        .sym-table tr:nth-child(odd) td { background: #111; }
+        .sym-table tr.prime-row td {
+            background: #1a0a0a;
+            font-weight: bold;
+        }
+        .sym-table .katex { font-size: 0.9em; }
+        #sym-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        #sym-controls label { color: #888; font-size: 13px; }
+        #sym-controls input, #sym-controls select {
+            background: #222; color: #fff; border: 1px solid #444;
+            padding: 4px 8px; border-radius: 3px;
+        }
+        #sym-controls button {
+            background: #0a6; color: #fff; border: none;
+            padding: 6px 14px; border-radius: 3px; cursor: pointer;
+        }
+        #sym-controls button:hover { background: #0b8; }
+
+        /* MIDI Playground */
+        #midi-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1100;
+            overflow: auto;
+            padding: 20px;
+        }
+        #midi-overlay.visible { display: block; }
+        #midi-content {
+            background: #101010;
+            border: 1px solid #444;
+            border-radius: 8px;
+            max-width: 96vw;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        #midi-content h2 {
+            color: #6dc0ff;
+            margin-top: 0;
+        }
+        #midi-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 5px 10px;
+        }
+        #midi-close:hover { color: #fff; }
+        #midi-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        #midi-controls label {
+            color: #9aa;
+            font-size: 12px;
+        }
+        #midi-controls input, #midi-controls select {
+            background: #1e1e1e;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 3px;
+            padding: 4px 6px;
+        }
+        #midi-controls button {
+            padding: 6px 10px;
+        }
+        #midi-layer-controls {
+            border: 1px solid #2e3640;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 8px 0 10px;
+            background: #10151c;
+        }
+        .midi-layer-head {
+            color: #9fc3e2;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        .midi-layer-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            border-top: 1px dashed #26313c;
+        }
+        .midi-layer-row:first-of-type {
+            border-top: none;
+        }
+        .midi-layer-row label {
+            color: #95a8bb;
+            font-size: 11px;
+        }
+        .midi-layer-row input, .midi-layer-row select {
+            background: #1c222a;
+            color: #fff;
+            border: 1px solid #404a55;
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+        #midi-summary {
+            font-size: 12px;
+            color: #8fb9d8;
+            margin-bottom: 8px;
+        }
+        #midi-scale-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .scale-chip {
+            font-size: 11px;
+            border-radius: 999px;
+            padding: 2px 8px;
+            border: 1px solid #3a3a3a;
+            background: #121212;
+            color: #8a8a8a;
+        }
+        .scale-chip.on {
+            border-color: #5ea6ff;
+            color: #d8ecff;
+            background: #1a2a3f;
+        }
+        .scale-chip.root {
+            box-shadow: 0 0 0 1px #ffb34d inset;
+        }
+        #midi-roll-wrap {
+            width: 100%;
+            overflow: auto;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #080808;
+        }
+        #midi-roll-canvas {
+            width: 100%;
+            min-width: 900px;
+            height: 420px;
+            display: block;
+            background: #0a0a0a;
+        }
+    </style>
+</head>
+<body>
+
+<div id="controls">
+    <div style="width: 100%; border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 10px;">
+        <h4 style="margin: 0 0 5px 0; color: #00bc8c;">Factorization in 2D</h4>
+        <div style="font-size: 14px; color: #aaa; line-height: 1.5;">
+            <p style="margin: 0 0 5px 0;">This tool visualizes two complex sequences derived from prime factorizations:</p>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li>
+                    <strong>$s_n$:</strong> Sum over prime factors with multiplicity ($b_k$).  
+                    $$ n = \prod_{k=1}^{M_n} b_k \implies s_n = \sum_{k=1}^{M_n} \omega^{b_k} $$
+                    where $M_n$ is the total number of prime factors (counting multiplicity).
+                </li>
+                <li>
+                    <strong>$\dot{s}_n$:</strong> Sum over distinct prime factors ($c_k$).  
+                    $$ n = \prod_{k=1}^{m_n} c_k^{e_k} \implies \dot{s}_n = \sum_{k=1}^{m_n} \omega^{c_k} $$
+                    where $m_n$ is the number of distinct prime factors.
+                </li>
+            </ul>
+            <p style="margin: 5px 0;">
+                Here, $\omega = e^{2\pi i / T_o}$ rotates based on the prime value. Primes $p$ correspond to single vectors $\omega^p$, so $|s_p| = |\dot{s}_p| = |\omega^p| = 1$.
+            </p>
+        </div>
+    </div>
+
+    <div class="control-group">
+        <label>Mode:</label>
+        <button id="btn-single" class="active" onclick="setViewMode('single')">Single</button>
+        <button id="btn-quad" onclick="setViewMode('quad')">Quad</button>
+    </div>
+    
+    <div class="control-group" id="single-selector">
+        <label>Active Plot:</label>
+        <select id="plot-select" onchange="setActivePlot(this.value)" style="background:#333; color:white; border:none; padding:4px;">
+            <option value="sn_complex">s_n (Complex)</option>
+            <option value="sn_mag">|s_n| (Magnitude)</option>
+            <option value="sdot_complex">s_dot_n (Complex)</option>
+            <option value="sdot_mag">|s_dot_n| (Magnitude)</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>N:</label>
+        <input type="number" id="inp-n" value="1000" min="1" max="10000000" style="width: 80px;">
+    </div>
+    
+    <div class="control-group">
+        <label>To:</label>
+        <input type="number" id="inp-to" value="10.0" step="0.1" style="width: 50px;" onchange="params.To = parseFloat(this.value); recompute();">
+    </div>
+
+    <div class="control-group">
+        <button id="btn-play" onclick="toggleAnimation()">▶ Play</button>
+        <label>FPS:</label>
+        <input type="range" id="inp-fps" min="1" max="60" value="30" style="width: 80px;">
+    </div>
+
+    <div class="control-group">
+        <label><input type="checkbox" id="chk-text" onchange="params.showText = this.checked"> Show N</label>
+        <label><input type="checkbox" id="chk-connect" onchange="params.connectLines = this.checked"> Lines</label>
+        <label><input type="checkbox" id="chk-primes" checked onchange="params.highlightPrimes = this.checked"> Primes</label>
+    </div>
+
+    <div class="control-group">
+        <button onclick="saveView()">📷 Save Image</button>
+        <button onclick="saveCSV()">💾 Save CSV</button>
+    </div>
+
+    <div class="control-group">
+        <button onclick="showExplanation()" style="background:#0a6;">📘 Explanation Table</button>
+    </div>
+
+    <div class="control-group">
+        <button onclick="showMidiPlayground()" style="background:#3567b8;">🎹 MIDI Playground</button>
+        <button onclick="openPrimeSpessaVersion()" style="background:#5a3fb3;">🧪 SpessaSynth Prime Version</button>
+    </div>
+    
+    <div style="font-size: 10px; color: #555; margin-left: auto;">
+        Factorization Visualizer
+    </div>
+</div>
+
+<div id="canvas-container">
+    <canvas id="mainCanvas"></canvas>
+</div>
+
+<!-- Explanation Modal -->
+<div id="explanation-overlay">
+    <div id="explanation-content">
+        <button id="explanation-close" onclick="hideExplanation()">&times;</button>
+        <h2>Symbolic Factorization Table</h2>
+        <p style="color:#aaa;">
+            Each row shows the factorization of $n$, the symbolic expression for $s_n$ and $\dot{s}_n$
+            using $\omega = e^{2\pi i / T_o}$, with exact values where available (fractions and square roots),
+            plus numeric results.
+        </p>
+        <div id="sym-controls">
+            <label>Show n from 1 to:</label>
+            <input type="number" id="sym-n" value="30" min="1" max="500" style="width:60px;">
+            <button onclick="buildSymbolicTable()">Generate</button>
+            <button onclick="downloadSymbolicMD()" style="background:#05a;">📄 Download Symbolic MD</button>
+        </div>
+        <div id="sym-table-container" class="sym-table-wrap">
+            <p style="color:#666;">Click "Generate" to build the table.</p>
+        </div>
+    </div>
+</div>
+
+<!-- MIDI Playground Modal -->
+<div id="midi-overlay">
+    <div id="midi-content">
+        <button id="midi-close" onclick="hideMidiPlayground()">&times;</button>
+        <h2>MIDI Playground (Multi-Curve Note Roll)</h2>
+        <p style="color:#99a; margin-top:0;">
+            Unique plot heights are mapped to note lanes across your selected range. Time runs left-to-right over $n=1\ldots N$, with BPM/subdivision controls.
+        </p>
+        <div id="midi-controls">
+            <label>Source:
+                <select id="midi-source">
+                    <option value="sn_re">Re(s_n)</option>
+                    <option value="sn_im">Im(s_n)</option>
+                    <option value="sn_mag" selected>|s_n|</option>
+                    <option value="sn_phase">Phase(s_n)</option>
+                    <option value="sdot_re">Re(s_dot_n)</option>
+                    <option value="sdot_im">Im(s_dot_n)</option>
+                    <option value="sdot_mag">|s_dot_n|</option>
+                    <option value="sdot_phase">Phase(s_dot_n)</option>
+                </select>
+            </label>
+            <label>Root:
+                <select id="midi-root">
+                    <option value="0" selected>C</option>
+                    <option value="1">C#</option>
+                    <option value="2">D</option>
+                    <option value="3">D#</option>
+                    <option value="4">E</option>
+                    <option value="5">F</option>
+                    <option value="6">F#</option>
+                    <option value="7">G</option>
+                    <option value="8">G#</option>
+                    <option value="9">A</option>
+                    <option value="10">A#</option>
+                    <option value="11">B</option>
+                </select>
+            </label>
+            <label>Scale:
+                <select id="midi-scale" style="max-width:180px;">
+                    <option value="chromatic" selected>Chromatic (All 12)</option>
+                    <option value="arabic">Arabic</option>
+                    <option value="harmonic_minor">Harmonic Minor</option>
+                    <option value="augmented">Augmented</option>
+                    <option value="bebop_dominant">Bebop Dominant</option>
+                    <option value="bebop_major">Bebop Major</option>
+                    <option value="blues">Blues</option>
+                    <option value="diminished">Diminished</option>
+                    <option value="dorian">Dorian (Jazz)</option>
+                    <option value="enigmatic">Enigmatic</option>
+                    <option value="major">Major</option>
+                    <option value="minor">Minor</option>
+                    <option value="phrygian">Phrygian</option>
+                    <option value="japanese">Japanese</option>
+                    <option value="lydian">Lydian</option>
+                    <option value="locrian_jh">Locrian (Japanese/Hindu)</option>
+                    <option value="hungarian_minor">Hungarian Minor</option>
+                    <option value="melodic_minor">Melodic Minor</option>
+                    <option value="mixolydian">Mixolydian (Jazz/Blues)</option>
+                    <option value="neapolitan">Neapolitan</option>
+                    <option value="neapolitan_minor">Neapolitan Minor</option>
+                    <option value="pentatonic_blues_rock">Pentatonic (Blues/Rock)</option>
+                    <option value="pentatonic_major">Pentatonic Major</option>
+                    <option value="pentatonic_minor">Pentatonic Minor</option>
+                    <option value="whole_tone">Whole Tone</option>
+                </select>
+            </label>
+            <label>Range:
+                <select id="midi-range">
+                    <option value="piano88" selected>Standard Range (A0..C8)</option>
+                    <option value="full8">Full 8 Octaves (C0..B7)</option>
+                </select>
+            </label>
+            <label>Layout:
+                <select id="midi-layout-mode">
+                    <option value="physical" selected>Physical Keys</option>
+                    <option value="scale_consecutive">Consecutive Scale Keys</option>
+                </select>
+            </label>
+            <label>Base Octave:
+                <select id="midi-base-octave">
+                    <option value="0">C0</option>
+                    <option value="1" selected>C1</option>
+                    <option value="2">C2</option>
+                    <option value="3">C3</option>
+                    <option value="4">C4</option>
+                    <option value="5">C5</option>
+                    <option value="6">C6</option>
+                    <option value="7">C7</option>
+                </select>
+            </label>
+            <label>Precision:
+                <input type="number" id="midi-precision" min="2" max="10" value="6" style="width:52px;">
+            </label>
+            <label>BPM:
+                <input type="number" id="midi-bpm" min="20" max="300" value="120" style="width:62px;">
+            </label>
+            <label>Subdivision:
+                <select id="midi-subdiv">
+                    <option value="1">1/4</option>
+                    <option value="2" selected>1/8</option>
+                    <option value="4">1/16</option>
+                </select>
+            </label>
+            <label>Velocity:
+                <input type="number" id="midi-velocity" min="1" max="127" value="96" style="width:54px;">
+            </label>
+            <label>Gate %:
+                <input type="number" id="midi-gate" min="10" max="100" value="85" style="width:54px;">
+            </label>
+            <label><input type="checkbox" id="midi-prime-accent" checked> Prime Accent</label>
+            <label>Prime Perc:
+                <select id="midi-prime-perc">
+                    <option value="clap" selected>Clap</option>
+                    <option value="snare">Snare</option>
+                    <option value="kick">Kick</option>
+                    <option value="closed_hat">Closed Hat</option>
+                    <option value="open_hat">Open Hat</option>
+                    <option value="tom">Tom</option>
+                    <option value="clave">Clave</option>
+                    <option value="cowbell">Cowbell</option>
+                </select>
+            </label>
+            <label>Instrument:
+                <select id="midi-instrument">
+                    <option value="acoustic_piano" selected>Acoustic Piano</option>
+                    <option value="electric_piano">Electric Piano</option>
+                    <option value="organ">Organ</option>
+                    <option value="strings">Strings</option>
+                    <option value="synth_lead">Synth Lead</option>
+                    <option value="bass">Bass</option>
+                    <option value="flute">Flute</option>
+                    <option value="pluck">Pluck</option>
+                    <option value="warm_pad">Warm Pad</option>
+                    <option value="glass_pad">Glass Pad</option>
+                    <option value="analog_brass">Analog Brass</option>
+                    <option value="soft_bell">Soft Bell</option>
+                    <option value="dark_bass">Dark Bass</option>
+                    <option value="air_lead">Air Lead</option>
+                    <option value="sample_piano">Sampled Piano (GM)</option>
+                    <option value="sample_epiano">Sampled E-Piano (GM)</option>
+                    <option value="sample_pad">Sampled Synth Pad (GM)</option>
+                    <option value="sample_lead">Sampled Synth Lead (GM)</option>
+                </select>
+            </label>
+            <label>FX Preset:
+                <select id="midi-fx-preset">
+                    <option value="studio" selected>Studio</option>
+                    <option value="ambient">Ambient</option>
+                    <option value="wide">Wide</option>
+                    <option value="punch">Punch</option>
+                    <option value="dry">Dry</option>
+                </select>
+            </label>
+            <label>MIDI Out:
+                <select id="midi-output-select" style="max-width:180px;"></select>
+            </label>
+            <button onclick="buildMidiSequence()">Build Map</button>
+            <button id="btn-midi-play" onclick="toggleMidiPlayback()" style="background:#0a6;">▶ Play</button>
+            <button onclick="playImportedMidi()" style="background:#6a4da8;">▶ Play Imported</button>
+            <button onclick="stopMidiPlayback()" style="background:#8a3030;">■ Stop</button>
+            <button onclick="downloadMidiFile()" style="background:#3d5ed1;">💾 Export .mid</button>
+            <button onclick="downloadMp3File()" style="background:#4f6fbf;">💾 Export .mp3</button>
+            <button onclick="downloadMappedNotesCsv()" style="background:#3d8b67;">💾 Notes CSV</button>
+            <button onclick="downloadMappedNotesMd()" style="background:#5f7a38;">💾 Notes MD</button>
+            <button onclick="downloadMidiSessionJson()" style="background:#2f7e5e;">💾 Export .json</button>
+            <button onclick="downloadMidiBundleZip()" style="background:#8b5f18;">💾 Export Bundle .zip</button>
+            <label>Load MIDI:
+                <input type="file" id="midi-import-file" accept=".mid,.midi,audio/midi,application/octet-stream">
+            </label>
+            <label>Load Session JSON:
+                <input type="file" id="midi-session-import-file" accept=".json,application/json">
+            </label>
+        </div>
+        <div id="midi-controls" style="margin-top:-6px;">
+            <label>Reverb %:
+                <input type="range" id="midi-fx-reverb" min="0" max="100" value="24" style="width:90px;">
+            </label>
+            <label>Delay %:
+                <input type="range" id="midi-fx-delay" min="0" max="100" value="16" style="width:90px;">
+            </label>
+            <label>Chorus %:
+                <input type="range" id="midi-fx-chorus" min="0" max="100" value="12" style="width:90px;">
+            </label>
+            <label>Drive %:
+                <input type="range" id="midi-fx-drive" min="0" max="100" value="10" style="width:90px;">
+            </label>
+        </div>
+        <div id="midi-layer-controls"></div>
+        <div id="midi-summary">Build a mapping to begin.</div>
+        <div id="midi-scale-legend"></div>
+        <div id="midi-roll-wrap">
+            <canvas id="midi-roll-canvas" width="1400" height="420"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Math & Logic ---
+
+const params = {
+    N: 1000,
+    To: 10.0,
+    viewMode: 'single', // 'single' or 'quad'
+    activePlot: 'sn_complex',
+    showText: false,
+    connectLines: false,
+    highlightPrimes: true,
+    running: false,
+    fps: 30,
+    scale: 40 // Pixels per unit
+};
+
+// Data Cache - Global Arrays to avoid allocation in loop
+// Supporting up to 1M points. 
+// Uses Float32Array for memory efficiency (8MB per array for 1M points).
+const MAX_N_SUPPORTED = 1000000; 
+let currentComputedN = 0;
+
+const snRe = new Float32Array(MAX_N_SUPPORTED + 1);
+const snIm = new Float32Array(MAX_N_SUPPORTED + 1);
+const snMag = new Float32Array(MAX_N_SUPPORTED + 1);
+
+const sdotRe = new Float32Array(MAX_N_SUPPORTED + 1);
+const sdotIm = new Float32Array(MAX_N_SUPPORTED + 1);
+const sdotMag = new Float32Array(MAX_N_SUPPORTED + 1);
+
+const isPrimeArr = new Uint8Array(MAX_N_SUPPORTED + 1); // 0 or 1
+
+// Precompute primes for factorization
+const MAX_PRECOMPUTE = MAX_N_SUPPORTED; 
+const minPrimes = new Int32Array(MAX_PRECOMPUTE + 1); // Smallest prime factor (SPF)
+
+function sieve() {
+    // Standard Linear Sieve could be used, but this optimized Eratosthenes is sufficient
+    // Initialize 0, 1?
+    // minPrimes[i] == 0 means i is prime initially (except 0,1)
+    
+    // Logic: minPrimes[i] stores the smallest prime factor of i.
+    // If minPrimes[i] == 0, then i is prime.
+    
+    for (let i = 2; i * i <= MAX_PRECOMPUTE; i++) {
+        if (minPrimes[i] === 0) {
+            for (let j = i * i; j <= MAX_PRECOMPUTE; j += i) {
+                if (minPrimes[j] === 0) minPrimes[j] = i;
+            }
+        }
+    }
+    // Fill remaining primes
+    for (let i = 2; i <= MAX_PRECOMPUTE; i++) {
+        if (minPrimes[i] === 0) minPrimes[i] = i;
+    }
+}
+sieve();
+
+// Factorization helper - writes to a pre-allocated buffer if needed, 
+// but for this specific calculation we can compute on the fly without allocating arrays.
+// However, the original logic used getPrimeFactors returning an array.
+// To be garbage-collection free, we avoid creating arrays per number.
+
+// Function to compute just one index and update global arrays
+function computeIndex(n) {
+    // 1. Get Factors
+    // We don't need to store them in an array if we just sum them up immediately.
+    
+    let temp = n;
+    
+    // s_n variables
+    let sumRe = 0;
+    let sumIm = 0;
+    
+    // s_dot_n variables
+    let dotRe = 0;
+    let dotIm = 0;
+    
+    let distinctCount = 0;
+    let lastP = -1;
+    let factorCount = 0;
+    
+    const TWO_PI = Math.PI * 2;
+    const invTo = 1.0 / params.To; // Optimization
+    
+    while (temp > 1) {
+        let p = minPrimes[temp];
+        
+        // Process for s_n (all factors)
+        // theta = (2pi * p) / To
+        const theta = (TWO_PI * p) * invTo;
+        const cosTheta = Math.cos(theta);
+        const sinTheta = Math.sin(theta);
+        
+        sumRe += cosTheta;
+        sumIm += sinTheta;
+        
+        // Process for s_dot_n (distinct factors)
+        if (p !== lastP) {
+            dotRe += cosTheta;
+            dotIm += sinTheta;
+            distinctCount++;
+            lastP = p;
+        }
+        
+        factorCount++;
+        temp = (temp / p) | 0; // Integer division
+    }
+    
+    isPrimeArr[n] = (factorCount === 1) ? 1 : 0;
+    
+    snRe[n] = sumRe;
+    snIm[n] = sumIm;
+    snMag[n] = Math.sqrt(sumRe*sumRe + sumIm*sumIm);
+    
+    sdotRe[n] = dotRe;
+    sdotIm[n] = dotIm;
+    sdotMag[n] = Math.sqrt(dotRe*dotRe + dotIm*dotIm);
+}
+
+// Incremental Update Function
+function updateSequence(targetN) {
+    // If To changed, we must invalidate everything. Currently handled by explicit recompute().
+    
+    if (targetN <= currentComputedN) {
+        // Already computed, nothing to do
+        return;
+    }
+    
+    // Ensure we don't exceed buffer
+    if (targetN > MAX_N_SUPPORTED) {
+        targetN = MAX_N_SUPPORTED;
+    }
+
+    // Compute missing range
+    // Start from currentComputedN + 1
+    // We handle n=0 separately or just ignore since loop starts at 1
+    if (currentComputedN === 0) {
+         snRe[0] = 0; snIm[0] = 0; snMag[0] = 0;
+         sdotRe[0] = 0; sdotIm[0] = 0; sdotMag[0] = 0;
+         currentComputedN = 1; 
+         // Compute n=1? factors of 1 is empty sum = 0
+         // Original code: if factors.length > 0 ... else 0
+         // computeIndex(1 -> temp=1 -> loop doesn't run -> sum=0. Correct.)
+         computeIndex(1);
+    }
+
+    for (let n = currentComputedN + 1; n <= targetN; n++) {
+        computeIndex(n);
+    }
+    
+    currentComputedN = targetN;
+}
+
+// Wrapper for existing calls
+function computeSequence(N) {
+    if (N > currentComputedN) {
+        updateSequence(N);
+    } 
+    // If N < currentComputedN, we just don't draw the extra points.
+    // No need to "uncompute".
+}
+
+// Full reset when parameters change (To)
+function fullReset() {
+    currentComputedN = 0;
+    computeSequence(params.N);
+}
+
+// --- Rendering ---
+
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+
+// Label Placement Manager
+class LabelManager {
+    constructor(ctx) {
+        this.ctx = ctx;
+        this.placedLabels = []; // Array of {x, y, w, h}
+    }
+
+    reset() {
+        this.placedLabels = [];
+    }
+
+    // Check if rectangle A overlaps rectangle B
+    rectOverlap(a, b) {
+        return (a.x < b.x + b.w &&
+                a.x + a.w > b.x &&
+                a.y < b.y + b.h &&
+                a.y + a.h > b.y);
+    }
+
+    placeLabel(n, px, py, isHighlighted) {
+        const text = n.toString();
+        
+        // Custom styling for primes vs composites
+        if (isHighlighted) {
+            // Primes: Bigger, Colored by mod 6
+            const hue = (n % 6) * 60; // 0->0, 1->60, ... 5->300
+            this.ctx.fillStyle = `hsl(${hue}, 100%, 70%)`; 
+            this.ctx.font = "bold 14px sans-serif";
+        } else {
+            // Composites: Standard
+            this.ctx.fillStyle = "#ccc";
+            this.ctx.font = "10px sans-serif";
+        }
+
+        const metrics = this.ctx.measureText(text);
+        const w = metrics.width + 4; // Width + padding
+        const h = isHighlighted ? 16 : 12; // Height approx
+
+        // Spiral search for non-overlapping position
+        // Top-right is preferred (angle -PI/4)
+        const attempts = 60;
+        const radiusStep = 10;
+        
+        let finalX = px + 6;
+        let finalY = py - 6;
+        let placed = false;
+
+        // Try positions
+        for (let i = 0; i < attempts; i++) {
+            let cx, cy;
+            if (i === 0) {
+                // Preferred spot
+                cx = px + 6;
+                cy = py - 6;
+            } else {
+                const angle = (i % 8) * (Math.PI / 4);
+                const radius = (Math.floor(i / 8) + 1) * radiusStep;
+                cx = px + Math.cos(angle) * radius;
+                cy = py + Math.sin(angle) * radius;
+            }
+
+            // Box for collision check (top-left based)
+            // Centering vertical alignment (approx)
+            const box = { x: cx, y: cy - h + 2, w: w, h: h };
+            
+            // Check collision with existing labels
+            let collision = false;
+            for (const label of this.placedLabels) {
+                if (this.rectOverlap(box, label)) {
+                    collision = true;
+                    break;
+                }
+            }
+
+            if (!collision) {
+                finalX = cx;
+                finalY = cy;
+                this.placedLabels.push(box);
+                placed = true;
+                break;
+            }
+        }
+
+        if (placed) {
+            // Already set style above in placeLabel start, but fillText resets if we are not careful? 
+            // Better to set context properties here before fillText.
+            if (isHighlighted) {
+                const hue = (n % 6) * 60;
+                this.ctx.fillStyle = `hsl(${hue}, 100%, 70%)`;
+                this.ctx.font = "bold 14px sans-serif";
+            } else {
+                this.ctx.fillStyle = "#ccc";
+                this.ctx.font = "10px sans-serif";
+            }
+            this.ctx.fillText(text, finalX, finalY);
+        }
+    }
+}
+
+const labelManager = new LabelManager(ctx);
+
+
+function resize() {
+    const container = document.getElementById('canvas-container');
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    draw();
+}
+window.addEventListener('resize', resize);
+
+function drawPlot(context, x, y, w, h, type) {
+    context.save();
+    
+    // Background and Clip
+    context.beginPath();
+    context.rect(x, y, w, h);
+    context.clip();
+    context.fillStyle = "#0a0a0a";
+    context.fill();
+    context.strokeStyle = "#333";
+    context.strokeRect(x, y, w, h);
+
+    // Coordinate System
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    
+    // Grid
+    context.strokeStyle = "#222";
+    context.lineWidth = 1;
+    context.beginPath();
+    context.moveTo(x, cy); context.lineTo(x + w, cy); // X axis
+    if (type.includes('complex')) {
+        context.moveTo(cx, y); context.lineTo(cx, y + h); // Y axis
+    }
+    context.stroke();
+
+    const N = params.N;
+    
+    // Determine plotting style based on type
+    const isComplex = type.includes('complex');
+    const isSn = type.startsWith('sn');
+    
+    // Select data arrays
+    let reArr, imArr, magArr;
+    if (isSn) {
+        reArr = snRe; imArr = snIm; magArr = snMag;
+    } else {
+        reArr = sdotRe; imArr = sdotIm; magArr = sdotMag;
+    }
+    
+    // --- Scale Calculation ---
+    let scale = 1;
+    let originX = cx, originY = cy;
+    let xScale = 1, yScale = 1;
+
+    if (isComplex) {
+        let maxBound = 0.1; // avoid 0
+        // Check only computed range or N? N could be smaller than computed.
+        for(let i=1; i<=N; i++) {
+            const mag = Math.abs(reArr[i]) > Math.abs(imArr[i]) ? Math.abs(reArr[i]) : Math.abs(imArr[i]); // Approx max
+            if(mag > maxBound) maxBound = mag;
+        }
+        scale = Math.min(w, h) / (2.2 * maxBound);
+    } else {
+        let maxMag = 0.1;
+        for(let i=1; i<=N; i++) if (magArr[i] > maxMag) maxMag = magArr[i];
+        xScale = (w - 40) / N;
+        yScale = (h - 40) / maxMag;
+        originX = x + 20;
+        originY = y + h - 20;
+    }
+
+    // --- Draw Points ---
+    
+    // Optimization: For N > 5000, use ImageData for direct pixel manipulation (much faster)
+    if (N > 5000 && params.viewMode === 'single') {
+        const imgData = context.createImageData(w, h); // Create blank
+        const data32 = new Uint32Array(imgData.data.buffer);
+        
+        // Colors: ABGR format (for little-endian 0xAABBGGRR)
+        // Red: FF (A) 33 (B) 33 (G) FF (R) -> 0xFF3333FF ? No.
+        // RGBA bytes: R, G, B, A
+        // Red: 255, 51, 51, 255.
+        // Little Endian u32: A B G R = 0xFF3333FF
+        const colorHighlight = 0xFF3333FF; 
+        const colorNormal = 0xFFCC9966;    
+
+        // Clear with background color if needed, but transparent is fine as we putImageData on top?
+        // Wait, putImageData REPLACES pixels. We need to respect the background.
+        // The background was drawn with fillRect before.
+        // We should probably read the existing background or just fill with black 0xFF000000 (if opaque).
+        // For now let's just use transparent and assume background is black, but putImageData overrides alpha.
+        // Actually, let's fill with transparent black 0x00000000? No, that erases the background grid.
+        
+        // Better way: Only draw pixels for points. But putImageData overwrites the rect.
+        // We can't use putImageData easily if we want to keep the grid underneath.
+        // Solution: Use fillRect(px, py, 1, 1) instead of putImageData for medium N.
+        // Or get existing image data.
+        
+        // Let's fallback to fillRect for simplicity and correctness with grid.
+        // It's still much faster than arc().
+        
+        context.fillStyle = "#cc9966"; 
+        
+        for(let i=1; i<=N; i++) {
+            let px, py;
+            if (isComplex) {
+                px = (originX + reArr[i] * scale);
+                py = (originY - imArr[i] * scale);
+            } else {
+                px = (originX + i * xScale);
+                py = (originY - magArr[i] * yScale);
+            }
+            
+            // Only draw if within bounds
+            if (px >= x && px < x + w && py >= y && py < y + h) {
+                if (isPrimeArr[i] === 1 && params.highlightPrimes) {
+                    context.fillStyle = "#ff3333";
+                    context.fillRect(px-1, py-1, 3, 3); // Slightly larger
+                    if (context.fillStyle !== "#ff3333") context.fillStyle = "#cc9966"; // Restore? No need
+                } else {
+                    context.fillStyle = "#cc9966";
+                    context.fillRect(px, py, 1, 1);
+                }
+            }
+        }
+    } else {
+        // Standard high-quality vector drawing for small N
+        for(let i=1; i<=N; i++) {
+            let px, py;
+            if (isComplex) {
+                px = originX + reArr[i] * scale;
+                py = originY - imArr[i] * scale;
+            } else {
+                px = originX + i * xScale;
+                py = originY - magArr[i] * yScale;
+            }
+            
+            const isPrime = (isPrimeArr[i] === 1);
+            const isHighlighted = params.highlightPrimes && isPrime;
+    
+            context.beginPath();
+            if (isHighlighted) {
+                context.fillStyle = "#ff3333";
+                context.strokeStyle = "#ffaaaa";
+                context.lineWidth = 1;
+                const r = params.showText ? 4 : 3;
+                context.arc(px, py, r, 0, Math.PI * 2);
+                context.fill();
+                context.stroke();
+            } else {
+                const hue = (i % 360);
+                context.fillStyle = `hsl(${hue}, 70%, 60%)`;
+                context.arc(px, py, 2, 0, Math.PI * 2);
+                context.fill();
+            }
+        }
+    }
+
+    // --- Draw Lines (Optional) ---
+    if (params.connectLines && N > 0) {
+        context.beginPath();
+        context.strokeStyle = "rgba(100, 100, 100, 0.3)";
+        context.lineWidth = 1;
+        
+        let startPx, startPy;
+         if (isComplex) {
+            startPx = originX + reArr[1] * scale;
+            startPy = originY - imArr[1] * scale;
+        } else {
+            startPx = originX + 1 * xScale;
+            startPy = originY - magArr[1] * yScale;
+        }
+        context.moveTo(startPx, startPy);
+
+        for(let i=2; i<=N; i++) {
+            let px, py;
+            if (isComplex) {
+                px = originX + reArr[i] * scale;
+                py = originY - imArr[i] * scale;
+            } else {
+                px = originX + i * xScale;
+                py = originY - magArr[i] * yScale;
+            }
+            context.lineTo(px, py);
+        }
+        context.stroke();
+    }
+
+    // --- Draw Labels ---
+    if (params.showText) {
+        const localLabelManager = new LabelManager(context);
+
+        for(let i=1; i<=N; i++) {
+            let px, py;
+            if (isComplex) {
+                px = originX + reArr[i] * scale;
+                py = originY - imArr[i] * scale;
+            } else {
+                px = originX + i * xScale;
+                py = originY - magArr[i] * yScale;
+            }
+            
+            // Only draw if within bounds (clipping handles drawing, but we can optimize)
+            if (px >= x && px <= x + w && py >= y && py <= y + h) {
+                localLabelManager.placeLabel(i, px, py, (isPrimeArr[i]===1) && params.highlightPrimes);
+            }
+        }
+    }
+
+    // Label
+    context.fillStyle = "white";
+    context.font = "14px monospace";
+    context.fillText(getLabel(type), x + 10, y + 20);
+
+    context.restore();
+}
+
+function getLabel(type) {
+    if (type === 'sn_complex') return "s_n (Complex)";
+    if (type === 'sn_mag') return "|s_n| vs n";
+    if (type === 'sdot_complex') return "s_dot_n (Complex)";
+    if (type === 'sdot_mag') return "|s_dot_n| vs n";
+    return "";
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (params.viewMode === 'single') {
+        drawPlot(ctx, 0, 0, canvas.width, canvas.height, params.activePlot);
+    } else {
+        const w = canvas.width / 2;
+        const h = canvas.height / 2;
+        drawPlot(ctx, 0, 0, w, h, 'sn_complex');
+        drawPlot(ctx, w, 0, w, h, 'sn_mag');
+        drawPlot(ctx, 0, h, w, h, 'sdot_complex');
+        drawPlot(ctx, w, h, w, h, 'sdot_mag');
+    }
+}
+
+// --- Interaction ---
+
+function setViewMode(mode) {
+    params.viewMode = mode;
+    document.getElementById('btn-single').className = mode === 'single' ? 'active' : '';
+    document.getElementById('btn-quad').className = mode === 'quad' ? 'active' : '';
+    document.getElementById('single-selector').style.display = mode === 'single' ? 'flex' : 'none';
+    draw();
+}
+
+function setActivePlot(type) {
+    params.activePlot = type;
+    if (params.viewMode === 'single') draw();
+}
+
+function recompute() {
+    fullReset(); // Reset when parameters change
+    draw();
+    midiState.needsRebuild = true;
+    if (document.getElementById('midi-overlay').classList.contains('visible') && !midiState.isPlaying) {
+        buildMidiSequence();
+    }
+}
+
+// --- Animation ---
+
+let animId;
+function toggleAnimation() {
+    const btn = document.getElementById('btn-play');
+    if (params.running) {
+        params.running = false;
+        btn.innerHTML = "▶ Play";
+        btn.classList.remove('danger');
+        cancelAnimationFrame(animId);
+    } else {
+        params.running = true;
+        btn.innerHTML = "⏹ Stop";
+        btn.classList.add('danger');
+        lastFrameTime = 0;
+        animLoop();
+    }
+}
+
+let lastFrameTime = 0;
+function animLoop(timestamp) {
+    if (!params.running) return;
+
+    const interval = 1000 / parseInt(document.getElementById('inp-fps').value);
+    
+    if (timestamp - lastFrameTime > interval) {
+        lastFrameTime = timestamp;
+        
+        // Logic: specific animation behavior. 
+        let n = parseInt(document.getElementById('inp-n').value);
+        
+        // Use a dynamic step size for larger N to make it watchable?
+        // Or keep it 1 per frame for precision. User asked for "increments N by 1".
+        // But let's handle the loopback.
+        
+        if (n >= MAX_N_SUPPORTED) {
+             params.running = false;
+             const btn = document.getElementById('btn-play');
+             btn.innerHTML = "▶ Play";
+             btn.classList.remove('danger');
+             return;
+        }
+        
+        // Dynamic step size for larger N to keep animation interesting
+        let step = 1;
+        if (n > 2000) step = 10;
+        if (n > 10000) step = 50;
+        if (n > 50000) step = 100;
+
+        n += step;
+        if (n > MAX_N_SUPPORTED) n = MAX_N_SUPPORTED;
+        
+        document.getElementById('inp-n').value = n;
+        params.N = n;
+        // Efficient incremental update
+        computeSequence(n);
+        draw();
+        midiState.needsRebuild = true;
+    }
+    
+    animId = requestAnimationFrame(animLoop);
+}
+
+// Manual N input change
+document.getElementById('inp-n').addEventListener('input', function(e) {
+    params.N = parseInt(e.target.value);
+    recompute();
+});
+
+// Save Functionality
+function saveView() {
+    const link = document.createElement('a');
+    link.download = `dirichlet_view_${params.N}_To${params.To}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+}
+
+function saveCSV() {
+    const N = params.N;
+    // Use an array of strings for better performance than string concatenation
+    const rows = [];
+    rows.push("n,is_prime,sn_re,sn_im,sn_mag,sdot_re,sdot_im,sdot_mag");
+    
+    for (let i = 1; i <= N; i++) {
+        // Format to 6 decimal places for precision
+        rows.push([
+            i,
+            isPrimeArr[i],
+            snRe[i].toFixed(6),
+            snIm[i].toFixed(6),
+            snMag[i].toFixed(6),
+            sdotRe[i].toFixed(6),
+            sdotIm[i].toFixed(6),
+            sdotMag[i].toFixed(6)
+        ].join(","));
+    }
+    
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `factorization_data_N${N}_To${params.To}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+// ============================================================================
+// MIDI PLAYGROUND — note-lane mapping from unique plot heights
+// ============================================================================
+
+const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SCALE_DEGREES = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5#', '6', '6#', '7', '7#'];
+const PHASE_EPSILON = 1e-9;
+
+const SCALE_LIBRARY = {
+    chromatic: { name: 'Chromatic (All 12)', intervals: [0,1,2,3,4,5,6,7,8,9,10,11] },
+    arabic: { name: 'Arabic', intervals: [0,1,4,5,7,8,11] },
+    harmonic_minor: { name: 'Harmonic Minor', intervals: [0,2,3,5,7,8,11] },
+    augmented: { name: 'Augmented', intervals: [0,3,4,7,8,11] },
+    bebop_dominant: { name: 'Bebop Dominant', intervals: [0,2,4,5,7,9,10,11] },
+    bebop_major: { name: 'Bebop Major', intervals: [0,2,4,5,7,8,9,11] },
+    blues: { name: 'Blues', intervals: [0,3,5,6,7,10] },
+    diminished: { name: 'Diminished', intervals: [0,1,3,4,6,7,9,10] },
+    dorian: { name: 'Dorian (Jazz)', intervals: [0,2,3,5,7,9,10] },
+    enigmatic: { name: 'Enigmatic', intervals: [0,1,4,6,8,10,11] },
+    major: { name: 'Major', intervals: [0,2,4,5,7,9,11] },
+    minor: { name: 'Minor', intervals: [0,2,3,5,7,8,10] },
+    phrygian: { name: 'Phrygian', intervals: [0,1,3,5,7,8,10] },
+    japanese: { name: 'Japanese', intervals: [0,1,5,7,10] },
+    lydian: { name: 'Lydian', intervals: [0,2,4,6,7,9,11] },
+    locrian_jh: { name: 'Locrian (Japanese/Hindu)', intervals: [0,1,3,5,6,8,10] },
+    hungarian_minor: { name: 'Hungarian Minor', intervals: [0,2,3,6,7,8,11] },
+    melodic_minor: { name: 'Melodic Minor', intervals: [0,2,3,5,7,9,11] },
+    mixolydian: { name: 'Mixolydian (Jazz/Blues)', intervals: [0,2,4,5,7,9,10] },
+    neapolitan: { name: 'Neapolitan', intervals: [0,1,3,5,7,9,11] },
+    neapolitan_minor: { name: 'Neapolitan Minor', intervals: [0,1,3,5,7,8,11] },
+    pentatonic_blues_rock: { name: 'Pentatonic (Blues/Rock)', intervals: [0,3,5,6,7,10] },
+    pentatonic_major: { name: 'Pentatonic Major', intervals: [0,2,4,7,9] },
+    pentatonic_minor: { name: 'Pentatonic Minor', intervals: [0,3,5,7,10] },
+    whole_tone: { name: 'Whole Tone', intervals: [0,2,4,6,8,10] }
+};
+
+const INSTRUMENT_LIBRARY = {
+    acoustic_piano: { name: 'Acoustic Piano', type: 'synth', program: 0, osc: 'triangle', attack: 0.01, release: 0.22, gain: 1.0, filter: 6000 },
+    electric_piano: { name: 'Electric Piano', type: 'synth', program: 4, osc: 'sine', attack: 0.008, release: 0.18, gain: 0.95, filter: 5200 },
+    organ: { name: 'Organ', type: 'synth', program: 16, osc: 'square', attack: 0.005, release: 0.30, gain: 0.85, filter: 4500 },
+    strings: { name: 'Strings', type: 'synth', program: 48, osc: 'sawtooth', attack: 0.03, release: 0.35, gain: 0.75, filter: 3600 },
+    synth_lead: { name: 'Synth Lead', type: 'synth', program: 80, osc: 'sawtooth', attack: 0.006, release: 0.16, gain: 0.90, filter: 7000 },
+    bass: { name: 'Bass', type: 'synth', program: 33, osc: 'square', attack: 0.008, release: 0.20, gain: 0.80, filter: 2200 },
+    flute: { name: 'Flute', type: 'synth', program: 73, osc: 'sine', attack: 0.02, release: 0.26, gain: 0.95, filter: 6400 },
+    pluck: { name: 'Pluck', type: 'synth', program: 24, osc: 'triangle', attack: 0.003, release: 0.10, gain: 1.05, filter: 7800 },
+    warm_pad: { name: 'Warm Pad', type: 'synth', program: 89, osc: 'sawtooth', attack: 0.045, release: 0.42, gain: 0.68, filter: 3000 },
+    glass_pad: { name: 'Glass Pad', type: 'synth', program: 92, osc: 'triangle', attack: 0.02, release: 0.34, gain: 0.72, filter: 5200 },
+    analog_brass: { name: 'Analog Brass', type: 'synth', program: 62, osc: 'sawtooth', attack: 0.012, release: 0.20, gain: 0.82, filter: 4200 },
+    soft_bell: { name: 'Soft Bell', type: 'synth', program: 10, osc: 'sine', attack: 0.002, release: 0.30, gain: 0.78, filter: 8200 },
+    dark_bass: { name: 'Dark Bass', type: 'synth', program: 38, osc: 'square', attack: 0.007, release: 0.24, gain: 0.86, filter: 1700 },
+    air_lead: { name: 'Air Lead', type: 'synth', program: 81, osc: 'triangle', attack: 0.01, release: 0.18, gain: 0.88, filter: 6500 },
+    sample_piano: { name: 'Sampled Piano (GM)', type: 'sample', program: 0, sfName: 'acoustic_grand_piano', gain: 1.0 },
+    sample_epiano: { name: 'Sampled E-Piano (GM)', type: 'sample', program: 4, sfName: 'electric_piano_1', gain: 0.95 },
+    sample_pad: { name: 'Sampled Synth Pad (GM)', type: 'sample', program: 88, sfName: 'pad_1_new_age', gain: 0.80 },
+    sample_lead: { name: 'Sampled Synth Lead (GM)', type: 'sample', program: 80, sfName: 'lead_1_square', gain: 0.86 }
+};
+
+const SOUND_FONT_BASE_URL = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/';
+
+const FX_PRESETS = {
+    studio: { reverb: 24, delay: 16, chorus: 12, drive: 10 },
+    ambient: { reverb: 55, delay: 30, chorus: 26, drive: 6 },
+    wide: { reverb: 34, delay: 22, chorus: 42, drive: 8 },
+    punch: { reverb: 12, delay: 8, chorus: 6, drive: 22 },
+    dry: { reverb: 0, delay: 0, chorus: 0, drive: 0 }
+};
+
+const PRIME_PERCUSSION = {
+    clap: { name: 'Clap', midiNote: 39, noise: true, hp: 1400, bp: 2400, q: 0.7, durMul: 0.35 },
+    snare: { name: 'Snare', midiNote: 38, noise: true, hp: 900, bp: 1900, q: 0.6, durMul: 0.42 },
+    kick: { name: 'Kick', midiNote: 36, noise: false, osc: 'sine', f1: 130, f2: 42, durMul: 0.55 },
+    closed_hat: { name: 'Closed Hat', midiNote: 42, noise: true, hp: 3500, bp: 6800, q: 0.8, durMul: 0.18 },
+    open_hat: { name: 'Open Hat', midiNote: 46, noise: true, hp: 3200, bp: 6100, q: 0.7, durMul: 0.55 },
+    tom: { name: 'Tom', midiNote: 45, noise: false, osc: 'triangle', f1: 210, f2: 130, durMul: 0.45 },
+    clave: { name: 'Clave', midiNote: 75, noise: false, osc: 'square', f1: 1700, f2: 900, durMul: 0.14 },
+    cowbell: { name: 'Cowbell', midiNote: 56, noise: false, osc: 'square', f1: 560, f2: 820, durMul: 0.32 }
+};
+
+const midiState = {
+    events: [],
+    uniqueHeights: [],
+    heightToMidi: new Map(),
+    availableMidiNotes: [],
+    midiMin: 21,
+    midiMax: 108,
+    rangeKey: 'piano88',
+    layoutMode: 'physical',
+    baseOctave: 1,
+    consecutiveOctavesUsed: 0,
+    consecutiveCycles: 1,
+    isPlaying: false,
+    playTimer: null,
+    playIndex: 0,
+    audioCtx: null,
+    masterGain: null,
+    midiAccess: null,
+    midiOutput: null,
+    activeMidiProgram: null,
+    sampleCache: new Map(),
+    needsRebuild: true,
+    source: 'sn_mag',
+    root: 0,
+    scaleKey: 'chromatic',
+    instrumentKey: 'acoustic_piano',
+    bpm: 120,
+    subdivision: 2,
+    velocity: 96,
+    gatePercent: 85,
+    precision: 6,
+    primeAccent: true,
+    primePerc: 'clap',
+    clapBuffer: null,
+    fxPreset: 'studio',
+    fxReverb: 24,
+    fxDelay: 16,
+    fxChorus: 12,
+    fxDrive: 10,
+    fxInput: null,
+    fxDryGain: null,
+    fxReverbGain: null,
+    fxDelayGain: null,
+    fxChorusGain: null,
+    fxDriveGain: null,
+    fxDelayNode: null,
+    fxDelayFeedback: null,
+    fxConvolver: null,
+    fxChorusDelayL: null,
+    fxChorusDelayR: null,
+    fxChorusLfo: null,
+    fxDriveNode: null,
+    fxCompressor: null,
+    importedEvents: [],
+    importedTempoBpm: 120,
+    importedDurationSeconds: 0,
+    importedName: '',
+    importTimers: [],
+    playbackMode: 'generated',
+    curveSequences: [],
+    timelineSteps: [],
+    activeMidiProgramsByChannel: {}
+};
+
+function clampValue(v, lo, hi) {
+    return Math.max(lo, Math.min(hi, v));
+}
+
+function midiNoteName(midi) {
+    const pitch = MIDI_NOTE_NAMES[midi % 12];
+    const octave = Math.floor(midi / 12) - 1;
+    return `${pitch}${octave}`;
+}
+
+function getMidiUiConfig() {
+    const source = document.getElementById('midi-source').value;
+    const root = clampValue(parseInt(document.getElementById('midi-root').value) || 0, 0, 11);
+    const scaleKey = document.getElementById('midi-scale').value || 'chromatic';
+    const rangeKey = document.getElementById('midi-range').value || 'piano88';
+    const layoutMode = document.getElementById('midi-layout-mode').value || 'physical';
+    const baseOctave = clampValue(parseInt(document.getElementById('midi-base-octave').value) || 1, 0, 7);
+    const precision = clampValue(parseInt(document.getElementById('midi-precision').value) || 6, 2, 10);
+    const bpm = clampValue(parseInt(document.getElementById('midi-bpm').value) || 120, 20, 300);
+    const subdivision = clampValue(parseInt(document.getElementById('midi-subdiv').value) || 2, 1, 4);
+    const velocity = clampValue(parseInt(document.getElementById('midi-velocity').value) || 96, 1, 127);
+    const gatePercent = clampValue(parseInt(document.getElementById('midi-gate').value) || 85, 10, 100);
+    const primeAccent = !!document.getElementById('midi-prime-accent').checked;
+    const primePerc = document.getElementById('midi-prime-perc').value || 'clap';
+    const instrumentKey = document.getElementById('midi-instrument').value || 'acoustic_piano';
+    const fxPreset = document.getElementById('midi-fx-preset').value || 'studio';
+    const fxReverb = clampValue(parseInt(document.getElementById('midi-fx-reverb').value) || 0, 0, 100);
+    const fxDelay = clampValue(parseInt(document.getElementById('midi-fx-delay').value) || 0, 0, 100);
+    const fxChorus = clampValue(parseInt(document.getElementById('midi-fx-chorus').value) || 0, 0, 100);
+    const fxDrive = clampValue(parseInt(document.getElementById('midi-fx-drive').value) || 0, 0, 100);
+    const stepSeconds = (60 / bpm) / subdivision;
+    const gateSeconds = stepSeconds * (gatePercent / 100);
+    const curveConfigs = getCurveConfigsFromUi({ source, root, scaleKey, rangeKey, layoutMode, baseOctave, precision, velocity, gatePercent, primeAccent, primePerc, instrumentKey, stepSeconds });
+    return { source, root, scaleKey, rangeKey, layoutMode, baseOctave, precision, bpm, subdivision, velocity, gatePercent, primeAccent, primePerc, instrumentKey, fxPreset, fxReverb, fxDelay, fxChorus, fxDrive, stepSeconds, gateSeconds, curveConfigs };
+}
+
+function getCurveConfigsFromUi(base) {
+    const curves = [];
+    curves.push({
+        curveIndex: 1,
+        channel: 0,
+        source: base.source,
+        root: base.root,
+        scaleKey: base.scaleKey,
+        rangeKey: base.rangeKey,
+        layoutMode: base.layoutMode,
+        baseOctave: base.baseOctave,
+        precision: base.precision,
+        velocity: base.velocity,
+        gatePercent: base.gatePercent,
+        gateSeconds: base.stepSeconds * (base.gatePercent / 100),
+        primeAccent: base.primeAccent,
+        primePerc: base.primePerc,
+        instrumentKey: base.instrumentKey,
+        enabled: true
+    });
+
+    for (let idx = 2; idx <= 4; idx++) {
+        const enabledEl = document.getElementById(`midi-curve${idx}-enabled`);
+        if (!enabledEl || !enabledEl.checked) continue;
+        const source = (document.getElementById(`midi-curve${idx}-source`) || {}).value || base.source;
+        const root = clampValue(parseInt((document.getElementById(`midi-curve${idx}-root`) || {}).value) || base.root, 0, 11);
+        const scaleKey = (document.getElementById(`midi-curve${idx}-scale`) || {}).value || base.scaleKey;
+        const instrumentKey = (document.getElementById(`midi-curve${idx}-instrument`) || {}).value || base.instrumentKey;
+        const velocity = clampValue(parseInt((document.getElementById(`midi-curve${idx}-velocity`) || {}).value) || base.velocity, 1, 127);
+        const gatePercent = clampValue(parseInt((document.getElementById(`midi-curve${idx}-gate`) || {}).value) || base.gatePercent, 10, 100);
+        const primeAccent = !!((document.getElementById(`midi-curve${idx}-prime`) || {}).checked);
+        const primePerc = (document.getElementById(`midi-curve${idx}-perc`) || {}).value || base.primePerc;
+        curves.push({
+            curveIndex: idx,
+            channel: idx - 1,
+            source,
+            root,
+            scaleKey,
+            rangeKey: base.rangeKey,
+            layoutMode: base.layoutMode,
+            baseOctave: base.baseOctave,
+            precision: base.precision,
+            velocity,
+            gatePercent,
+            gateSeconds: base.stepSeconds * (gatePercent / 100),
+            primeAccent,
+            primePerc,
+            instrumentKey,
+            enabled: true
+        });
+    }
+
+    return curves.slice(0, 4);
+}
+
+function buildSingleCurveSequence(curveCfg, nMax) {
+    const range = getMidiRange(curveCfg.rangeKey);
+    const uniqueByKey = new Map();
+    const pending = [];
+
+    for (let n = 1; n <= nMax; n++) {
+        const h = getHeightForPlot(n, curveCfg.source);
+        const key = normalizedHeightKey(h, curveCfg.precision);
+        if (!uniqueByKey.has(key)) uniqueByKey.set(key, Number(key));
+        pending.push({ n, key, height: Number(key) });
+    }
+
+    const zeroKey = normalizedHeightKey(0, curveCfg.precision);
+    if (!uniqueByKey.has(zeroKey)) uniqueByKey.set(zeroKey, 0);
+
+    const uniqueHeights = Array.from(uniqueByKey.values()).sort((a, b) => a - b);
+    let allowedMidiNotes;
+    let cycleByIndex = [];
+    let truncatedConsecutive = false;
+
+    if (curveCfg.layoutMode === 'scale_consecutive') {
+        const requestedStart = cOctaveToMidi(curveCfg.baseOctave);
+        const anchoredStart = Math.max(range.min, Math.min(range.max, requestedStart));
+        const palette = buildConsecutiveScalePalette(curveCfg.root, curveCfg.scaleKey, anchoredStart, uniqueHeights.length, range.min, range.max);
+        allowedMidiNotes = palette.notes;
+        cycleByIndex = palette.cycleByIndex || [];
+        curveCfg.consecutiveOctavesUsed = palette.octavesUsed;
+        curveCfg.consecutiveCycles = palette.cycles;
+        truncatedConsecutive = palette.truncated;
+    } else {
+        allowedMidiNotes = buildAvailableMidiNotes(curveCfg.root, curveCfg.scaleKey, range.min, range.max);
+        curveCfg.consecutiveOctavesUsed = 0;
+        curveCfg.consecutiveCycles = 1;
+    }
+
+    if (!allowedMidiNotes || allowedMidiNotes.length === 0) allowedMidiNotes = [range.min];
+
+    const heightToMidi = new Map();
+    const denom = Math.max(1, uniqueHeights.length - 1);
+    for (let idx = 0; idx < uniqueHeights.length; idx++) {
+        const key = normalizedHeightKey(uniqueHeights[idx], curveCfg.precision);
+        const noteIndex = Math.round((idx * (allowedMidiNotes.length - 1)) / denom);
+        const midi = allowedMidiNotes[noteIndex];
+        heightToMidi.set(key, midi);
+    }
+
+    const events = pending.map((e, i) => {
+        const midi = heightToMidi.get(e.key);
+        const chroma = midi % 12;
+        const isPrime = isPrimeArr[e.n] === 1;
+        const cycle = curveCfg.layoutMode === 'scale_consecutive' ? (cycleByIndex[i] || 0) : 0;
+        return {
+            i,
+            n: e.n,
+            key: e.key,
+            height: e.height,
+            midi,
+            chromaIndex: chroma,
+            degree: SCALE_DEGREES[chroma],
+            index13: chroma + 13,
+            note: midiNoteName(midi),
+            isPrime,
+            cycle,
+            curveIndex: curveCfg.curveIndex,
+            channel: curveCfg.channel,
+            instrumentKey: curveCfg.instrumentKey,
+            velocity: curveCfg.velocity,
+            gatePercent: curveCfg.gatePercent,
+            gateSeconds: curveCfg.gateSeconds,
+            primeAccent: curveCfg.primeAccent,
+            primePerc: curveCfg.primePerc,
+            source: curveCfg.source,
+            root: curveCfg.root,
+            scaleKey: curveCfg.scaleKey
+        };
+    });
+
+    return {
+        curve: curveCfg,
+        events,
+        uniqueHeights,
+        heightToMidi,
+        availableMidiNotes: allowedMidiNotes,
+        midiMin: Math.min(...allowedMidiNotes),
+        midiMax: Math.max(...allowedMidiNotes),
+        consecutiveTruncated: truncatedConsecutive
+    };
+}
+
+function getHeightForPlot(n, source) {
+    if (source === 'sn_re') return snRe[n];
+    if (source === 'sn_im') return snIm[n];
+    if (source === 'sn_mag') return snMag[n];
+    if (source === 'sn_phase') return Math.atan2(snIm[n], Math.abs(snRe[n]) < PHASE_EPSILON && Math.abs(snIm[n]) < PHASE_EPSILON ? 0 : snRe[n]);
+    if (source === 'sdot_re') return sdotRe[n];
+    if (source === 'sdot_im') return sdotIm[n];
+    if (source === 'sdot_mag') return sdotMag[n];
+    if (source === 'sdot_phase') return Math.atan2(sdotIm[n], Math.abs(sdotRe[n]) < PHASE_EPSILON && Math.abs(sdotIm[n]) < PHASE_EPSILON ? 0 : sdotRe[n]);
+    return snMag[n];
+}
+
+function getScaleIntervals(scaleKey) {
+    return (SCALE_LIBRARY[scaleKey] || SCALE_LIBRARY.chromatic).intervals;
+}
+
+function optionHtmlFromMap(obj, selectedValue) {
+    return Object.keys(obj).map((key) => {
+        const name = obj[key] && obj[key].name ? obj[key].name : key;
+        const selected = String(key) === String(selectedValue) ? ' selected' : '';
+        return `<option value="${key}"${selected}>${name}</option>`;
+    }).join('');
+}
+
+function optionHtmlFromList(items, selectedValue) {
+    return items.map((item) => {
+        const selected = String(item.value) === String(selectedValue) ? ' selected' : '';
+        return `<option value="${item.value}"${selected}>${item.label}</option>`;
+    }).join('');
+}
+
+function initCurveLayerControls() {
+    const host = document.getElementById('midi-layer-controls');
+    if (!host) return;
+
+    const sourceOptions = optionHtmlFromList([
+        { value: 'sn_re', label: 'Re(s_n)' },
+        { value: 'sn_im', label: 'Im(s_n)' },
+        { value: 'sn_mag', label: '|s_n|' },
+        { value: 'sn_phase', label: 'Phase(s_n)' },
+        { value: 'sdot_re', label: 'Re(s_dot_n)' },
+        { value: 'sdot_im', label: 'Im(s_dot_n)' },
+        { value: 'sdot_mag', label: '|s_dot_n|' },
+        { value: 'sdot_phase', label: 'Phase(s_dot_n)' }
+    ], 'sn_mag');
+    const rootOptions = optionHtmlFromList(MIDI_NOTE_NAMES.map((note, i) => ({ value: String(i), label: note })), '0');
+    const scaleOptions = optionHtmlFromMap(SCALE_LIBRARY, 'chromatic');
+    const instrumentOptions = optionHtmlFromMap(INSTRUMENT_LIBRARY, 'acoustic_piano');
+    const percOptions = optionHtmlFromMap(PRIME_PERCUSSION, 'clap');
+
+    let html = '<div class="midi-layer-head">Extra Curves (2-4): each can run with its own source/root/scale/instrument/velocity/gate/prime settings.</div>';
+    for (let idx = 2; idx <= 4; idx++) {
+        const defaults = idx === 2
+            ? { source: 'sn_im', root: '0', scale: 'chromatic', instrument: 'electric_piano', velocity: 90, gate: 80, prime: true, perc: 'snare' }
+            : idx === 3
+                ? { source: 'sn_mag', root: '0', scale: 'chromatic', instrument: 'strings', velocity: 84, gate: 78, prime: false, perc: 'clap' }
+                : { source: 'sdot_mag', root: '0', scale: 'chromatic', instrument: 'flute', velocity: 82, gate: 82, prime: false, perc: 'clap' };
+        html += `
+            <div class="midi-layer-row" data-curve="${idx}">
+                <label><input type="checkbox" id="midi-curve${idx}-enabled"> Curve ${idx}</label>
+                <label>Source <select id="midi-curve${idx}-source">${sourceOptions.replace(`value="${defaults.source}"`, `value="${defaults.source}" selected`)}</select></label>
+                <label>Root <select id="midi-curve${idx}-root">${rootOptions.replace(`value="${defaults.root}"`, `value="${defaults.root}" selected`)}</select></label>
+                <label>Scale <select id="midi-curve${idx}-scale" style="max-width:160px;">${scaleOptions}</select></label>
+                <label>Instr <select id="midi-curve${idx}-instrument" style="max-width:160px;">${instrumentOptions.replace(`value="${defaults.instrument}"`, `value="${defaults.instrument}" selected`)}</select></label>
+                <label>Vel <input type="number" id="midi-curve${idx}-velocity" min="1" max="127" value="${defaults.velocity}" style="width:52px;"></label>
+                <label>Gate <input type="number" id="midi-curve${idx}-gate" min="10" max="100" value="${defaults.gate}" style="width:52px;"></label>
+                <label><input type="checkbox" id="midi-curve${idx}-prime"${defaults.prime ? ' checked' : ''}> Prime</label>
+                <label>Perc <select id="midi-curve${idx}-perc">${percOptions.replace(`value="${defaults.perc}"`, `value="${defaults.perc}" selected`)}</select></label>
+            </div>`;
+    }
+    host.innerHTML = html;
+}
+
+function renderScaleLegend(root, scaleKey) {
+    const legend = document.getElementById('midi-scale-legend');
+    if (!legend) return;
+    const intervals = getScaleIntervals(scaleKey);
+    const enabled = new Set(intervals);
+    const chips = [];
+
+    for (let pitchClass = 0; pitchClass < 12; pitchClass++) {
+        const rel = ((pitchClass - root) + 12) % 12;
+        const isOn = enabled.has(rel);
+        const isRoot = pitchClass === root;
+        const noteName = MIDI_NOTE_NAMES[pitchClass];
+        const degree = SCALE_DEGREES[rel];
+        chips.push(`<span class="scale-chip${isOn ? ' on' : ''}${isRoot ? ' root' : ''}">${noteName}${isOn ? ` (${degree})` : ''}</span>`);
+    }
+
+    legend.innerHTML = chips.join('');
+}
+
+function getMidiRange(rangeKey) {
+    if (rangeKey === 'full8') return { min: 12, max: 107, label: 'C0..B7' };
+    return { min: 21, max: 108, label: 'A0..C8' };
+}
+
+function buildAvailableMidiNotes(root, scaleKey, midiMin, midiMax) {
+    const intervals = getScaleIntervals(scaleKey);
+    const allow = new Set(intervals);
+    const notes = [];
+    for (let midi = midiMin; midi <= midiMax; midi++) {
+        if (scaleKey === 'chromatic') {
+            notes.push(midi);
+            continue;
+        }
+        const pitchClass = ((midi % 12) + 12) % 12;
+        const rel = ((pitchClass - root) + 12) % 12;
+        if (allow.has(rel)) notes.push(midi);
+    }
+    if (notes.length === 0) {
+        for (let midi = midiMin; midi <= midiMax; midi++) notes.push(midi);
+    }
+    return notes;
+}
+
+function buildConsecutiveScalePalette(root, scaleKey, startMidi, desiredCount, midiMin, midiMax) {
+    const intervals = getScaleIntervals(scaleKey);
+    const allowed = new Set(intervals.map((x) => ((root + x) % 12 + 12) % 12));
+    const candidates = [];
+    for (let midi = midiMin; midi <= midiMax; midi++) {
+        const pitchClass = ((midi % 12) + 12) % 12;
+        if (scaleKey === 'chromatic' || allowed.has(pitchClass)) candidates.push(midi);
+    }
+
+    if (candidates.length === 0) {
+        for (let midi = midiMin; midi <= midiMax; midi++) candidates.push(midi);
+    }
+
+    let startIndex = candidates.findIndex((m) => m >= startMidi);
+    if (startIndex < 0) startIndex = 0;
+
+    const notes = [];
+    const cycleByIndex = [];
+    if (desiredCount <= 0) {
+        return { notes: [], cycleByIndex: [], octavesUsed: 0, cycles: 0, truncated: false };
+    }
+    for (let i = 0; i < desiredCount; i++) {
+        const idx = (startIndex + i) % candidates.length;
+        notes.push(candidates[idx]);
+        cycleByIndex.push(Math.floor((startIndex + i) / Math.max(1, candidates.length)));
+    }
+
+    const octaveSet = new Set(notes.map((m) => Math.floor(m / 12)));
+    const cycles = Math.ceil((startIndex + desiredCount) / Math.max(1, candidates.length));
+    return {
+        notes,
+        cycleByIndex,
+        octavesUsed: octaveSet.size,
+        cycles,
+        truncated: false
+    };
+}
+
+function cOctaveToMidi(oct) {
+    return (oct + 1) * 12;
+}
+
+function normalizedHeightKey(height, precision) {
+    const rounded = Number(height.toFixed(precision));
+    const safe = Math.abs(rounded) < Math.pow(10, -precision) ? 0 : rounded;
+    return safe.toFixed(precision);
+}
+
+function buildMidiSequence() {
+    const cfg = getMidiUiConfig();
+    midiState.source = cfg.source;
+    midiState.root = cfg.root;
+    midiState.scaleKey = cfg.scaleKey;
+    midiState.rangeKey = cfg.rangeKey;
+    midiState.layoutMode = cfg.layoutMode;
+    midiState.baseOctave = cfg.baseOctave;
+    midiState.bpm = cfg.bpm;
+    midiState.subdivision = cfg.subdivision;
+    midiState.velocity = cfg.velocity;
+    midiState.gatePercent = cfg.gatePercent;
+    midiState.precision = cfg.precision;
+    midiState.primeAccent = cfg.primeAccent;
+    midiState.primePerc = cfg.primePerc;
+    midiState.instrumentKey = cfg.instrumentKey;
+    midiState.fxPreset = cfg.fxPreset;
+    midiState.fxReverb = cfg.fxReverb;
+    midiState.fxDelay = cfg.fxDelay;
+    midiState.fxChorus = cfg.fxChorus;
+    midiState.fxDrive = cfg.fxDrive;
+
+    const N = Math.max(1, Math.min(params.N, MAX_N_SUPPORTED));
+    computeSequence(N);
+
+    const curveSequences = (cfg.curveConfigs || []).map((curveCfg) => buildSingleCurveSequence(curveCfg, N));
+    const timelineSteps = [];
+    for (let i = 0; i < N; i++) {
+        const notes = [];
+        for (const seq of curveSequences) {
+            if (seq.events[i]) notes.push(seq.events[i]);
+        }
+        timelineSteps.push({ i, n: i + 1, notes });
+    }
+
+    const first = curveSequences[0] || null;
+    const allNotes = [];
+    const allUnique = new Set();
+    const allAvail = new Set();
+    for (const seq of curveSequences) {
+        for (const ev of seq.events) allNotes.push(ev.midi);
+        for (const h of seq.uniqueHeights) allUnique.add(h);
+        for (const m of seq.availableMidiNotes) allAvail.add(m);
+    }
+
+    midiState.curveSequences = curveSequences;
+    midiState.timelineSteps = timelineSteps;
+    midiState.events = first ? first.events : [];
+    midiState.uniqueHeights = Array.from(allUnique).sort((a, b) => a - b);
+    midiState.heightToMidi = first ? first.heightToMidi : new Map();
+    midiState.availableMidiNotes = Array.from(allAvail).sort((a, b) => a - b);
+    midiState.midiMin = allNotes.length ? Math.min(...allNotes) : 21;
+    midiState.midiMax = allNotes.length ? Math.max(...allNotes) : 108;
+    midiState.needsRebuild = false;
+    midiState.consecutiveOctavesUsed = first ? (first.curve.consecutiveOctavesUsed || 0) : 0;
+    midiState.consecutiveCycles = first ? (first.curve.consecutiveCycles || 1) : 1;
+    midiState.consecutiveTruncated = first ? !!first.consecutiveTruncated : false;
+
+    ensureAudioContext();
+    applyFxSettings(cfg);
+
+    updateMidiSummary();
+    renderScaleLegend(cfg.root, cfg.scaleKey);
+    renderMidiRoll();
+}
+
+function updateMidiSummary(extra = '') {
+    const summary = document.getElementById('midi-summary');
+    if (!summary) return;
+    const unique = midiState.uniqueHeights.length;
+    const total = midiState.timelineSteps.length;
+    const activeCurves = midiState.curveSequences.length;
+    const scaleName = (SCALE_LIBRARY[midiState.scaleKey] || SCALE_LIBRARY.chromatic).name;
+    const instrumentName = (INSTRUMENT_LIBRARY[midiState.instrumentKey] || INSTRUMENT_LIBRARY.acoustic_piano).name;
+    const percName = (PRIME_PERCUSSION[midiState.primePerc] || PRIME_PERCUSSION.clap).name;
+    const rootName = MIDI_NOTE_NAMES[midiState.root || 0];
+    const rangeLabel = `${midiNoteName(midiState.midiMin)}..${midiNoteName(midiState.midiMax)}`;
+    const fxText = `FX R${midiState.fxReverb}% D${midiState.fxDelay}% C${midiState.fxChorus}% Dr${midiState.fxDrive}%`;
+    const layoutText = midiState.layoutMode === 'scale_consecutive'
+        ? `Layout: Consecutive Scale Keys (base C${midiState.baseOctave}, ${midiState.consecutiveOctavesUsed} octaves in-map, rollover cycles: ${midiState.consecutiveCycles})`
+        : `Layout: Physical Keys`;
+    const base = `Mapped ${total} time-steps across ${activeCurves} curve(s) with ${unique} unique heights on enabled notes (${midiState.availableMidiNotes.length} notes in ${rangeLabel}). ${layoutText}. Curve 1 scale: ${rootName} ${scaleName}. Curve 1 instrument: ${instrumentName}. ${fxText}. Curve 1 prime percussion: ${midiState.primeAccent ? percName : 'OFF'}. Chroma index_0: 0..11 ↔ C..B, index_13: 13..24.`;
+    summary.textContent = extra ? `${base} ${extra}` : base;
+}
+
+function ensureAudioContext() {
+    if (!midiState.audioCtx) {
+        midiState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        midiState.masterGain = midiState.audioCtx.createGain();
+        midiState.masterGain.gain.value = 0.12;
+
+        midiState.fxInput = midiState.audioCtx.createGain();
+        midiState.fxDryGain = midiState.audioCtx.createGain();
+        midiState.fxReverbGain = midiState.audioCtx.createGain();
+        midiState.fxDelayGain = midiState.audioCtx.createGain();
+        midiState.fxChorusGain = midiState.audioCtx.createGain();
+        midiState.fxDriveGain = midiState.audioCtx.createGain();
+        midiState.fxConvolver = midiState.audioCtx.createConvolver();
+        midiState.fxDelayNode = midiState.audioCtx.createDelay(1.0);
+        midiState.fxDelayFeedback = midiState.audioCtx.createGain();
+        midiState.fxChorusDelayL = midiState.audioCtx.createDelay(0.05);
+        midiState.fxChorusDelayR = midiState.audioCtx.createDelay(0.05);
+        midiState.fxDriveNode = midiState.audioCtx.createWaveShaper();
+        midiState.fxCompressor = midiState.audioCtx.createDynamicsCompressor();
+
+        const chorusMerge = midiState.audioCtx.createChannelMerger(2);
+        const chorusSplit = midiState.audioCtx.createChannelSplitter(2);
+        midiState.fxChorusLfo = midiState.audioCtx.createOscillator();
+        const chorusLfoGainL = midiState.audioCtx.createGain();
+        const chorusLfoGainR = midiState.audioCtx.createGain();
+        chorusLfoGainL.gain.value = 0.002;
+        chorusLfoGainR.gain.value = -0.002;
+        midiState.fxChorusLfo.frequency.value = 0.35;
+        midiState.fxChorusLfo.connect(chorusLfoGainL);
+        midiState.fxChorusLfo.connect(chorusLfoGainR);
+        chorusLfoGainL.connect(midiState.fxChorusDelayL.delayTime);
+        chorusLfoGainR.connect(midiState.fxChorusDelayR.delayTime);
+        midiState.fxChorusLfo.start();
+
+        midiState.fxInput.connect(midiState.fxDryGain);
+        midiState.fxDryGain.connect(midiState.masterGain);
+
+        midiState.fxInput.connect(midiState.fxConvolver);
+        midiState.fxConvolver.connect(midiState.fxReverbGain);
+        midiState.fxReverbGain.connect(midiState.masterGain);
+
+        midiState.fxInput.connect(midiState.fxDelayNode);
+        midiState.fxDelayNode.connect(midiState.fxDelayFeedback);
+        midiState.fxDelayFeedback.connect(midiState.fxDelayNode);
+        midiState.fxDelayNode.connect(midiState.fxDelayGain);
+        midiState.fxDelayGain.connect(midiState.masterGain);
+
+        midiState.fxInput.connect(chorusSplit);
+        chorusSplit.connect(midiState.fxChorusDelayL, 0);
+        chorusSplit.connect(midiState.fxChorusDelayR, 1);
+        midiState.fxChorusDelayL.connect(chorusMerge, 0, 0);
+        midiState.fxChorusDelayR.connect(chorusMerge, 0, 1);
+        chorusMerge.connect(midiState.fxChorusGain);
+        midiState.fxChorusGain.connect(midiState.masterGain);
+
+        midiState.fxInput.connect(midiState.fxDriveNode);
+        midiState.fxDriveNode.connect(midiState.fxDriveGain);
+        midiState.fxDriveGain.connect(midiState.masterGain);
+
+        midiState.masterGain.connect(midiState.fxCompressor);
+        midiState.fxCompressor.threshold.value = -18;
+        midiState.fxCompressor.knee.value = 10;
+        midiState.fxCompressor.ratio.value = 3;
+        midiState.fxCompressor.attack.value = 0.003;
+        midiState.fxCompressor.release.value = 0.18;
+        midiState.fxCompressor.connect(midiState.audioCtx.destination);
+
+        const ir = midiState.audioCtx.createBuffer(2, midiState.audioCtx.sampleRate * 2.2, midiState.audioCtx.sampleRate);
+        for (let ch = 0; ch < 2; ch++) {
+            const d = ir.getChannelData(ch);
+            for (let i = 0; i < d.length; i++) {
+                const t = i / d.length;
+                d[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 2.6);
+            }
+        }
+        midiState.fxConvolver.buffer = ir;
+        midiState.fxDelayNode.delayTime.value = 0.24;
+        midiState.fxDelayFeedback.gain.value = 0.28;
+        midiState.fxChorusDelayL.delayTime.value = 0.012;
+        midiState.fxChorusDelayR.delayTime.value = 0.018;
+        midiState.fxDriveNode.curve = makeDriveCurve(220);
+        midiState.fxDriveNode.oversample = '4x';
+    }
+    if (midiState.audioCtx.state === 'suspended') midiState.audioCtx.resume();
+}
+
+function makeDriveCurve(amount) {
+    const n = 2048;
+    const curve = new Float32Array(n);
+    const k = amount;
+    for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = ((3 + k) * x * 20 * (Math.PI / 180)) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+}
+
+function applyFxSettings(cfg) {
+    if (!midiState.audioCtx || !midiState.fxDryGain) return;
+    midiState.fxPreset = cfg.fxPreset;
+    midiState.fxReverb = cfg.fxReverb;
+    midiState.fxDelay = cfg.fxDelay;
+    midiState.fxChorus = cfg.fxChorus;
+    midiState.fxDrive = cfg.fxDrive;
+
+    const wetR = cfg.fxReverb / 100;
+    const wetD = cfg.fxDelay / 100;
+    const wetC = cfg.fxChorus / 100;
+    const wetV = cfg.fxDrive / 100;
+    const dry = Math.max(0.15, 1 - Math.max(wetR, wetD, wetC, wetV) * 0.5);
+
+    midiState.fxDryGain.gain.value = dry;
+    midiState.fxReverbGain.gain.value = wetR * 0.55;
+    midiState.fxDelayGain.gain.value = wetD * 0.48;
+    midiState.fxDelayFeedback.gain.value = 0.16 + wetD * 0.48;
+    midiState.fxChorusGain.gain.value = wetC * 0.45;
+    midiState.fxDriveGain.gain.value = wetV * 0.42;
+    midiState.fxDriveNode.curve = makeDriveCurve(40 + wetV * 380);
+}
+
+function applyFxPresetToUi(presetKey) {
+    const preset = FX_PRESETS[presetKey] || FX_PRESETS.studio;
+    const reverb = document.getElementById('midi-fx-reverb');
+    const delay = document.getElementById('midi-fx-delay');
+    const chorus = document.getElementById('midi-fx-chorus');
+    const drive = document.getElementById('midi-fx-drive');
+    if (reverb) reverb.value = `${preset.reverb}`;
+    if (delay) delay.value = `${preset.delay}`;
+    if (chorus) chorus.value = `${preset.chorus}`;
+    if (drive) drive.value = `${preset.drive}`;
+}
+
+function midiToFrequency(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function getInstrumentProfile(instrumentKey) {
+    return INSTRUMENT_LIBRARY[instrumentKey] || INSTRUMENT_LIBRARY.acoustic_piano;
+}
+
+function getInstrumentKeyForProgram(programNumber, fallbackKey = 'acoustic_piano') {
+    const target = clampValue(parseInt(programNumber) || 0, 0, 127);
+    const keys = Object.keys(INSTRUMENT_LIBRARY);
+    for (const key of keys) {
+        const profile = INSTRUMENT_LIBRARY[key];
+        if (profile && profile.program === target && profile.type === 'synth') return key;
+    }
+    for (const key of keys) {
+        const profile = INSTRUMENT_LIBRARY[key];
+        if (profile && profile.program === target) return key;
+    }
+    return INSTRUMENT_LIBRARY[fallbackKey] ? fallbackKey : 'acoustic_piano';
+}
+
+function midiToSampleName(midi) {
+    const note = MIDI_NOTE_NAMES[midi % 12].replace('#', 's');
+    const octave = Math.floor(midi / 12) - 1;
+    return `${note}${octave}`;
+}
+
+async function getSampleBuffer(sfName, midi) {
+    ensureAudioContext();
+    const sampleName = midiToSampleName(midi);
+    const cacheKey = `${sfName}|${sampleName}`;
+    if (midiState.sampleCache.has(cacheKey)) return midiState.sampleCache.get(cacheKey);
+    const url = `${SOUND_FONT_BASE_URL}${sfName}-mp3/${sampleName}.mp3`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const arr = await res.arrayBuffer();
+        const buffer = await midiState.audioCtx.decodeAudioData(arr.slice(0));
+        midiState.sampleCache.set(cacheKey, buffer);
+        return buffer;
+    } catch (_err) {
+        return null;
+    }
+}
+
+async function playSampleNote(midi, velocity, gateSeconds, profile) {
+    const buffer = await getSampleBuffer(profile.sfName, midi);
+    if (!buffer) {
+        playInstrumentNote(midi, velocity, gateSeconds, 'acoustic_piano');
+        return;
+    }
+    const now = midiState.audioCtx.currentTime;
+    const source = midiState.audioCtx.createBufferSource();
+    source.buffer = buffer;
+    const gain = midiState.audioCtx.createGain();
+    const amp = (0.025 + (velocity / 127) * 0.13) * (profile.gain || 1);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(amp, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.08, gateSeconds + 0.18));
+    source.connect(gain);
+    gain.connect(midiState.fxInput);
+    source.start(now);
+    source.stop(now + Math.max(0.12, gateSeconds + 0.22));
+}
+
+function ensureClapBuffer() {
+    if (!midiState.audioCtx || midiState.clapBuffer) return;
+    const sampleRate = midiState.audioCtx.sampleRate;
+    const length = Math.floor(sampleRate * 0.12);
+    const buffer = midiState.audioCtx.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) {
+        const t = i / length;
+        const env = Math.pow(1 - t, 2.8);
+        data[i] = (Math.random() * 2 - 1) * env;
+    }
+    midiState.clapBuffer = buffer;
+}
+
+function getPrimePercProfile(key) {
+    return PRIME_PERCUSSION[key] || PRIME_PERCUSSION.clap;
+}
+
+function playPrimePercussion(velocity, gateSeconds, percKey) {
+    ensureAudioContext();
+    ensureClapBuffer();
+    if (!midiState.clapBuffer) return;
+
+    const profile = getPrimePercProfile(percKey);
+    const now = midiState.audioCtx.currentTime;
+    const finalDur = Math.max(0.02, gateSeconds * profile.durMul);
+
+    if (profile.noise) {
+        const source = midiState.audioCtx.createBufferSource();
+        source.buffer = midiState.clapBuffer;
+
+        const hp = midiState.audioCtx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = profile.hp || 1400;
+
+        const bp = midiState.audioCtx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = profile.bp || 2400;
+        bp.Q.value = profile.q || 0.7;
+
+        const gain = midiState.audioCtx.createGain();
+        const amp = 0.02 + (velocity / 127) * 0.09;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(amp, now + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + finalDur);
+
+        source.connect(hp);
+        hp.connect(bp);
+        bp.connect(gain);
+        gain.connect(midiState.fxInput);
+        source.start(now);
+        source.stop(now + finalDur + 0.02);
+        return;
+    }
+
+    const osc = midiState.audioCtx.createOscillator();
+    const gain = midiState.audioCtx.createGain();
+    osc.type = profile.osc || 'sine';
+    osc.frequency.setValueAtTime(profile.f1 || 180, now);
+    if (profile.f2) osc.frequency.exponentialRampToValueAtTime(Math.max(20, profile.f2), now + finalDur);
+
+    const amp = 0.02 + (velocity / 127) * 0.11;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(amp, now + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + finalDur);
+
+    osc.connect(gain);
+    gain.connect(midiState.fxInput);
+    osc.start(now);
+    osc.stop(now + finalDur + 0.02);
+}
+
+function playInstrumentNote(midi, velocity, gateSeconds, instrumentKey) {
+    ensureAudioContext();
+    const now = midiState.audioCtx.currentTime;
+    const profile = getInstrumentProfile(instrumentKey);
+    if (profile.type === 'sample') {
+        playSampleNote(midi, velocity, gateSeconds, profile);
+        return;
+    }
+    const osc = midiState.audioCtx.createOscillator();
+    const osc2 = midiState.audioCtx.createOscillator();
+    const gain = midiState.audioCtx.createGain();
+    const filter = midiState.audioCtx.createBiquadFilter();
+    osc.type = profile.osc;
+    osc2.type = profile.osc;
+
+    let freqMidi = midi;
+    if (instrumentKey === 'bass') freqMidi = clampValue(midi - 12, 12, 108);
+    osc.frequency.value = midiToFrequency(freqMidi);
+    osc2.frequency.value = midiToFrequency(freqMidi) * 1.0035;
+    filter.type = 'lowpass';
+    filter.frequency.value = profile.filter || 5200;
+    filter.Q.value = 0.5;
+
+    const amp = (0.03 + (velocity / 127) * 0.14) * profile.gain;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(amp, now + profile.attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.03, gateSeconds + profile.release * 0.4));
+
+    osc.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(midiState.fxInput);
+    osc.start(now);
+    osc2.start(now);
+    osc.stop(now + Math.max(0.05, gateSeconds + profile.release));
+    osc2.stop(now + Math.max(0.05, gateSeconds + profile.release));
+}
+
+async function initWebMidi() {
+    const select = document.getElementById('midi-output-select');
+    if (!select) return;
+    select.innerHTML = '';
+
+    const noneOpt = document.createElement('option');
+    noneOpt.value = '';
+    noneOpt.textContent = 'Local synth only';
+    select.appendChild(noneOpt);
+
+    if (!navigator.requestMIDIAccess) return;
+
+    try {
+        if (!midiState.midiAccess) midiState.midiAccess = await navigator.requestMIDIAccess();
+        const outs = Array.from(midiState.midiAccess.outputs.values());
+        for (const out of outs) {
+            const opt = document.createElement('option');
+            opt.value = out.id;
+            opt.textContent = out.name || out.manufacturer || out.id;
+            select.appendChild(opt);
+        }
+        select.onchange = () => {
+            const id = select.value;
+            midiState.midiOutput = id ? midiState.midiAccess.outputs.get(id) : null;
+            midiState.activeMidiProgram = null;
+            midiState.activeMidiProgramsByChannel = {};
+        };
+    } catch (_err) {
+        // keep synth-only mode
+    }
+}
+
+function ensureOutputInstrument(programNumber, channel = 0) {
+    const out = midiState.midiOutput;
+    if (!out) return;
+    const ch = clampValue(channel, 0, 15);
+    if (!midiState.activeMidiProgramsByChannel) midiState.activeMidiProgramsByChannel = {};
+    if (midiState.activeMidiProgramsByChannel[ch] === programNumber) return;
+    const now = window.performance.now();
+    out.send([0xC0 + ch, programNumber & 0x7F], now);
+    midiState.activeMidiProgramsByChannel[ch] = programNumber;
+    if (ch === 0) midiState.activeMidiProgram = programNumber;
+}
+
+function sendMidiNoteOut(midi, velocity, gateSeconds, channel = 0) {
+    const out = midiState.midiOutput;
+    if (!out) return;
+    const vel = clampValue(velocity, 1, 127);
+    const ch = clampValue(channel, 0, 15);
+    const on = [0x90 + ch, midi & 0x7F, vel];
+    const off = [0x80 + ch, midi & 0x7F, 0];
+    const now = window.performance.now();
+    out.send(on, now);
+    out.send(off, now + gateSeconds * 1000);
+}
+
+function sendMidiPrimePercOut(velocity, gateSeconds, percKey) {
+    const profile = getPrimePercProfile(percKey);
+    const drumVelocity = clampValue(Math.round(velocity * 1.05), 1, 127);
+    sendMidiNoteOut(profile.midiNote, drumVelocity, Math.max(0.02, gateSeconds * (profile.durMul || 0.35)), 9);
+}
+
+function clearImportTimers() {
+    if (!midiState.importTimers || midiState.importTimers.length === 0) return;
+    for (const id of midiState.importTimers) clearTimeout(id);
+    midiState.importTimers = [];
+}
+
+function playImportedMidi() {
+    if (!midiState.importedEvents || midiState.importedEvents.length === 0) {
+        updateMidiSummary('No imported MIDI loaded yet. Use “Load MIDI” first.');
+        return;
+    }
+    if (midiState.isPlaying) stopMidiPlayback();
+
+    const cfg = getMidiUiConfig();
+    ensureAudioContext();
+    applyFxSettings(cfg);
+
+    const channelPrograms = new Map();
+    for (const ev of midiState.importedEvents) {
+        const ch = clampValue(ev.channel || 0, 0, 15);
+        if (ch === 9) continue;
+        if (Number.isFinite(ev.program)) {
+            channelPrograms.set(ch, clampValue(ev.program, 0, 127));
+        }
+    }
+    for (const [ch, program] of channelPrograms.entries()) {
+        ensureOutputInstrument(program, ch);
+    }
+
+    midiState.playbackMode = 'imported';
+    midiState.isPlaying = true;
+    const btn = document.getElementById('btn-midi-play');
+    if (btn) btn.textContent = '▶ Play';
+
+    clearImportTimers();
+    for (const ev of midiState.importedEvents) {
+        const ms = Math.max(0, Math.round(ev.startSec * 1000));
+        const tid = setTimeout(() => {
+            if (!midiState.isPlaying || midiState.playbackMode !== 'imported') return;
+            const vel = clampValue(ev.velocity || 96, 1, 127);
+            const gate = Math.max(0.02, ev.durationSec || 0.12);
+            const channel = clampValue(ev.channel || 0, 0, 15);
+            if (channel === 9) {
+                playPrimePercussion(vel, gate, midiState.primePerc);
+            } else {
+                const program = Number.isFinite(ev.program)
+                    ? clampValue(ev.program, 0, 127)
+                    : getInstrumentProfile(cfg.instrumentKey).program;
+                ensureOutputInstrument(program, channel);
+                const instrumentKey = getInstrumentKeyForProgram(program, cfg.instrumentKey);
+                playInstrumentNote(ev.midi, vel, gate, instrumentKey);
+            }
+            sendMidiNoteOut(ev.midi, vel, gate, channel);
+        }, ms);
+        midiState.importTimers.push(tid);
+    }
+
+    const stopMs = Math.max(1, Math.round((midiState.importedDurationSeconds + 0.15) * 1000));
+    const stopTid = setTimeout(() => {
+        if (!midiState.isPlaying || midiState.playbackMode !== 'imported') return;
+        stopMidiPlayback();
+    }, stopMs);
+    midiState.importTimers.push(stopTid);
+
+    updateMidiSummary(`Imported playback started (${midiState.importedName || 'MIDI'}), ${midiState.importedEvents.length} notes, ~${midiState.importedTempoBpm} BPM.`);
+}
+
+function readU32BE(bytes, offset) {
+    return ((bytes[offset] * 16777216) + (bytes[offset + 1] << 16) + (bytes[offset + 2] << 8) + bytes[offset + 3]) >>> 0;
+}
+
+function readU16BE(bytes, offset) {
+    return (bytes[offset] << 8) | bytes[offset + 1];
+}
+
+function readVarLenFromBytes(bytes, offset, endExclusive) {
+    let value = 0;
+    let pos = offset;
+    while (pos < endExclusive) {
+        const b = bytes[pos++];
+        value = value * 128 + (b & 0x7F);
+        if ((b & 0x80) === 0) return { value, next: pos };
+    }
+    throw new Error('Invalid MIDI variable-length quantity.');
+}
+
+function finalizeTempoMap(rawTempo) {
+    const sorted = (rawTempo || []).slice().sort((a, b) => a.tick - b.tick);
+    const out = [];
+    for (const t of sorted) {
+        if (out.length > 0 && out[out.length - 1].tick === t.tick) {
+            out[out.length - 1].tempo = t.tempo;
+        } else {
+            out.push({ tick: t.tick, tempo: t.tempo });
+        }
+    }
+    if (out.length === 0 || out[0].tick !== 0) out.unshift({ tick: 0, tempo: 500000 });
+    return out;
+}
+
+function tickToSeconds(tick, tpq, tempoMap) {
+    let seconds = 0;
+    let prevTick = 0;
+    let currentTempo = tempoMap[0].tempo;
+    for (let i = 1; i < tempoMap.length; i++) {
+        const nextTick = tempoMap[i].tick;
+        if (tick < nextTick) break;
+        const dt = nextTick - prevTick;
+        seconds += (dt * currentTempo) / (tpq * 1000000);
+        prevTick = nextTick;
+        currentTempo = tempoMap[i].tempo;
+    }
+    const tail = tick - prevTick;
+    if (tail > 0) seconds += (tail * currentTempo) / (tpq * 1000000);
+    return seconds;
+}
+
+function parseMidiBytes(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    if (bytes.length < 14) throw new Error('File too short to be a valid MIDI file.');
+    if (!(bytes[0] === 0x4D && bytes[1] === 0x54 && bytes[2] === 0x68 && bytes[3] === 0x64)) {
+        throw new Error('Missing MThd header.');
+    }
+
+    const headerLen = readU32BE(bytes, 4);
+    if (headerLen < 6) throw new Error('Invalid MIDI header length.');
+    const format = readU16BE(bytes, 8);
+    const trackCount = readU16BE(bytes, 10);
+    const division = readU16BE(bytes, 12);
+    if (division & 0x8000) throw new Error('SMPTE-timed MIDI is not supported.');
+    const tpq = division;
+
+    let offset = 8 + headerLen;
+    const notes = [];
+    const tempoEvents = [{ tick: 0, tempo: 500000 }];
+    let maxTick = 0;
+
+    for (let trackIndex = 0; trackIndex < trackCount; trackIndex++) {
+        if (offset + 8 > bytes.length) throw new Error('Unexpected end of file while reading track header.');
+        if (!(bytes[offset] === 0x4D && bytes[offset + 1] === 0x54 && bytes[offset + 2] === 0x72 && bytes[offset + 3] === 0x6B)) {
+            throw new Error(`Missing MTrk header at track ${trackIndex + 1}.`);
+        }
+        const trackLen = readU32BE(bytes, offset + 4);
+        const trackStart = offset + 8;
+        const trackEnd = trackStart + trackLen;
+        if (trackEnd > bytes.length) throw new Error(`Track ${trackIndex + 1} exceeds file length.`);
+
+        let pos = trackStart;
+        let absTick = 0;
+        let runningStatus = 0;
+        const channelPrograms = new Int16Array(16);
+        for (let ch = 0; ch < 16; ch++) channelPrograms[ch] = 0;
+        const activeNotes = new Map();
+
+        const noteOn = (ch, note, vel) => {
+            const key = `${ch}:${note}`;
+            if (!activeNotes.has(key)) activeNotes.set(key, []);
+            activeNotes.get(key).push({ tick: absTick, velocity: vel, channel: ch, midi: note, program: channelPrograms[ch] });
+        };
+
+        const noteOff = (ch, note) => {
+            const key = `${ch}:${note}`;
+            const stack = activeNotes.get(key);
+            if (!stack || stack.length === 0) return;
+            const start = stack.pop();
+            const endTick = Math.max(start.tick + 1, absTick);
+            notes.push({
+                startTick: start.tick,
+                endTick,
+                velocity: start.velocity,
+                channel: start.channel,
+                midi: start.midi,
+                program: start.program
+            });
+        };
+
+        while (pos < trackEnd) {
+            const deltaParsed = readVarLenFromBytes(bytes, pos, trackEnd);
+            absTick += deltaParsed.value;
+            pos = deltaParsed.next;
+            if (pos >= trackEnd) break;
+
+            let status = bytes[pos++];
+            if (status < 0x80) {
+                if (!runningStatus) throw new Error(`Invalid running status in track ${trackIndex + 1}.`);
+                pos--;
+                status = runningStatus;
+            } else {
+                runningStatus = status;
+            }
+
+            if (status === 0xFF) {
+                if (pos >= trackEnd) break;
+                const metaType = bytes[pos++];
+                const metaLenParsed = readVarLenFromBytes(bytes, pos, trackEnd);
+                const metaLen = metaLenParsed.value;
+                pos = metaLenParsed.next;
+                if (pos + metaLen > trackEnd) throw new Error(`Invalid meta event length in track ${trackIndex + 1}.`);
+                if (metaType === 0x51 && metaLen === 3) {
+                    const tempo = (bytes[pos] << 16) | (bytes[pos + 1] << 8) | bytes[pos + 2];
+                    if (tempo > 0) tempoEvents.push({ tick: absTick, tempo });
+                }
+                pos += metaLen;
+                continue;
+            }
+
+            if (status === 0xF0 || status === 0xF7) {
+                const sysexLenParsed = readVarLenFromBytes(bytes, pos, trackEnd);
+                pos = sysexLenParsed.next + sysexLenParsed.value;
+                if (pos > trackEnd) throw new Error(`Invalid sysex event length in track ${trackIndex + 1}.`);
+                continue;
+            }
+
+            const command = status & 0xF0;
+            const channel = status & 0x0F;
+            if (pos >= trackEnd) break;
+            const data1 = bytes[pos++];
+            let data2 = 0;
+            if (!(command === 0xC0 || command === 0xD0)) {
+                if (pos >= trackEnd) break;
+                data2 = bytes[pos++];
+            }
+
+            if (command === 0x90) {
+                if (data2 > 0) noteOn(channel, data1 & 0x7F, data2 & 0x7F);
+                else noteOff(channel, data1 & 0x7F);
+            } else if (command === 0x80) {
+                noteOff(channel, data1 & 0x7F);
+            } else if (command === 0xC0) {
+                channelPrograms[channel] = data1 & 0x7F;
+            }
+        }
+
+        for (const stack of activeNotes.values()) {
+            for (const start of stack) {
+                notes.push({
+                    startTick: start.tick,
+                    endTick: start.tick + Math.max(1, Math.floor(tpq / 4)),
+                    velocity: start.velocity,
+                    channel: start.channel,
+                    midi: start.midi,
+                    program: start.program
+                });
+            }
+        }
+
+        maxTick = Math.max(maxTick, absTick);
+        offset = trackEnd;
+    }
+
+    notes.sort((a, b) => a.startTick - b.startTick || a.midi - b.midi);
+    const tempoMap = finalizeTempoMap(tempoEvents);
+    const importedEvents = notes.map((n) => {
+        const startSec = tickToSeconds(n.startTick, tpq, tempoMap);
+        const endSec = tickToSeconds(n.endTick, tpq, tempoMap);
+        return {
+            startSec,
+            durationSec: Math.max(0.02, endSec - startSec),
+            midi: n.midi,
+            velocity: clampValue(n.velocity || 96, 1, 127),
+            channel: clampValue(n.channel || 0, 0, 15),
+            program: Number.isFinite(n.program) ? clampValue(n.program, 0, 127) : undefined
+        };
+    });
+
+    const durationSeconds = importedEvents.length > 0
+        ? importedEvents.reduce((mx, e) => Math.max(mx, e.startSec + e.durationSec), 0)
+        : tickToSeconds(maxTick, tpq, tempoMap);
+    const baseTempo = tempoMap[0] && tempoMap[0].tempo ? tempoMap[0].tempo : 500000;
+    const bpm = Math.max(1, Math.round(60000000 / baseTempo));
+
+    return { format, trackCount, tpq, bpm, importedEvents, durationSeconds };
+}
+
+function handleMidiImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const parsed = parseMidiBytes(reader.result);
+            midiState.importedEvents = parsed.importedEvents;
+            midiState.importedTempoBpm = parsed.bpm;
+            midiState.importedDurationSeconds = parsed.durationSeconds;
+            midiState.importedName = file.name || 'Imported MIDI';
+            updateMidiSummary(`Loaded MIDI: ${midiState.importedName} (${parsed.format === 0 ? 'Format 0' : 'Format 1/2'}), ${parsed.trackCount} track(s), ${parsed.importedEvents.length} notes, ~${parsed.bpm} BPM.`);
+        } catch (err) {
+            midiState.importedEvents = [];
+            midiState.importedDurationSeconds = 0;
+            updateMidiSummary(`MIDI import failed: ${err && err.message ? err.message : 'Unknown error'}`);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function toggleMidiPlayback() {
+    if (midiState.isPlaying) {
+        stopMidiPlayback();
+    } else {
+        startMidiPlayback();
+    }
+}
+
+function startMidiPlayback() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+
+    const cfg = getMidiUiConfig();
+    midiState.bpm = cfg.bpm;
+    midiState.subdivision = cfg.subdivision;
+    midiState.velocity = cfg.velocity;
+    midiState.gatePercent = cfg.gatePercent;
+    midiState.primeAccent = cfg.primeAccent;
+    midiState.primePerc = cfg.primePerc;
+    midiState.instrumentKey = cfg.instrumentKey;
+    midiState.fxPreset = cfg.fxPreset;
+    midiState.fxReverb = cfg.fxReverb;
+    midiState.fxDelay = cfg.fxDelay;
+    midiState.fxChorus = cfg.fxChorus;
+    midiState.fxDrive = cfg.fxDrive;
+
+    ensureAudioContext();
+    applyFxSettings(cfg);
+    for (const seq of midiState.curveSequences) {
+        const profile = getInstrumentProfile(seq.curve.instrumentKey || cfg.instrumentKey);
+        ensureOutputInstrument(profile.program, clampValue(seq.curve.channel || 0, 0, 15));
+    }
+
+    midiState.playbackMode = 'generated';
+    midiState.isPlaying = true;
+    midiState.playIndex = 0;
+    const btn = document.getElementById('btn-midi-play');
+    if (btn) btn.textContent = '⏸ Pause';
+
+    const stepMs = cfg.stepSeconds * 1000;
+    midiState.playTimer = setInterval(() => {
+        if (!midiState.isPlaying) return;
+        if (midiState.playIndex >= midiState.timelineSteps.length) {
+            stopMidiPlayback();
+            return;
+        }
+
+        const step = midiState.timelineSteps[midiState.playIndex];
+        for (const ev of (step.notes || [])) {
+            const baseVel = clampValue(ev.velocity || cfg.velocity, 1, 127);
+            const mainVelocity = ev.isPrime && ev.primeAccent ? clampValue(Math.round(baseVel * 1.2), 1, 127) : baseVel;
+            const gateSeconds = Math.max(0.02, ev.gateSeconds || cfg.gateSeconds);
+            const channel = clampValue(ev.channel || 0, 0, 15);
+            const instrumentKey = ev.instrumentKey || cfg.instrumentKey;
+            const profile = getInstrumentProfile(instrumentKey);
+            ensureOutputInstrument(profile.program, channel);
+            playInstrumentNote(ev.midi, mainVelocity, gateSeconds, instrumentKey);
+            sendMidiNoteOut(ev.midi, mainVelocity, gateSeconds, channel);
+
+            if (ev.isPrime && ev.primeAccent) {
+                playPrimePercussion(mainVelocity, gateSeconds, ev.primePerc || midiState.primePerc);
+                sendMidiPrimePercOut(mainVelocity, gateSeconds, ev.primePerc || midiState.primePerc);
+            }
+        }
+
+        renderMidiRoll(midiState.playIndex);
+        updateMidiSummary(`Now: n=${step.n}, notes=${(step.notes || []).length}.`);
+        midiState.playIndex++;
+    }, stepMs);
+}
+
+function stopMidiPlayback() {
+    midiState.isPlaying = false;
+    clearImportTimers();
+    midiState.playbackMode = 'generated';
+    if (midiState.playTimer) {
+        clearInterval(midiState.playTimer);
+        midiState.playTimer = null;
+    }
+    const btn = document.getElementById('btn-midi-play');
+    if (btn) btn.textContent = '▶ Play';
+    renderMidiRoll();
+    updateMidiSummary();
+}
+
+function renderMidiRoll(activeIndex = -1) {
+    const canvasRoll = document.getElementById('midi-roll-canvas');
+    const wrap = document.getElementById('midi-roll-wrap');
+    if (!canvasRoll || !wrap) return;
+
+    const ctxRoll = canvasRoll.getContext('2d');
+    const events = midiState.events;
+    const timeline = (midiState.timelineSteps && midiState.timelineSteps.length > 0) ? midiState.timelineSteps : null;
+    const cfg = getMidiUiConfig();
+
+    let keyOrder;
+    if (midiState.layoutMode === 'scale_consecutive') {
+        keyOrder = Array.from(new Set(midiState.availableMidiNotes)).sort((a, b) => a - b);
+    } else {
+        keyOrder = [];
+        for (let midi = midiState.midiMin; midi <= midiState.midiMax; midi++) keyOrder.push(midi);
+    }
+    const keyCount = Math.max(1, keyOrder.length);
+    const stepCount = timeline ? timeline.length : events.length;
+    const rowByMidi = new Map();
+    for (let i = 0; i < keyOrder.length; i++) rowByMidi.set(keyOrder[i], i);
+    const leftPad = 72;
+    const topPad = 12;
+    const keyH = 4;
+    const totalH = topPad * 2 + keyCount * keyH;
+    const stepPx = stepCount > 0 ? Math.max(3, Math.min(14, Math.floor((wrap.clientWidth - leftPad - 20) / Math.max(32, stepCount)))) : 6;
+    const rollW = Math.max(wrap.clientWidth, leftPad + 20 + stepCount * stepPx);
+
+    const ratio = window.devicePixelRatio || 1;
+    canvasRoll.width = Math.floor(rollW * ratio);
+    canvasRoll.height = Math.floor(totalH * ratio);
+    canvasRoll.style.height = `${totalH}px`;
+    ctxRoll.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    ctxRoll.fillStyle = '#090909';
+    ctxRoll.fillRect(0, 0, rollW, totalH);
+
+    for (let k = 0; k < keyCount; k++) {
+        const midi = keyOrder[keyCount - 1 - k];
+        const chroma = midi % 12;
+        const isBlack = [1, 3, 6, 8, 10].includes(chroma);
+        const y = topPad + k * keyH;
+        ctxRoll.fillStyle = isBlack ? '#101010' : '#161616';
+        ctxRoll.fillRect(0, y, rollW, keyH);
+        ctxRoll.strokeStyle = '#202020';
+        ctxRoll.beginPath();
+        ctxRoll.moveTo(0, y + keyH);
+        ctxRoll.lineTo(rollW, y + keyH);
+        ctxRoll.stroke();
+    }
+
+    if (stepCount > 0) {
+        const beatEvery = cfg.subdivision;
+        for (let i = 0; i <= stepCount; i++) {
+            const x = leftPad + i * stepPx;
+            const isBar = i % (beatEvery * 4) === 0;
+            const isBeat = i % beatEvery === 0;
+            if (!isBeat && !isBar) continue;
+            ctxRoll.strokeStyle = isBar ? '#2a3f55' : '#1d2834';
+            ctxRoll.beginPath();
+            ctxRoll.moveTo(x, 0);
+            ctxRoll.lineTo(x, totalH);
+            ctxRoll.stroke();
+        }
+
+        if (midiState.layoutMode === 'scale_consecutive') {
+            for (let i = 1; i < events.length; i++) {
+                if ((events[i].cycle || 0) !== (events[i - 1].cycle || 0)) {
+                    const x = leftPad + i * stepPx;
+                    ctxRoll.strokeStyle = '#52d2ff';
+                    ctxRoll.lineWidth = 1.5;
+                    ctxRoll.beginPath();
+                    ctxRoll.moveTo(x, 0);
+                    ctxRoll.lineTo(x, totalH);
+                    ctxRoll.stroke();
+                }
+            }
+            ctxRoll.lineWidth = 1;
+        }
+    }
+
+    const curveColors = ['#4ca5ff', '#8ce25c', '#ff7ed5', '#ffd86b'];
+    if (timeline) {
+        for (let i = 0; i < timeline.length; i++) {
+            const notes = timeline[i].notes || [];
+            const laneCount = Math.max(1, notes.length);
+            const subW = Math.max(2, Math.floor((stepPx - 1) / laneCount));
+            for (let j = 0; j < notes.length; j++) {
+                const ev = notes[j];
+                const keyIndex = rowByMidi.has(ev.midi) ? rowByMidi.get(ev.midi) : 0;
+                const row = (keyCount - 1) - keyIndex;
+                const x = leftPad + i * stepPx + j * subW;
+                const y = topPad + row * keyH;
+                if (ev.isPrime && ev.primeAccent) {
+                    ctxRoll.fillStyle = '#ff8f3d';
+                } else {
+                    ctxRoll.fillStyle = curveColors[(ev.curveIndex || 1) - 1] || '#4ca5ff';
+                }
+                ctxRoll.fillRect(x, y, Math.max(1, subW - 1), keyH - 1);
+            }
+        }
+    } else {
+        for (let i = 0; i < events.length; i++) {
+            const ev = events[i];
+            const keyIndex = rowByMidi.has(ev.midi) ? rowByMidi.get(ev.midi) : 0;
+            const row = (keyCount - 1) - keyIndex;
+            const x = leftPad + i * stepPx;
+            const y = topPad + row * keyH;
+            if (ev.isPrime && midiState.primeAccent) {
+                ctxRoll.fillStyle = '#ff8f3d';
+            } else {
+                const hue = (ev.chromaIndex / 12) * 360;
+                ctxRoll.fillStyle = `hsl(${hue}, 80%, 58%)`;
+            }
+            ctxRoll.fillRect(x, y, Math.max(2, stepPx - 1), keyH - 1);
+        }
+    }
+
+    ctxRoll.fillStyle = '#cfd8e0';
+    ctxRoll.font = '11px monospace';
+    ctxRoll.fillText(midiNoteName(keyOrder[keyOrder.length - 1]), 10, topPad + 10);
+    if (rowByMidi.has(60)) {
+        const c4Row = (keyCount - 1) - rowByMidi.get(60);
+        ctxRoll.fillText('C4', 10, topPad + c4Row * keyH + 10);
+    }
+    ctxRoll.fillText(midiNoteName(keyOrder[0]), 10, totalH - 6);
+
+    if (activeIndex >= 0 && activeIndex < stepCount) {
+        const x = leftPad + activeIndex * stepPx;
+        ctxRoll.strokeStyle = '#ffe45a';
+        ctxRoll.lineWidth = 2;
+        ctxRoll.beginPath();
+        ctxRoll.moveTo(x, 0);
+        ctxRoll.lineTo(x, totalH);
+        ctxRoll.stroke();
+        ctxRoll.lineWidth = 1;
+    }
+}
+
+function writeVarLen(value) {
+    let v = Math.max(0, Math.floor(value));
+    const bytes = [v % 128];
+    v = Math.floor(v / 128);
+    while (v > 0) {
+        bytes.unshift((v % 128) | 0x80);
+        v = Math.floor(v / 128);
+    }
+    return bytes;
+}
+
+function pushU32BE(arr, value) {
+    arr.push((value >>> 24) & 0xFF, (value >>> 16) & 0xFF, (value >>> 8) & 0xFF, value & 0xFF);
+}
+
+function pushU16BE(arr, value) {
+    arr.push((value >>> 8) & 0xFF, value & 0xFF);
+}
+
+function buildMidiExportBaseName(cfg) {
+    return `factorization_midi_N${params.N}_To${params.To}_${cfg.source}`;
+}
+
+function buildMidiSessionPayload(cfg) {
+    const heightToMidiObj = {};
+    for (const [key, value] of midiState.heightToMidi.entries()) {
+        heightToMidiObj[key] = value;
+    }
+    return {
+        schema: 'factorization-midi-session-v1',
+        generatedAt: new Date().toISOString(),
+        generator: {
+            app: 'FactorizationIn2D',
+            N: params.N,
+            To: params.To
+        },
+        midiConfig: {
+            source: cfg.source,
+            root: cfg.root,
+            scaleKey: cfg.scaleKey,
+            rangeKey: cfg.rangeKey,
+            layoutMode: cfg.layoutMode,
+            baseOctave: cfg.baseOctave,
+            precision: cfg.precision,
+            bpm: cfg.bpm,
+            subdivision: cfg.subdivision,
+            velocity: cfg.velocity,
+            gatePercent: cfg.gatePercent,
+            primeAccent: cfg.primeAccent,
+            primePerc: cfg.primePerc,
+            instrumentKey: cfg.instrumentKey,
+            fxPreset: cfg.fxPreset,
+            fxReverb: cfg.fxReverb,
+            fxDelay: cfg.fxDelay,
+            fxChorus: cfg.fxChorus,
+            fxDrive: cfg.fxDrive,
+            curveConfigs: (cfg.curveConfigs || []).map((c) => ({
+                curveIndex: c.curveIndex,
+                channel: c.channel,
+                source: c.source,
+                root: c.root,
+                scaleKey: c.scaleKey,
+                velocity: c.velocity,
+                gatePercent: c.gatePercent,
+                primeAccent: c.primeAccent,
+                primePerc: c.primePerc,
+                instrumentKey: c.instrumentKey,
+                enabled: c.enabled
+            }))
+        },
+        mapping: {
+            uniqueHeights: midiState.uniqueHeights.slice(),
+            availableMidiNotes: midiState.availableMidiNotes.slice(),
+            midiMin: midiState.midiMin,
+            midiMax: midiState.midiMax,
+            consecutiveOctavesUsed: midiState.consecutiveOctavesUsed,
+            consecutiveCycles: midiState.consecutiveCycles,
+            consecutiveTruncated: !!midiState.consecutiveTruncated,
+            heightToMidi: heightToMidiObj
+        },
+        events: (midiState.timelineSteps || []).map((step) => ({
+            i: step.i,
+            n: step.n,
+            notes: (step.notes || []).map((ev) => ({
+                curveIndex: ev.curveIndex,
+                channel: ev.channel,
+                key: ev.key,
+                height: ev.height,
+                midi: ev.midi,
+                note: ev.note,
+                chromaIndex: ev.chromaIndex,
+                degree: ev.degree,
+                index13: ev.index13,
+                isPrime: !!ev.isPrime,
+                source: ev.source
+            }))
+        }))
+    };
+}
+
+function triggerJsonDownload(dataObj, fileName) {
+    const blob = new Blob([JSON.stringify(dataObj, null, 2)], { type: 'application/json;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function downloadMidiSessionJson(stem = null, cfgArg = null, quiet = false) {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+    const cfg = cfgArg || getMidiUiConfig();
+    const base = stem || buildMidiExportBaseName(cfg);
+    const payload = buildMidiSessionPayload(cfg);
+    triggerJsonDownload(payload, `${base}.json`);
+    if (!quiet) updateMidiSummary(`Session JSON exported: ${base}.json`);
+}
+
+function pushU16LE(arr, value) {
+    arr.push(value & 0xFF, (value >>> 8) & 0xFF);
+}
+
+function pushU32LE(arr, value) {
+    arr.push(value & 0xFF, (value >>> 8) & 0xFF, (value >>> 16) & 0xFF, (value >>> 24) & 0xFF);
+}
+
+let CRC32_TABLE = null;
+function getCrc32Table() {
+    if (CRC32_TABLE) return CRC32_TABLE;
+    CRC32_TABLE = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let j = 0; j < 8; j++) {
+            c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        }
+        CRC32_TABLE[i] = c >>> 0;
+    }
+    return CRC32_TABLE;
+}
+
+function crc32(bytes) {
+    const table = getCrc32Table();
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) {
+        c = table[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function toDosDateTime(date) {
+    const year = Math.max(1980, date.getFullYear());
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    const second = date.getSeconds();
+    const dosTime = ((hour & 0x1F) << 11) | ((minute & 0x3F) << 5) | (Math.floor(second / 2) & 0x1F);
+    const dosDate = (((year - 1980) & 0x7F) << 9) | ((month & 0x0F) << 5) | (day & 0x1F);
+    return { dosTime, dosDate };
+}
+
+function buildZipStore(files) {
+    const out = [];
+    const central = [];
+    const encoder = new TextEncoder();
+    const now = toDosDateTime(new Date());
+
+    for (const file of files) {
+        const nameBytes = encoder.encode(file.name);
+        const dataBytes = file.data;
+        const fileCrc = crc32(dataBytes);
+        const offset = out.length;
+
+        pushU32LE(out, 0x04034B50);
+        pushU16LE(out, 20);
+        pushU16LE(out, 0);
+        pushU16LE(out, 0);
+        pushU16LE(out, now.dosTime);
+        pushU16LE(out, now.dosDate);
+        pushU32LE(out, fileCrc);
+        pushU32LE(out, dataBytes.length);
+        pushU32LE(out, dataBytes.length);
+        pushU16LE(out, nameBytes.length);
+        pushU16LE(out, 0);
+        out.push(...nameBytes);
+        out.push(...dataBytes);
+
+        central.push({
+            offset,
+            nameBytes,
+            crc: fileCrc,
+            size: dataBytes.length,
+            dosTime: now.dosTime,
+            dosDate: now.dosDate
+        });
+    }
+
+    const centralOffset = out.length;
+    for (const c of central) {
+        pushU32LE(out, 0x02014B50);
+        pushU16LE(out, 20);
+        pushU16LE(out, 20);
+        pushU16LE(out, 0);
+        pushU16LE(out, 0);
+        pushU16LE(out, c.dosTime);
+        pushU16LE(out, c.dosDate);
+        pushU32LE(out, c.crc);
+        pushU32LE(out, c.size);
+        pushU32LE(out, c.size);
+        pushU16LE(out, c.nameBytes.length);
+        pushU16LE(out, 0);
+        pushU16LE(out, 0);
+        pushU16LE(out, 0);
+        pushU16LE(out, 0);
+        pushU32LE(out, 0);
+        pushU32LE(out, c.offset);
+        out.push(...c.nameBytes);
+    }
+
+    const centralSize = out.length - centralOffset;
+    pushU32LE(out, 0x06054B50);
+    pushU16LE(out, 0);
+    pushU16LE(out, 0);
+    pushU16LE(out, central.length);
+    pushU16LE(out, central.length);
+    pushU32LE(out, centralSize);
+    pushU32LE(out, centralOffset);
+    pushU16LE(out, 0);
+
+    return new Uint8Array(out);
+}
+
+async function downloadMidiBundleZip() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    const midiBytes = buildMidiFileBytes(midiState.timelineSteps, midiState.curveSequences, cfg.bpm, cfg.subdivision);
+    const payload = buildMidiSessionPayload(cfg);
+    const jsonBytes = new TextEncoder().encode(JSON.stringify(payload, null, 2));
+    const csvBytes = new TextEncoder().encode(buildMappedNotesCsvText());
+    const mdBytes = new TextEncoder().encode(buildMappedNotesMdText(cfg));
+
+    const files = [
+        { name: `${baseName}.mid`, data: midiBytes },
+        { name: `${baseName}.json`, data: jsonBytes },
+        { name: `${baseName}_notes_octaves.csv`, data: csvBytes },
+        { name: `${baseName}_notes_octaves.md`, data: mdBytes }
+    ];
+    let mp3Included = false;
+    try {
+        updateMidiSummary('Rendering MP3 for bundle... this may take a few seconds.');
+        await loadLameJs();
+        const audioBuffer = await renderTimelineToAudioBuffer(cfg);
+        const mp3Blob = encodeAudioBufferToMp3(audioBuffer, 192);
+        const mp3Bytes = new Uint8Array(await mp3Blob.arrayBuffer());
+        files.push({ name: `${baseName}.mp3`, data: mp3Bytes });
+        mp3Included = true;
+    } catch (err) {
+        mp3Included = false;
+    }
+
+    const zipBytes = buildZipStore(files);
+
+    const blob = new Blob([zipBytes], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${baseName}.zip`;
+    link.click();
+    URL.revokeObjectURL(url);
+    if (mp3Included) {
+        updateMidiSummary(`Exported bundle ${baseName}.zip (.mid + .mp3 + .json + notes csv/md).`);
+    } else {
+        updateMidiSummary(`Exported bundle ${baseName}.zip (.mid + .json + notes csv/md). MP3 could not be included.`);
+    }
+}
+
+function applyMidiConfigToUi(cfg) {
+    const setSelect = (id, value) => {
+        const el = document.getElementById(id);
+        if (!el || value === undefined || value === null) return;
+        const str = String(value);
+        if (Array.from(el.options || []).some((opt) => opt.value === str)) el.value = str;
+    };
+    const setInput = (id, value) => {
+        const el = document.getElementById(id);
+        if (!el || value === undefined || value === null) return;
+        el.value = String(value);
+    };
+    setSelect('midi-source', cfg.source);
+    setSelect('midi-root', cfg.root);
+    setSelect('midi-scale', cfg.scaleKey);
+    setSelect('midi-range', cfg.rangeKey);
+    setSelect('midi-layout-mode', cfg.layoutMode);
+    setSelect('midi-base-octave', cfg.baseOctave);
+    setInput('midi-precision', cfg.precision);
+    setInput('midi-bpm', cfg.bpm);
+    setSelect('midi-subdiv', cfg.subdivision);
+    setInput('midi-velocity', cfg.velocity);
+    setInput('midi-gate', cfg.gatePercent);
+    const primeAccentEl = document.getElementById('midi-prime-accent');
+    if (primeAccentEl && typeof cfg.primeAccent === 'boolean') primeAccentEl.checked = cfg.primeAccent;
+    setSelect('midi-prime-perc', cfg.primePerc);
+    setSelect('midi-instrument', cfg.instrumentKey);
+    setSelect('midi-fx-preset', cfg.fxPreset);
+    setInput('midi-fx-reverb', cfg.fxReverb);
+    setInput('midi-fx-delay', cfg.fxDelay);
+    setInput('midi-fx-chorus', cfg.fxChorus);
+    setInput('midi-fx-drive', cfg.fxDrive);
+}
+
+function applyCurveConfigsToUi(curveConfigs) {
+    if (!Array.isArray(curveConfigs)) return;
+    for (let idx = 2; idx <= 4; idx++) {
+        const enabledEl = document.getElementById(`midi-curve${idx}-enabled`);
+        if (enabledEl) enabledEl.checked = false;
+    }
+    for (const cfg of curveConfigs) {
+        const idx = Number(cfg.curveIndex);
+        if (!Number.isFinite(idx) || idx < 2 || idx > 4) continue;
+        const enabledEl = document.getElementById(`midi-curve${idx}-enabled`);
+        if (enabledEl) enabledEl.checked = cfg.enabled !== false;
+        const setSelect = (id, value) => {
+            const el = document.getElementById(id);
+            if (!el || value === undefined || value === null) return;
+            const str = String(value);
+            if (Array.from(el.options || []).some((opt) => opt.value === str)) el.value = str;
+        };
+        const setInput = (id, value) => {
+            const el = document.getElementById(id);
+            if (!el || value === undefined || value === null) return;
+            el.value = String(value);
+        };
+        setSelect(`midi-curve${idx}-source`, cfg.source);
+        setSelect(`midi-curve${idx}-root`, cfg.root);
+        setSelect(`midi-curve${idx}-scale`, cfg.scaleKey);
+        setSelect(`midi-curve${idx}-instrument`, cfg.instrumentKey);
+        setInput(`midi-curve${idx}-velocity`, cfg.velocity);
+        setInput(`midi-curve${idx}-gate`, cfg.gatePercent);
+        const primeEl = document.getElementById(`midi-curve${idx}-prime`);
+        if (primeEl && typeof cfg.primeAccent === 'boolean') primeEl.checked = cfg.primeAccent;
+        setSelect(`midi-curve${idx}-perc`, cfg.primePerc);
+    }
+}
+
+function importMidiSessionJson(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        try {
+            const parsed = JSON.parse(reader.result);
+            const gen = parsed && parsed.generator ? parsed.generator : null;
+            const cfg = parsed && parsed.midiConfig ? parsed.midiConfig : null;
+
+            if (gen && Number.isFinite(Number(gen.N)) && Number.isFinite(Number(gen.To))) {
+                const nextN = Math.max(1, Math.min(parseInt(gen.N), MAX_N_SUPPORTED));
+                const nextTo = Math.max(2, parseFloat(gen.To));
+                const nInput = document.getElementById('inp-n');
+                const toInput = document.getElementById('inp-to');
+                if (nInput) nInput.value = String(nextN);
+                if (toInput) toInput.value = String(nextTo);
+                params.N = nextN;
+                params.To = nextTo;
+                recompute();
+            }
+
+            if (cfg) {
+                applyMidiConfigToUi(cfg);
+                applyCurveConfigsToUi(cfg.curveConfigs || []);
+                if (typeof applyFxPresetToUi === 'function' && cfg.fxPreset) applyFxPresetToUi(cfg.fxPreset);
+            }
+
+            midiState.needsRebuild = true;
+            buildMidiSequence();
+            updateMidiSummary(`Session JSON loaded: ${file.name}. Mapping rebuilt.`);
+        } catch (err) {
+            updateMidiSummary(`Session JSON import failed: ${err && err.message ? err.message : 'Unknown error'}`);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function buildMidiFileBytes(timelineSteps, curveSequences, bpm, subdivision) {
+    const tpq = 480;
+    const stepTicks = Math.max(1, Math.round(tpq / subdivision));
+    const tempo = Math.round(60000000 / bpm);
+
+    const timedEvents = [];
+    const steps = Array.isArray(timelineSteps) ? timelineSteps : [];
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const t0 = i * stepTicks;
+        for (const ev of (step.notes || [])) {
+            const channel = clampValue(ev.channel || 0, 0, 15);
+            const baseVel = clampValue(ev.velocity || 96, 1, 127);
+            const mainVel = ev.isPrime && ev.primeAccent ? clampValue(Math.round(baseVel * 1.2), 1, 127) : baseVel;
+            const gateTicks = Math.max(1, Math.round(stepTicks * ((ev.gatePercent || 85) / 100)));
+            timedEvents.push({ t: t0, status: 0x90 + channel, note: ev.midi & 0x7F, vel: mainVel & 0x7F, kind: 1 });
+            timedEvents.push({ t: t0 + gateTicks, status: 0x80 + channel, note: ev.midi & 0x7F, vel: 0, kind: 0 });
+
+            if (ev.isPrime && ev.primeAccent) {
+                const profilePerc = getPrimePercProfile(ev.primePerc || 'clap');
+                const percGate = Math.max(1, Math.round(gateTicks * (profilePerc.durMul || 0.35)));
+                const percVel = clampValue(Math.round(mainVel * 1.05), 1, 127);
+                timedEvents.push({ t: t0, status: 0x99, note: profilePerc.midiNote & 0x7F, vel: percVel & 0x7F, kind: 1 });
+                timedEvents.push({ t: t0 + percGate, status: 0x89, note: profilePerc.midiNote & 0x7F, vel: 0, kind: 0 });
+            }
+        }
+    }
+
+    timedEvents.sort((a, b) => {
+        if (a.t !== b.t) return a.t - b.t;
+        return a.kind - b.kind;
+    });
+
+    const track = [];
+    track.push(...writeVarLen(0), 0xFF, 0x51, 0x03, (tempo >> 16) & 0xFF, (tempo >> 8) & 0xFF, tempo & 0xFF);
+    const usedChannels = new Set();
+    for (const seq of (curveSequences || [])) {
+        const channel = clampValue((seq.curve && seq.curve.channel) || 0, 0, 15);
+        if (usedChannels.has(channel)) continue;
+        usedChannels.add(channel);
+        const profile = getInstrumentProfile((seq.curve && seq.curve.instrumentKey) || 'acoustic_piano');
+        track.push(...writeVarLen(0), 0xC0 + channel, profile.program & 0x7F);
+    }
+
+    let lastTick = 0;
+    for (const ev of timedEvents) {
+        const delta = ev.t - lastTick;
+        track.push(...writeVarLen(delta), ev.status, ev.note, ev.vel);
+        lastTick = ev.t;
+    }
+
+    track.push(...writeVarLen(0), 0xFF, 0x2F, 0x00);
+
+    const bytes = [];
+    bytes.push(0x4D, 0x54, 0x68, 0x64);
+    pushU32BE(bytes, 6);
+    pushU16BE(bytes, 0);
+    pushU16BE(bytes, 1);
+    pushU16BE(bytes, tpq);
+
+    bytes.push(0x4D, 0x54, 0x72, 0x6B);
+    pushU32BE(bytes, track.length);
+    bytes.push(...track);
+    return new Uint8Array(bytes);
+}
+
+let lameJsLoaderPromise = null;
+async function loadLameJs() {
+    if (window.lamejs) return window.lamejs;
+    if (lameJsLoaderPromise) return lameJsLoaderPromise;
+    const scriptUrls = [
+        './vendor/lame.min.js',
+        'vendor/lame.min.js',
+        'https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js',
+        'https://unpkg.com/lamejs@1.2.1/lame.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js'
+    ];
+    lameJsLoaderPromise = (async () => {
+        let lastErr = null;
+        for (const src of scriptUrls) {
+            try {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.async = true;
+                    script.onload = () => resolve();
+                    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+                    document.head.appendChild(script);
+                });
+                if (window.lamejs && window.lamejs.Mp3Encoder) return window.lamejs;
+            } catch (err) {
+                lastErr = err;
+            }
+        }
+        throw new Error(`MP3 encoder load failed. ${lastErr && lastErr.message ? lastErr.message : ''}`.trim());
+    })();
+    try {
+        return await lameJsLoaderPromise;
+    } catch (err) {
+        lameJsLoaderPromise = null;
+        throw err;
+    }
+}
+
+function offlineProfileForInstrument(instrumentKey) {
+    const profile = getInstrumentProfile(instrumentKey);
+    if (profile && profile.type === 'synth') return profile;
+    return getInstrumentProfile('acoustic_piano');
+}
+
+function buildOfflineNoiseBuffer(ctx) {
+    const len = Math.max(1, Math.floor(ctx.sampleRate * 0.5));
+    const buffer = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    return buffer;
+}
+
+function scheduleOfflinePrimePerc(offlineCtx, destination, noiseBuffer, startTime, velocity, gateSeconds, percKey) {
+    const profile = getPrimePercProfile(percKey || 'clap');
+    const dur = Math.max(0.02, gateSeconds * (profile.durMul || 0.35));
+    const velNorm = Math.max(0.05, Math.min(1, velocity / 127));
+
+    if (profile.noise) {
+        const source = offlineCtx.createBufferSource();
+        source.buffer = noiseBuffer;
+        const hp = offlineCtx.createBiquadFilter();
+        hp.type = 'highpass';
+        hp.frequency.value = profile.hp || 900;
+        const bp = offlineCtx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = profile.bp || 2200;
+        bp.Q.value = profile.q || 0.7;
+        const gain = offlineCtx.createGain();
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.10 * velNorm, startTime + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur);
+        source.connect(hp);
+        hp.connect(bp);
+        bp.connect(gain);
+        gain.connect(destination);
+        source.start(startTime);
+        source.stop(startTime + dur + 0.01);
+        return;
+    }
+
+    const osc = offlineCtx.createOscillator();
+    osc.type = profile.osc || 'sine';
+    const f1 = profile.f1 || 220;
+    const f2 = profile.f2 || Math.max(40, f1 * 0.55);
+    osc.frequency.setValueAtTime(f1, startTime);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(20, f2), startTime + Math.max(0.015, dur * 0.7));
+    const gain = offlineCtx.createGain();
+    gain.gain.setValueAtTime(0.0001, startTime);
+    gain.gain.exponentialRampToValueAtTime(0.12 * velNorm, startTime + 0.003);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + dur);
+    osc.connect(gain);
+    gain.connect(destination);
+    osc.start(startTime);
+    osc.stop(startTime + dur + 0.01);
+}
+
+async function renderTimelineToAudioBuffer(cfg) {
+    const steps = midiState.timelineSteps || [];
+    if (steps.length === 0) throw new Error('No generated music to render. Build a map first.');
+
+    const stepSeconds = (60 / cfg.bpm) / cfg.subdivision;
+    const totalSeconds = Math.max(1, steps.length * stepSeconds + 1);
+    const sampleRate = 44100;
+    const frameCount = Math.max(1, Math.ceil(totalSeconds * sampleRate));
+    const OfflineCtxClass = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OfflineCtxClass) throw new Error('OfflineAudioContext is not supported in this browser.');
+    const offlineCtx = new OfflineCtxClass(2, frameCount, sampleRate);
+
+    const master = offlineCtx.createGain();
+    master.gain.value = 0.22;
+    master.connect(offlineCtx.destination);
+    const comp = offlineCtx.createDynamicsCompressor();
+    comp.threshold.value = -16;
+    comp.knee.value = 20;
+    comp.ratio.value = 3;
+    comp.attack.value = 0.003;
+    comp.release.value = 0.18;
+    comp.connect(master);
+
+    const noiseBuffer = buildOfflineNoiseBuffer(offlineCtx);
+
+    for (let i = 0; i < steps.length; i++) {
+        const t0 = i * stepSeconds;
+        const notes = steps[i].notes || [];
+        for (const ev of notes) {
+            const profile = offlineProfileForInstrument(ev.instrumentKey || cfg.instrumentKey);
+            let freqMidi = ev.midi;
+            if ((ev.instrumentKey || cfg.instrumentKey) === 'bass') freqMidi = clampValue(ev.midi - 12, 12, 108);
+            const freq = midiToFrequency(freqMidi);
+            const vel = clampValue(ev.velocity || cfg.velocity, 1, 127);
+            const mainVel = ev.isPrime && ev.primeAccent ? clampValue(Math.round(vel * 1.2), 1, 127) : vel;
+            const gate = Math.max(0.02, stepSeconds * ((ev.gatePercent || cfg.gatePercent || 85) / 100));
+
+            const osc1 = offlineCtx.createOscillator();
+            const osc2 = offlineCtx.createOscillator();
+            const filter = offlineCtx.createBiquadFilter();
+            const gain = offlineCtx.createGain();
+
+            osc1.type = profile.osc || 'triangle';
+            osc2.type = profile.osc || 'triangle';
+            osc1.frequency.setValueAtTime(freq, t0);
+            osc2.frequency.setValueAtTime(freq * 1.0035, t0);
+
+            filter.type = 'lowpass';
+            filter.frequency.value = profile.filter || 5200;
+            filter.Q.value = 0.5;
+
+            const amp = (0.015 + (mainVel / 127) * 0.095) * (profile.gain || 1.0);
+            const attack = Math.max(0.002, profile.attack || 0.01);
+            const release = Math.max(0.04, profile.release || 0.18);
+            gain.gain.setValueAtTime(0.0001, t0);
+            gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, amp), t0 + attack);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + Math.max(0.04, gate + release * 0.45));
+
+            osc1.connect(filter);
+            osc2.connect(filter);
+            filter.connect(gain);
+            gain.connect(comp);
+
+            osc1.start(t0);
+            osc2.start(t0);
+            osc1.stop(t0 + Math.max(0.06, gate + release));
+            osc2.stop(t0 + Math.max(0.06, gate + release));
+
+            if (ev.isPrime && ev.primeAccent) {
+                scheduleOfflinePrimePerc(offlineCtx, comp, noiseBuffer, t0, mainVel, gate, ev.primePerc || cfg.primePerc);
+            }
+        }
+    }
+
+    return offlineCtx.startRendering();
+}
+
+function floatToInt16(samples) {
+    const out = new Int16Array(samples.length);
+    for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        out[i] = s < 0 ? Math.round(s * 32768) : Math.round(s * 32767);
+    }
+    return out;
+}
+
+function encodeAudioBufferToMp3(audioBuffer, kbps = 192) {
+    if (!window.lamejs) throw new Error('MP3 encoder library not loaded.');
+    const sampleRate = audioBuffer.sampleRate;
+    const leftData = audioBuffer.getChannelData(0);
+    const rightData = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : leftData;
+    const left = floatToInt16(leftData);
+    const right = floatToInt16(rightData);
+    const encoder = new window.lamejs.Mp3Encoder(2, sampleRate, kbps);
+    const block = 1152;
+    const chunks = [];
+
+    for (let i = 0; i < left.length; i += block) {
+        const l = left.subarray(i, i + block);
+        const r = right.subarray(i, i + block);
+        const mp3buf = encoder.encodeBuffer(l, r);
+        if (mp3buf && mp3buf.length > 0) chunks.push(new Uint8Array(mp3buf));
+    }
+    const endBuf = encoder.flush();
+    if (endBuf && endBuf.length > 0) chunks.push(new Uint8Array(endBuf));
+    return new Blob(chunks, { type: 'audio/mpeg' });
+}
+
+function buildMappedNotesRows() {
+    const rows = [];
+    const steps = midiState.timelineSteps || [];
+    for (const step of steps) {
+        const notes = step.notes || [];
+        for (const ev of notes) {
+            const noteOctave = ev.note || midiNoteName(ev.midi);
+            const octave = Number.isFinite(ev.midi) ? (Math.floor(ev.midi / 12) - 1) : null;
+            rows.push({
+                step: step.i,
+                n: step.n,
+                curve: ev.curveIndex || 1,
+                source: ev.source || '',
+                note_octave: noteOctave,
+                midi: ev.midi,
+                octave,
+                velocity: ev.velocity,
+                gatePercent: ev.gatePercent,
+                isPrime: ev.isPrime ? 1 : 0,
+                height: ev.height
+            });
+        }
+    }
+    rows.sort((a, b) => a.step - b.step || a.curve - b.curve || a.midi - b.midi);
+    return rows;
+}
+
+function csvEscape(value) {
+    const s = String(value ?? '');
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+}
+
+function buildMappedNotesCsvText() {
+    const rows = buildMappedNotesRows();
+    const header = ['step', 'n', 'curve', 'source', 'note_octave', 'midi', 'octave', 'velocity', 'gate_percent', 'is_prime', 'height'];
+    const lines = [header.join(',')];
+    for (const r of rows) {
+        lines.push([
+            r.step, r.n, r.curve, r.source, r.note_octave, r.midi, r.octave, r.velocity, r.gatePercent, r.isPrime, r.height
+        ].map(csvEscape).join(','));
+    }
+    return lines.join('\n');
+}
+
+function buildMappedNotesMdText(cfg) {
+    const rows = buildMappedNotesRows();
+    let md = '';
+    md += `# Mapped Note-Octave Sequence\n\n`;
+    md += `- N: ${params.N}\n`;
+    md += `- To: ${params.To}\n`;
+    md += `- BPM: ${cfg.bpm}\n`;
+    md += `- Subdivision: ${cfg.subdivision}\n\n`;
+    md += `| step | n | curve | source | note_octave | midi | octave | velocity | gate_% | is_prime | height |\n`;
+    md += `|---:|---:|---:|:---|:---|---:|---:|---:|---:|---:|---:|\n`;
+    for (const r of rows) {
+        md += `| ${r.step} | ${r.n} | ${r.curve} | ${r.source} | ${r.note_octave} | ${r.midi} | ${r.octave} | ${r.velocity} | ${r.gatePercent} | ${r.isPrime} | ${r.height} |\n`;
+    }
+    return md;
+}
+
+function downloadMappedNotesCsv() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    const text = buildMappedNotesCsvText();
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${baseName}_notes_octaves.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    updateMidiSummary(`Exported ${baseName}_notes_octaves.csv`);
+}
+
+function downloadMappedNotesMd() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    const text = buildMappedNotesMdText(cfg);
+    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${baseName}_notes_octaves.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    updateMidiSummary(`Exported ${baseName}_notes_octaves.md`);
+}
+
+async function downloadMp3File() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    try {
+        updateMidiSummary('Rendering MP3... this may take a few seconds.');
+        await loadLameJs();
+        const audioBuffer = await renderTimelineToAudioBuffer(cfg);
+        const blob = encodeAudioBufferToMp3(audioBuffer, 192);
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${baseName}.mp3`;
+        link.click();
+        URL.revokeObjectURL(url);
+        updateMidiSummary(`Exported ${baseName}.mp3`);
+    } catch (err) {
+        updateMidiSummary(`MP3 export failed: ${err && err.message ? err.message : 'Unknown error'}`);
+    }
+}
+
+function downloadMidiFile() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) return;
+
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    const bytes = buildMidiFileBytes(midiState.timelineSteps, midiState.curveSequences, cfg.bpm, cfg.subdivision);
+    const blob = new Blob([bytes], { type: 'audio/midi' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${baseName}.mid`;
+    link.click();
+    URL.revokeObjectURL(url);
+    downloadMidiSessionJson(baseName, cfg, true);
+    updateMidiSummary(`Exported ${baseName}.mid and ${baseName}.json`);
+}
+
+function showMidiPlayground() {
+    document.getElementById('midi-overlay').classList.add('visible');
+    const srcSel = document.getElementById('midi-source');
+    if (srcSel) {
+        if (params.activePlot === 'sn_mag') srcSel.value = 'sn_mag';
+        else if (params.activePlot === 'sdot_mag') srcSel.value = 'sdot_mag';
+        else if (params.activePlot === 'sn_complex') srcSel.value = 'sn_im';
+        else if (params.activePlot === 'sdot_complex') srcSel.value = 'sdot_im';
+    }
+    const cfg = getMidiUiConfig();
+    renderScaleLegend(cfg.root, cfg.scaleKey);
+    initWebMidi();
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    else renderMidiRoll();
+}
+
+function hideMidiPlayground() {
+    stopMidiPlayback();
+    document.getElementById('midi-overlay').classList.remove('visible');
+}
+
+window.addEventListener('resize', () => {
+    if (document.getElementById('midi-overlay').classList.contains('visible')) {
+        renderMidiRoll(midiState.isPlaying ? Math.max(0, midiState.playIndex - 1) : -1);
+    }
+});
+
+
+// ============================================================================
+// SYMBOLIC MATH ENGINE — Structural coefficient arithmetic
+// Fractions are added, expressions are simplified to minimum form.
+// Mirrors the Python engine in factorization_2d_symbolic.py exactly.
+// ============================================================================
+
+// ── Fraction helpers (num/den as integers) ─────────────────────
+function symGcd(a, b) {
+    a = Math.abs(a); b = Math.abs(b);
+    while (b) { [a, b] = [b, a % b]; }
+    return a || 1;
+}
+function symLcm(a, b) { return (a / symGcd(a, b)) * b; }
+
+// ── SymVal: { basisKey: [num, den], ... } ──────────────────────
+// Represents  Σ (num/den) · basisKey
+// basisKey ∈ {'1','sqrt2','sqrt3','sqrt5','sqrt10p2sqrt5','sqrt10m2sqrt5',
+//             'phi','sqrt2pphi','sqrt3mphi'}
+
+function svCreate(...triples) {
+    const d = {};
+    for (const [basis, num, den] of triples) {
+        const g = symGcd(Math.abs(num), Math.abs(den));
+        let n = num / g, dd = den / g;
+        if (dd < 0) { n = -n; dd = -dd; }
+        if (n !== 0) d[basis] = [n, dd];
+    }
+    return d;
+}
+
+function svAdd(a, b) {
+    const r = {};
+    for (const k in a) r[k] = a[k].slice();
+    for (const k in b) {
+        if (r[k]) {
+            const [an, ad] = r[k], [bn, bd] = b[k];
+            const lcd = symLcm(ad, bd);
+            const num = an * (lcd / ad) + bn * (lcd / bd);
+            if (num === 0) { delete r[k]; continue; }
+            const g = symGcd(Math.abs(num), lcd);
+            r[k] = [num / g, lcd / g];
+        } else {
+            r[k] = b[k].slice();
+        }
+    }
+    return r;
+}
+
+function svScale(a, k) {
+    if (k === 0) return {};
+    const r = {};
+    for (const b in a) {
+        const [n, d] = a[b];
+        const num = n * k;
+        const g = symGcd(Math.abs(num), d);
+        r[b] = [num / g, d / g];
+    }
+    return r;
+}
+
+// ── LaTeX rendering of SymVal ──────────────────────────────────
+const RAD_ORDER = ['sqrt2','sqrt3','sqrt5','sqrt10p2sqrt5','sqrt10m2sqrt5','1'];
+const PHI_ORDER = ['sqrt2','sqrt3','phi','sqrt2pphi','sqrt3mphi','1'];
+
+const RAD_LABELS = {
+    '1':'', 'sqrt2':'\\sqrt{2}', 'sqrt3':'\\sqrt{3}', 'sqrt5':'\\sqrt{5}',
+    'sqrt10p2sqrt5':'\\sqrt{10+2\\sqrt{5}}', 'sqrt10m2sqrt5':'\\sqrt{10-2\\sqrt{5}}'
+};
+const PHI_LABELS = {
+    '1':'', 'sqrt2':'\\sqrt{2}', 'sqrt3':'\\sqrt{3}', 'phi':'\\varphi',
+    'sqrt2pphi':'\\sqrt{2+\\varphi}', 'sqrt3mphi':'\\sqrt{3-\\varphi}'
+};
+
+function svToLatex(coeffs, order, labels) {
+    const terms = [];
+    for (const b of order) {
+        if (coeffs[b] && coeffs[b][0] !== 0) terms.push([b, coeffs[b][0], coeffs[b][1]]);
+    }
+    for (const b in coeffs) {
+        if (!order.includes(b) && coeffs[b][0] !== 0) terms.push([b, coeffs[b][0], coeffs[b][1]]);
+    }
+    if (terms.length === 0) return '0';
+
+    if (terms.length === 1 && terms[0][0] === '1') {
+        const [, n, d] = terms[0];
+        return d === 1 ? `${n}` : `\\frac{${n}}{${d}}`;
+    }
+
+    let lcd = 1;
+    for (const [, , d] of terms) lcd = symLcm(lcd, d);
+
+    let scaled = terms.map(([b, n, d]) => [b, n * (lcd / d)]);
+
+    let g = lcd;
+    for (const [, s] of scaled) g = symGcd(g, Math.abs(s));
+    lcd /= g;
+    scaled = scaled.map(([b, s]) => [b, s / g]);
+
+    const allNeg = scaled.every(([, s]) => s < 0);
+    if (allNeg) scaled = scaled.map(([b, s]) => [b, -s]);
+
+    const numStr = _buildSum(scaled, labels);
+
+    if (allNeg) {
+        return lcd === 1
+            ? (scaled.length > 1 ? `-\\left(${numStr}\\right)` : `-${numStr}`)
+            : `-\\frac{${numStr}}{${lcd}}`;
+    }
+    return lcd === 1 ? numStr : `\\frac{${numStr}}{${lcd}}`;
+}
+
+function _buildSum(scaled, labels) {
+    let parts = [];
+    for (let i = 0; i < scaled.length; i++) {
+        const [basis, coeff] = scaled[i];
+        if (coeff === 0) continue;
+        const label = labels[basis] || basis;
+        const isRat = (basis === '1');
+        const ac = Math.abs(coeff);
+        const term = isRat ? `${ac}` : (ac === 1 ? label : `${ac}${label}`);
+        if (parts.length === 0) {
+            parts.push(coeff < 0 ? `-${term}` : term);
+        } else {
+            parts.push(coeff < 0 ? ` - ${term}` : ` + ${term}`);
+        }
+    }
+    return parts.join('') || '0';
+}
+
+// ── Normalize key ──────────────────────────────────────────────
+function _nk(k, m) {
+    const g = symGcd(Math.abs(k), Math.abs(m));
+    k = k / g; m = m / g;
+    if (m < 0) { k = -k; m = -m; }
+    k = ((k % m) + m) % m;
+    return `${k}/${m}`;
+}
+
+// ── Radical-form trig lookup tables ────────────────────────────
+const _RC = {}, _RS = {};
+function _ar(k, m, c, s) { const key = _nk(k,m); _RC[key] = c; _RS[key] = s; }
+
+_ar(0,1, svCreate(['1',1,1]),   svCreate());
+_ar(1,2, svCreate(['1',-1,1]),  svCreate());
+_ar(1,3, svCreate(['1',-1,2]),  svCreate(['sqrt3',1,2]));
+_ar(2,3, svCreate(['1',-1,2]),  svCreate(['sqrt3',-1,2]));
+_ar(1,4, svCreate(),            svCreate(['1',1,1]));
+_ar(2,4, svCreate(['1',-1,1]), svCreate());
+_ar(3,4, svCreate(),            svCreate(['1',-1,1]));
+_ar(1,5, svCreate(['1',-1,4],['sqrt5',1,4]),   svCreate(['sqrt10p2sqrt5',1,4]));
+_ar(2,5, svCreate(['1',-1,4],['sqrt5',-1,4]),  svCreate(['sqrt10m2sqrt5',1,4]));
+_ar(3,5, svCreate(['1',-1,4],['sqrt5',-1,4]),  svCreate(['sqrt10m2sqrt5',-1,4]));
+_ar(4,5, svCreate(['1',-1,4],['sqrt5',1,4]),   svCreate(['sqrt10p2sqrt5',-1,4]));
+_ar(1,6, svCreate(['1',1,2]),   svCreate(['sqrt3',1,2]));
+_ar(5,6, svCreate(['1',1,2]),   svCreate(['sqrt3',-1,2]));
+_ar(1,8, svCreate(['sqrt2',1,2]),  svCreate(['sqrt2',1,2]));
+_ar(3,8, svCreate(['sqrt2',-1,2]), svCreate(['sqrt2',1,2]));
+_ar(5,8, svCreate(['sqrt2',-1,2]), svCreate(['sqrt2',-1,2]));
+_ar(7,8, svCreate(['sqrt2',1,2]),  svCreate(['sqrt2',-1,2]));
+_ar(1,10, svCreate(['1',1,4],['sqrt5',1,4]),   svCreate(['sqrt10m2sqrt5',1,4]));
+_ar(3,10, svCreate(['1',1,4],['sqrt5',-1,4]),  svCreate(['sqrt10p2sqrt5',1,4]));
+_ar(7,10, svCreate(['1',1,4],['sqrt5',-1,4]),  svCreate(['sqrt10p2sqrt5',-1,4]));
+_ar(9,10, svCreate(['1',1,4],['sqrt5',1,4]),   svCreate(['sqrt10m2sqrt5',-1,4]));
+_ar(1,12, svCreate(['sqrt3',1,2]),  svCreate(['1',1,2]));
+_ar(5,12, svCreate(['sqrt3',-1,2]), svCreate(['1',1,2]));
+_ar(7,12, svCreate(['sqrt3',-1,2]), svCreate(['1',-1,2]));
+_ar(11,12, svCreate(['sqrt3',1,2]), svCreate(['1',-1,2]));
+
+// ── Golden-ratio φ trig lookup tables ──────────────────────────
+const _PC = {}, _PS = {};
+function _ap(k, m, c, s) { const key = _nk(k,m); _PC[key] = c; _PS[key] = s; }
+
+_ap(0,1, svCreate(['1',1,1]),   svCreate());
+_ap(1,2, svCreate(['1',-1,1]),  svCreate());
+_ap(1,3, svCreate(['1',-1,2]),  svCreate(['sqrt3',1,2]));
+_ap(2,3, svCreate(['1',-1,2]),  svCreate(['sqrt3',-1,2]));
+_ap(1,4, svCreate(),            svCreate(['1',1,1]));
+_ap(2,4, svCreate(['1',-1,1]), svCreate());
+_ap(3,4, svCreate(),            svCreate(['1',-1,1]));
+_ap(1,5, svCreate(['1',-1,2],['phi',1,2]),  svCreate(['sqrt2pphi',1,2]));
+_ap(2,5, svCreate(['phi',-1,2]),            svCreate(['sqrt3mphi',1,2]));
+_ap(3,5, svCreate(['phi',-1,2]),            svCreate(['sqrt3mphi',-1,2]));
+_ap(4,5, svCreate(['1',-1,2],['phi',1,2]), svCreate(['sqrt2pphi',-1,2]));
+_ap(1,6, svCreate(['1',1,2]),   svCreate(['sqrt3',1,2]));
+_ap(5,6, svCreate(['1',1,2]),   svCreate(['sqrt3',-1,2]));
+_ap(1,8, svCreate(['sqrt2',1,2]),  svCreate(['sqrt2',1,2]));
+_ap(3,8, svCreate(['sqrt2',-1,2]), svCreate(['sqrt2',1,2]));
+_ap(5,8, svCreate(['sqrt2',-1,2]), svCreate(['sqrt2',-1,2]));
+_ap(7,8, svCreate(['sqrt2',1,2]),  svCreate(['sqrt2',-1,2]));
+_ap(1,10, svCreate(['phi',1,2]),             svCreate(['sqrt3mphi',1,2]));
+_ap(3,10, svCreate(['1',1,2],['phi',-1,2]), svCreate(['sqrt2pphi',1,2]));
+_ap(7,10, svCreate(['1',1,2],['phi',-1,2]), svCreate(['sqrt2pphi',-1,2]));
+_ap(9,10, svCreate(['phi',1,2]),             svCreate(['sqrt3mphi',-1,2]));
+_ap(1,12, svCreate(['sqrt3',1,2]),  svCreate(['1',1,2]));
+_ap(5,12, svCreate(['sqrt3',-1,2]), svCreate(['1',1,2]));
+_ap(7,12, svCreate(['sqrt3',-1,2]), svCreate(['1',-1,2]));
+_ap(11,12, svCreate(['sqrt3',1,2]), svCreate(['1',-1,2]));
+
+// ── Lookup helpers ─────────────────────────────────────────────
+function _lookupKey(p, To) {
+    let k = p, m = (Number.isInteger(To) ? To : Math.round(To));
+    return _nk(k, m);
+}
+
+function getRadTrig(p, To) {
+    const key = _lookupKey(p, To);
+    if (_RC[key] && _RS[key]) return [_RC[key], _RS[key]];
+    return null;
+}
+
+function getPhiTrig(p, To) {
+    const key = _lookupKey(p, To);
+    if (_PC[key] && _PS[key]) return [_PC[key], _PS[key]];
+    return null;
+}
+
+// ── Factorization ──────────────────────────────────────────────
+function symGetFactorization(n) {
+    const factors = [];
+    let temp = n;
+    while (temp > 1) {
+        const p = minPrimes[temp];
+        let exp = 0;
+        while (temp > 1 && minPrimes[temp] === p) {
+            exp++;
+            temp = (temp / p) | 0;
+        }
+        factors.push([p, exp]);
+    }
+    return factors;
+}
+
+// ── Symbolic sum computation with simplified fractions ─────────
+function computeSnSym(factors, To, trigFn) {
+    let re = {}, im = {};
+    for (const [p, e] of factors) {
+        const trig = trigFn(p, To);
+        if (!trig) return null;
+        re = svAdd(re, svScale(trig[0], e));
+        im = svAdd(im, svScale(trig[1], e));
+    }
+    return [re, im];
+}
+
+function computeSdotSym(factors, To, trigFn) {
+    let re = {}, im = {};
+    for (const [p, ] of factors) {
+        const trig = trigFn(p, To);
+        if (!trig) return null;
+        re = svAdd(re, trig[0]);
+        im = svAdd(im, trig[1]);
+    }
+    return [re, im];
+}
+
+// ── ω-notation with simplified coefficients ────────────────────
+function omegaExprLatex(factors) {
+    if (!factors.length) return '0';
+    return factors.map(([p, e]) =>
+        e === 1 ? `\\omega^{${p}}` : `${e}\\omega^{${p}}`
+    ).join(' + ');
+}
+
+function omegaDotExprLatex(factors) {
+    if (!factors.length) return '0';
+    return factors.map(([p, ]) => `\\omega^{${p}}`).join(' + ');
+}
+
+// ── Fallback LaTeX for unsupported To ──────────────────────────
+function fallbackAngleLatex(p, To) {
+    if (Number.isInteger(To)) {
+        const g = symGcd(2*p, To);
+        const n = 2*p/g, d = To/g;
+        return d === 1 ? `${n}\\pi` : `\\frac{${n}\\pi}{${d}}`;
+    }
+    return `\\frac{2\\pi \\cdot ${p}}{${To}}`;
+}
+
+function fallbackTrigLatex(p, To) {
+    const a = fallbackAngleLatex(p, To);
+    return {
+        cosL: `\\cos\\!\\left(${a}\\right)`,
+        sinL: `\\sin\\!\\left(${a}\\right)`
+    };
+}
+
+// ── Build all row data ─────────────────────────────────────────
+function buildRowData(symN, To) {
+    computeSequence(symN);
+    const rows = [];
+    for (let n = 1; n <= symN; n++) {
+        if (n === 1) {
+            rows.push({ n:1, prime:false, factL:'1',
+                snExpr:'0', sdExpr:'0',
+                snReR:'0', snImR:'0', sdReR:'0', sdImR:'0',
+                snReP:'0', snImP:'0', sdReP:'0', sdImP:'0',
+                snReN:snRe[n].toFixed(6), snImN:snIm[n].toFixed(6), snMagN:snMag[n].toFixed(6),
+                sdReN:sdotRe[n].toFixed(6), sdImN:sdotIm[n].toFixed(6), sdMagN:sdotMag[n].toFixed(6)
+            });
+            continue;
+        }
+        const factors = symGetFactorization(n);
+        const prime = isPrimeArr[n] === 1;
+        const factL = factors.map(([p,e]) => e===1 ? `${p}` : `${p}^{${e}}`).join(' \\cdot ');
+
+        const snExpr = omegaExprLatex(factors);
+        const sdExpr = omegaDotExprLatex(factors);
+
+        const snR = computeSnSym(factors, To, getRadTrig);
+        const sdR = computeSdotSym(factors, To, getRadTrig);
+        const snP = computeSnSym(factors, To, getPhiTrig);
+        const sdP = computeSdotSym(factors, To, getPhiTrig);
+
+        let snReR, snImR, sdReR, sdImR;
+        if (snR) {
+            snReR = svToLatex(snR[0], RAD_ORDER, RAD_LABELS);
+            snImR = svToLatex(snR[1], RAD_ORDER, RAD_LABELS);
+        } else {
+            const fb = factors.map(([p,e]) => { const t = fallbackTrigLatex(p,To); return {p,e,t}; });
+            snReR = fb.map(f => f.e > 1 ? `${f.e}${f.t.cosL}` : f.t.cosL).join(' + ');
+            snImR = fb.map(f => f.e > 1 ? `${f.e}${f.t.sinL}` : f.t.sinL).join(' + ');
+        }
+        if (sdR) {
+            sdReR = svToLatex(sdR[0], RAD_ORDER, RAD_LABELS);
+            sdImR = svToLatex(sdR[1], RAD_ORDER, RAD_LABELS);
+        } else {
+            const fb = factors.map(([p,]) => fallbackTrigLatex(p,To));
+            sdReR = fb.map(t => t.cosL).join(' + ');
+            sdImR = fb.map(t => t.sinL).join(' + ');
+        }
+
+        let snReP, snImP, sdReP, sdImP;
+        if (snP) {
+            snReP = svToLatex(snP[0], PHI_ORDER, PHI_LABELS);
+            snImP = svToLatex(snP[1], PHI_ORDER, PHI_LABELS);
+        } else { snReP = snReR; snImP = snImR; }
+        if (sdP) {
+            sdReP = svToLatex(sdP[0], PHI_ORDER, PHI_LABELS);
+            sdImP = svToLatex(sdP[1], PHI_ORDER, PHI_LABELS);
+        } else { sdReP = sdReR; sdImP = sdImR; }
+
+        rows.push({ n, prime, factL, snExpr, sdExpr,
+            snReR, snImR, sdReR, sdImR, snReP, snImP, sdReP, sdImP,
+            snReN:snRe[n].toFixed(6), snImN:snIm[n].toFixed(6), snMagN:snMag[n].toFixed(6),
+            sdReN:sdotRe[n].toFixed(6), sdImN:sdotIm[n].toFixed(6), sdMagN:sdotMag[n].toFixed(6)
+        });
+    }
+    return rows;
+}
+
+// ── Build HTML table (modal) ───────────────────────────────────
+function buildSymbolicTable() {
+    const symN = Math.min(parseInt(document.getElementById('sym-n').value) || 30, 500);
+    const rows = buildRowData(symN, params.To);
+
+    let html = '<table class="sym-table"><thead><tr>';
+    html += '<th>$n$</th><th>Prime?</th><th>Factorization</th>';
+    html += '<th>$s_n$</th><th>$\\text{Re}(s_n)$</th><th>$\\text{Im}(s_n)$</th>';
+    html += '<th>$\\text{Re}(s_n)\\;(\\varphi)$</th><th>$\\text{Im}(s_n)\\;(\\varphi)$</th>';
+    html += '<th>$s_n$ num</th>';
+    html += '<th>$\\dot{s}_n$</th><th>$\\text{Re}(\\dot{s}_n)$</th><th>$\\text{Im}(\\dot{s}_n)$</th>';
+    html += '<th>$\\text{Re}(\\dot{s}_n)\\;(\\varphi)$</th><th>$\\text{Im}(\\dot{s}_n)\\;(\\varphi)$</th>';
+    html += '<th>$\\dot{s}_n$ num</th>';
+    html += '</tr></thead><tbody>';
+
+    for (const r of rows) {
+        const rc = r.prime ? ' class="prime-row"' : '';
+        const snNum = `${r.snReN} + ${r.snImN}i`;
+        const sdNum = `${r.sdReN} + ${r.sdImN}i`;
+        html += `<tr${rc}>`;
+        html += `<td>${r.n}</td><td>${r.prime?'✓':''}</td><td>$${r.factL}$</td>`;
+        html += `<td>$${r.snExpr}$</td><td>$${r.snReR}$</td><td>$${r.snImR}$</td>`;
+        html += `<td style="color:#e8b84d;">$${r.snReP}$</td><td style="color:#e8b84d;">$${r.snImP}$</td>`;
+        html += `<td style="font-family:monospace;font-size:11px;">${snNum}</td>`;
+        html += `<td>$${r.sdExpr}$</td><td>$${r.sdReR}$</td><td>$${r.sdImR}$</td>`;
+        html += `<td style="color:#e8b84d;">$${r.sdReP}$</td><td style="color:#e8b84d;">$${r.sdImP}$</td>`;
+        html += `<td style="font-family:monospace;font-size:11px;">${sdNum}</td>`;
+        html += `</tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('sym-table-container').innerHTML = html;
+
+    renderMathInElement(document.getElementById('sym-table-container'), {
+        delimiters: [{left:'$',right:'$',display:false},{left:'$$',right:'$$',display:true}],
+        throwOnError: false
+    });
+}
+
+// ── Download Symbolic Markdown ─────────────────────────────────
+function downloadSymbolicMD() {
+    const symN = Math.min(parseInt(document.getElementById('sym-n').value) || 30, 500);
+    const To = params.To;
+    const rows = buildRowData(symN, To);
+
+    let md = '';
+    md += `# Factorization in 2D — Symbolic Reference\n\n`;
+    md += `> Auto-generated for $T_o = ${To}$, $n = 1 \\ldots ${symN}$\n\n`;
+    md += `---\n\n`;
+
+    md += `## 1. Definitions\n\n`;
+    md += `Consider a number $n$ with its prime factorization given by:\n\n`;
+    md += `Here, $\\omega = e^{2\\pi i / T_o}$ rotates based on the value (period $T_o = ${To}$). Primes $p$ correspond to single vectors $\\omega^p$, so $|s_p| = |\\dot{s}_p| = |\\ddot{s}_p| = |\\omega^p| = 1$.\n\n`;
+    md += `*   $s_n$: Sum over prime factors with multiplicity ($b_k$).\n\n`;
+    md += `$$n = \\prod_{k=1}^{M_n} b_k \\implies s_n = \\sum_{k=1}^{M_n} \\omega^{b_k}$$\n\n`;
+    md += `*   $\\dot{s}_n$: Sum over distinct prime factors ($d_k$).\n\n`;
+    md += `$$[ d_1, d_2, \\dots, d_{m_n}] \\text{ are the distinct prime factors} \\implies \\dot{s}_n = \\sum_{k=1}^{m_n} \\omega^{d_k}$$\n\n`;
+    md += `*   $\\ddot{s}_n$: Sum over distinct prime factors raised to their exponents ($d_k^{e_k}$).\n\n`;
+    md += `$$n = \\prod_{k=1}^{m_n} d_k^{e_k} \\implies \\ddot{s}_n = \\sum_{k=1}^{m_n} \\omega^{d_k^{e_k}}$$\n\n`;
+    md += `where $e_k$ is the exponent of the prime factor $d_k$ in the factorization of $n$.\n\n`;
+    md += `Note: $M_n = \\Omega(n)$ is the number of prime factors with multiplicity (sum of exponents: $M_n = \\sum e_k$), and $m_n = \\omega(n)$ is the number of distinct prime factors.\n\n`;
+    md += `---\n\n`;
+    md += `### Examples\n\n`;
+    md += `**For $n=2$:**\n`;
+    md += `$$ 2 = 2^1 $$\n`;
+    md += `*   $b_k = [2] \\implies M_2 = 1$\n`;
+    md += `*   $d_k = [2] \\implies m_2 = 1$\n`;
+    md += `*   $e_k = [1] \\implies \\sum e_k = 1 = M_2$\n`;
+    md += `$$ s_2 = \\omega^2, \\quad \\dot{s}_2 = \\omega^2, \\quad \\ddot{s}_2 = \\omega^{2^1} = \\omega^2 $$\n\n`;
+    md += `**For $n=12$:**\n`;
+    md += `$$ 12 = 2^2 \\cdot 3^1 $$\n`;
+    md += `*   $b_k = [2, 2, 3] \\implies M_{12} = 3$\n`;
+    md += `*   $d_k = [2, 3] \\implies m_{12} = 2$\n`;
+    md += `*   $e_k = [2, 1] \\implies \\sum e_k = 2+1 = 3 = M_{12}$\n`;
+    md += `$$ s_{12} = \\omega^2 + \\omega^2 + \\omega^3, \\quad \\dot{s}_{12} = \\omega^2 + \\omega^3, \\quad \\ddot{s}_{12} = \\omega^{2^2} + \\omega^{3^1} = \\omega^4 + \\omega^3 $$\n\n`;
+    md += `**For $n=16$:**\n`;
+    md += `$$ 16 = 2^4 $$\n`;
+    md += `*   $b_k = [2, 2, 2, 2] \\implies M_{16} = 4$\n`;
+    md += `*   $d_k = [2] \\implies m_{16} = 1$\n`;
+    md += `*   $e_k = [4] \\implies \\sum e_k = 4 = M_{16}$\n`;
+    md += `$$ s_{16} = \\omega^2 + \\omega^2 + \\omega^2 + \\omega^2, \\quad \\dot{s}_{16} = \\omega^2, \\quad \\ddot{s}_{16} = \\omega^{2^4} = \\omega^{16} $$\n\n`;
+    md += `**For $n=60$:**\n`;
+    md += `$$ 60 = 2^2 \\cdot 3^1 \\cdot 5^1 $$\n`;
+    md += `*   $b_k = [2, 2, 3, 5] \\implies M_{60} = 4$\n`;
+    md += `*   $d_k = [2, 3, 5] \\implies m_{60} = 3$\n`;
+    md += `*   $e_k = [2, 1, 1] \\implies \\sum e_k = 2+1+1 = 4 = M_{60}$\n`;
+    md += `$$ s_{60} = \\omega^2 + \\omega^2 + \\omega^3 + \\omega^5, \\quad \\dot{s}_{60} = \\omega^2 + \\omega^3 + \\omega^5, \\quad \\ddot{s}_{60} = \\omega^{2^2} + \\omega^{3^1} + \\omega^{5^1} = \\omega^4 + \\omega^3 + \\omega^5 $$\n\n`;
+    md += `Both sequences (and $\\ddot{s}_n$) are set to $0$ for $n = 1$.\n\n`;
+
+    md += `## 2. Exact Trigonometric Values\n\n`;
+    md += `Each $\\omega^{p}$ decomposes into real and imaginary parts:\n\n`;
+    md += `$$\\omega^{p} = \\cos\\!\\left(\\frac{2\\pi p}{T_o}\\right) + i\\,\\sin\\!\\left(\\frac{2\\pi p}{T_o}\\right)$$\n\n`;
+    md += `For integer $T_o$ dividing into known roots, exact closed forms exist.\n`;
+    md += `The tables below list the exact values in two notations:\n\n`;
+    md += `- **Radical form**: using $\\sqrt{2}, \\sqrt{3}, \\sqrt{5}$\n`;
+    md += `- **Golden ratio form**: using $\\varphi = \\tfrac{1+\\sqrt{5}}{2}$, exploiting $\\sqrt{5} = 2\\varphi - 1$\n\n`;
+    md += `Key identities:\n\n`;
+    md += `| Radical | $\\varphi$ form |\n`;
+    md += `|:--------|:---------------|\n`;
+    md += `| $\\frac{\\sqrt{5}-1}{4}$ | $\\frac{\\varphi-1}{2}$ |\n`;
+    md += `| $\\frac{-1-\\sqrt{5}}{4}$ | $-\\frac{\\varphi}{2}$ |\n`;
+    md += `| $\\frac{1+\\sqrt{5}}{4}$ | $\\frac{\\varphi}{2}$ |\n`;
+    md += `| $\\frac{\\sqrt{10+2\\sqrt{5}}}{4}$ | $\\frac{\\sqrt{2+\\varphi}}{2}$ |\n`;
+    md += `| $\\frac{\\sqrt{10-2\\sqrt{5}}}{4}$ | $\\frac{\\sqrt{3-\\varphi}}{2}$ |\n\n`;
+
+    md += `## 3. Interpretation of the Plots\n\n`;
+    md += `The visualizer plots each $s_n$ (or $\\dot{s}_n$) as a point in the complex plane $\\mathbb{C}$.\n\n`;
+    md += `- **Primes** ($n = p$): the point lies exactly on the unit circle at angle $\\frac{2\\pi p}{T_o}$, since $s_p = \\omega^{p}$.\n`;
+    md += `- **Prime powers** ($n = p^a$): the point sits at $a \\cdot \\omega^{p}$, i.e. distance $a$ from the origin along the same ray.\n`;
+    md += `- **Composites** ($n = p \\cdot q \\cdots$): the point is the vector sum of the individual $\\omega^{p_j}$ contributions.\n\n`;
+    md += `The structure of the plot reveals how prime factors at different angles interfere to create the overall pattern. Residues modulo $T_o$ determine the discrete set of angles; numbers sharing the same set of prime residues cluster together.\n\n`;
+    md += `### Why $T_o = 10$? — Primes separated by last digit\n\n`;
+    md += `The choice $T_o = 10$ is especially natural because $\\omega^p = e^{2\\pi i p / 10}$ depends only on $p \\bmod 10$, i.e. the **last digit** of the prime.\n\n`;
+    md += `Since every prime $p \\ge 5$ ends in $1, 3, 7,$ or $9$, there are exactly **four distinct angles** on the unit circle:\n\n`;
+    md += `| Last digit | Angle $\\frac{2\\pi p}{10}$ | Degrees | Point on unit circle |\n`;
+    md += `|:----------:|:------------------------:|:-------:|:--------------------:|\n`;
+    md += `| 1 | $\\frac{\\pi}{5}$ | $36°$ | $\\omega^1$ |\n`;
+    md += `| 3 | $\\frac{3\\pi}{5}$ | $108°$ | $\\omega^3$ |\n`;
+    md += `| 7 | $\\frac{7\\pi}{5}$ | $252°$ | $\\omega^7$ |\n`;
+    md += `| 9 | $\\frac{9\\pi}{5}$ | $324°$ | $\\omega^9$ |\n\n`;
+    md += `The small primes $2, 3, 5$ occupy their own angles ($\\omega^2, \\omega^3, \\omega^5$); note that $\\omega^3$ is shared by the prime $3$ and all primes ending in $3$.\n\n`;
+    md += `**Key symmetries at $T_o = 10$:**\n\n`;
+    md += `- $\\omega^1$ and $\\omega^9$ are complex conjugates ($\\omega^9 = \\overline{\\omega^1}$), so primes ending in $1$ and $9$ are mirror-reflected across the real axis.\n`;
+    md += `- $\\omega^3$ and $\\omega^7$ are complex conjugates ($\\omega^7 = \\overline{\\omega^3}$), likewise for primes ending in $3$ and $7$.\n`;
+    md += `- $\\omega^5 = -1$ (half-turn), so the prime $5$ maps to $(-1, 0)$.\n`;
+    md += `- $\\omega^2 + \\omega^7 = 0$ — diametrically opposite. This is why, e.g., $s_{34} = \\omega^2 + \\omega^{17} = \\omega^2 + \\omega^7 = 0$.\n\n`;
+    md += `This makes $T_o = 10$ a natural "fingerprint" period: composite numbers cluster along rays determined by which last-digit classes their prime factors belong to, and the 4-fold structure of primes mod 10 creates the characteristic cross-shaped pattern in the complex plane.\n\n`;
+    md += `---\n\n`;
+
+    md += `## Table A — Factorization & Simplified Symbolic Expressions\n\n`;
+    md += `| $n$ | Prime | Factorization | $s_n$ | $\\dot{s}_n$ |\n`;
+    md += `|----:|:-----:|:--------------|:------|:-------------|\n`;
+    for (const r of rows)
+        md += `| ${r.n} | ${r.prime?'✓':''} | $${r.factL}$ | $${r.snExpr}$ | $${r.sdExpr}$ |\n`;
+    md += `\n`;
+
+    md += `## Table B — Exact Components (Radical Form, Simplified)\n\n`;
+    md += `| $n$ | $\\operatorname{Re}(s_n)$ | $\\operatorname{Im}(s_n)$ | $\\operatorname{Re}(\\dot{s}_n)$ | $\\operatorname{Im}(\\dot{s}_n)$ |\n`;
+    md += `|----:|:--------------------------|:--------------------------|:-------------------------------|:-------------------------------|\n`;
+    for (const r of rows)
+        md += `| ${r.n} | $${r.snReR}$ | $${r.snImR}$ | $${r.sdReR}$ | $${r.sdImR}$ |\n`;
+    md += `\n`;
+
+    md += `## Table C — Exact Components (Golden Ratio $\\varphi$ Form, Simplified)\n\n`;
+    md += `| $n$ | $\\operatorname{Re}(s_n)$ | $\\operatorname{Im}(s_n)$ | $\\operatorname{Re}(\\dot{s}_n)$ | $\\operatorname{Im}(\\dot{s}_n)$ |\n`;
+    md += `|----:|:--------------------------|:--------------------------|:-------------------------------|:-------------------------------|\n`;
+    for (const r of rows)
+        md += `| ${r.n} | $${r.snReP}$ | $${r.snImP}$ | $${r.sdReP}$ | $${r.sdImP}$ |\n`;
+    md += `\n`;
+
+    md += `## Table D — Numeric Values\n\n`;
+    md += `| $n$ | $\\operatorname{Re}(s_n)$ | $\\operatorname{Im}(s_n)$ | $|s_n|$ | $\\operatorname{Re}(\\dot{s}_n)$ | $\\operatorname{Im}(\\dot{s}_n)$ | $|\\dot{s}_n|$ |\n`;
+    md += `|----:|---------:|---------:|-------:|---------:|---------:|-------:|\n`;
+    for (const r of rows)
+        md += `| ${r.n} | ${r.snReN} | ${r.snImN} | ${r.snMagN} | ${r.sdReN} | ${r.sdImN} | ${r.sdMagN} |\n`;
+    md += `\n`;
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `factorization_2D_N${symN}_To${To}.md`;
+    link.click();
+}
+
+
+function showExplanation() {
+    document.getElementById('explanation-overlay').classList.add('visible');
+}
+
+function hideExplanation() {
+    document.getElementById('explanation-overlay').classList.remove('visible');
+}
+
+function openPrimeSpessaVersion() {
+    const target = './SpessaSynth_PrimeVersion/index.html';
+    window.open(target, '_blank', 'noopener,noreferrer');
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideExplanation();
+        hideMidiPlayground();
+    }
+});
+
+['midi-source', 'midi-precision', 'midi-root', 'midi-scale', 'midi-range', 'midi-layout-mode', 'midi-base-octave'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', () => {
+        const cfg = getMidiUiConfig();
+        renderScaleLegend(cfg.root, cfg.scaleKey);
+        midiState.needsRebuild = true;
+        if (document.getElementById('midi-overlay').classList.contains('visible') && !midiState.isPlaying) {
+            buildMidiSequence();
+        }
+    });
+});
+
+['midi-bpm', 'midi-subdiv', 'midi-gate', 'midi-velocity', 'midi-prime-accent', 'midi-prime-perc', 'midi-instrument'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', () => {
+        if (id === 'midi-prime-accent') midiState.primeAccent = !!document.getElementById('midi-prime-accent').checked;
+        if (id === 'midi-prime-perc') midiState.primePerc = document.getElementById('midi-prime-perc').value || 'clap';
+        if (id === 'midi-instrument') midiState.instrumentKey = document.getElementById('midi-instrument').value || 'acoustic_piano';
+        const cfg = getMidiUiConfig();
+        renderScaleLegend(cfg.root, cfg.scaleKey);
+        updateMidiSummary();
+        if (document.getElementById('midi-overlay').classList.contains('visible')) {
+            renderMidiRoll(midiState.isPlaying ? Math.max(0, midiState.playIndex - 1) : -1);
+        }
+    });
+});
+
+{
+    const fxPresetEl = document.getElementById('midi-fx-preset');
+    if (fxPresetEl) {
+        fxPresetEl.addEventListener('change', () => {
+            applyFxPresetToUi(fxPresetEl.value || 'studio');
+            const cfg = getMidiUiConfig();
+            ensureAudioContext();
+            applyFxSettings(cfg);
+            updateMidiSummary();
+        });
+    }
+}
+
+['midi-fx-reverb', 'midi-fx-delay', 'midi-fx-chorus', 'midi-fx-drive'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+        const cfg = getMidiUiConfig();
+        ensureAudioContext();
+        applyFxSettings(cfg);
+        updateMidiSummary();
+    });
+});
+
+{
+    const midiImportInput = document.getElementById('midi-import-file');
+    if (midiImportInput) {
+        midiImportInput.addEventListener('change', (e) => {
+            const file = e.target && e.target.files ? e.target.files[0] : null;
+            handleMidiImportFile(file);
+            midiImportInput.value = '';
+        });
+    }
+}
+
+{
+    const sessionImportInput = document.getElementById('midi-session-import-file');
+    if (sessionImportInput) {
+        sessionImportInput.addEventListener('change', (e) => {
+            const file = e.target && e.target.files ? e.target.files[0] : null;
+            importMidiSessionJson(file);
+            sessionImportInput.value = '';
+        });
+    }
+}
+
+{
+    initCurveLayerControls();
+    const layerHost = document.getElementById('midi-layer-controls');
+    if (layerHost) {
+        const onLayerChange = () => {
+            midiState.needsRebuild = true;
+            const cfg = getMidiUiConfig();
+            renderScaleLegend(cfg.root, cfg.scaleKey);
+            if (document.getElementById('midi-overlay').classList.contains('visible') && !midiState.isPlaying) {
+                buildMidiSequence();
+            } else {
+                updateMidiSummary();
+            }
+        };
+        layerHost.addEventListener('change', onLayerChange);
+        layerHost.addEventListener('input', onLayerChange);
+    }
+}
+
+{
+    applyFxPresetToUi('studio');
+    const cfg = getMidiUiConfig();
+    renderScaleLegend(cfg.root, cfg.scaleKey);
+    ensureAudioContext();
+    applyFxSettings(cfg);
+}
+updateMidiSummary();
+initWebMidi();
+
+// Initialize
+resize();
+recompute();
+
+</script>
+</body>
+</html>
