@@ -508,10 +508,20 @@
           return;
         }
       } catch (e) { /* cross-origin shouldn't happen, same origin */ }
-      if (attemptsLeft > 0) setTimeout(() => tryCall(attemptsLeft - 1), 150);
+      if (attemptsLeft > 0) setTimeout(() => tryCall(attemptsLeft - 1), 200);
       else alert('Loader is not available in the target app yet. Try again in a moment.');
     };
-    tryCall(40); // ~6s total
+
+    // If the iframe hasn't finished loading yet, wait for its `load` event first.
+    const started = frame.dataset.loaded === '1';
+    if (started) {
+      tryCall(150); // ~30s
+    } else {
+      const onLoad = () => { frame.dataset.loaded = '1'; tryCall(150); };
+      frame.addEventListener('load', onLoad, { once: true });
+      // Safety: also start polling immediately in case `load` already fired.
+      setTimeout(() => tryCall(150), 300);
+    }
   }
 })();
 </script>
