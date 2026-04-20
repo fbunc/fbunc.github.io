@@ -616,6 +616,7 @@
             <button onclick="playImportedMidi()" style="background:#6a4da8;">▶ Play Imported</button>
             <button onclick="stopMidiPlayback()" style="background:#8a3030;">■ Stop</button>
             <button onclick="downloadMidiFile()" style="background:#3d5ed1;">💾 Export .mid</button>
+            <button onclick="sendMidiToSpessaSynth()" style="background:#8b5cf6;" title="Export .mid and open SpessaSynth in a new tab — drop the downloaded file into that tab to play it with soundfonts.">🎼 Play in SpessaSynth</button>
             <button onclick="downloadMp3File()" style="background:#4f6fbf;">💾 Export .mp3</button>
             <button onclick="downloadMappedNotesCsv()" style="background:#3d8b67;">💾 Notes CSV</button>
             <button onclick="downloadMappedNotesMd()" style="background:#5f7a38;">💾 Notes MD</button>
@@ -3548,6 +3549,33 @@ function downloadMidiFile() {
     URL.revokeObjectURL(url);
     downloadMidiSessionJson(baseName, cfg, true);
     updateMidiSummary(`Exported ${baseName}.mid and ${baseName}.json`);
+}
+
+const SPESSASYNTH_URL = 'https://spessasus.github.io/SpessaSynth/';
+
+function sendMidiToSpessaSynth() {
+    if (midiState.needsRebuild || midiState.timelineSteps.length === 0) buildMidiSequence();
+    if (midiState.timelineSteps.length === 0) {
+        updateMidiSummary('Nothing to send — build a map first.');
+        return;
+    }
+    const cfg = getMidiUiConfig();
+    const baseName = buildMidiExportBaseName(cfg);
+    const bytes = buildMidiFileBytes(midiState.timelineSteps, midiState.curveSequences, cfg.bpm, cfg.subdivision);
+    const blob = new Blob([bytes], { type: 'audio/midi' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${baseName}.mid`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+    const win = window.open(SPESSASYNTH_URL, '_blank', 'noopener');
+    if (!win) {
+        updateMidiSummary(`Exported ${baseName}.mid. Pop-up blocked — open ${SPESSASYNTH_URL} manually and drop the downloaded file in.`);
+    } else {
+        updateMidiSummary(`Exported ${baseName}.mid and opened SpessaSynth. Drop the downloaded .mid into that tab to play with soundfonts.`);
+    }
 }
 
 function showMidiPlayground() {
