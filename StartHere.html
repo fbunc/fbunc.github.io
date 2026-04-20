@@ -2809,54 +2809,39 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     loadViewFileInput.click();
                 });
                 
+                async function applyLoadedView(saveData) {
+                    currentParams = { ...saveData.parameters };
+                    updateControlsFromCurrentParams();
+                    if (saveData.preset) presetDropdown.value = saveData.preset;
+                    updatePlot();
+                    if (saveData.data && saveData.data.base) {
+                        fullCoordDataCache = {
+                            n_array: saveData.data.base.n_array || [],
+                            u_base:  saveData.data.base.u_base  || [],
+                            v_base:  saveData.data.base.v_base  || [],
+                            w_base:  saveData.data.base.w_base  || []
+                        };
+                        drawPlotData(fullCoordDataCache.n_array, fullCoordDataCache.u_base, fullCoordDataCache.v_base, fullCoordDataCache.w_base);
+                    }
+                    setTimeout(() => {
+                        if (saveData.camera) Plotly.relayout('plotDiv', { 'scene.camera': saveData.camera });
+                    }, 100);
+                }
+                // Parent-window bridge: allow the wrapper's view picker to load a view
+                // by object, without going through the file input.
+                window.fbuncLoadView = (saveData) => applyLoadedView(saveData).catch(err => console.error('fbuncLoadView error:', err));
+
                 loadViewFileInput.addEventListener('change', async (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    
                     try {
-                        const text = await file.text();
-                        const saveData = JSON.parse(text);
-                        
-                        // Restore parameters
-                        currentParams = { ...saveData.parameters };
-                        
-                        // Update UI
-                        updateControlsFromCurrentParams();
-                        
-                        // Update preset dropdown if saved
-                        if (saveData.preset) {
-                            presetDropdown.value = saveData.preset;
-                        }
-                        
-                        // Update plot
-                        updatePlot();
-
-                        // If saved payload includes full data, reuse it and redraw for exact reproducibility
-                        if (saveData.data && saveData.data.base) {
-                            fullCoordDataCache = {
-                                n_array: saveData.data.base.n_array || [],
-                                u_base: saveData.data.base.u_base || [],
-                                v_base: saveData.data.base.v_base || [],
-                                w_base: saveData.data.base.w_base || []
-                            };
-                            // Redraw with saved data (no animation)
-                            drawPlotData(fullCoordDataCache.n_array, fullCoordDataCache.u_base, fullCoordDataCache.v_base, fullCoordDataCache.w_base);
-                        }
-                        
-                        // Restore camera view after plot renders
-                        setTimeout(() => {
-                            if (saveData.camera) {
-                                Plotly.relayout('plotDiv', { 'scene.camera': saveData.camera });
-                            }
-                        }, 100);
-                        
+                        const saveData = JSON.parse(await file.text());
+                        await applyLoadedView(saveData);
                         alert('View loaded successfully!');
                     } catch (err) {
                         console.error('Load error:', err);
                         alert('Error loading view: ' + err.message);
                     }
-                    
-                    // Reset file input
                     e.target.value = '';
                 });
             }

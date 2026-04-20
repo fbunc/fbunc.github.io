@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-11-24T21:14:08.912Z",
+  "parameters": {
+    "formula_set": "User's Formulas",
+    "num_points": 500,
+    "M_r_update": 13,
+    "delta_r_initial": 0.1,
+    "T_o_period": 13,
+    "D_dimension": 4,
+    "M_c_color": 13,
+    "active_curves": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H"
+    ],
+    "highlight_primes": true,
+    "line_between_dots": true,
+    "show_all_point_indices": false,
+    "show_prime_point_indices": false,
+    "show_index_mod_mc": false,
+    "animate_points": false,
+    "animation_fps": 1,
+    "scatter_size": 5,
+    "prime_size_factor": 2,
+    "line_width": 1,
+    "use_custom_function": false,
+    "custom_zn_function": "",
+    "custom_r_function": "",
+    "custom_theta_function": ""
+  },
+  "camera": {
+    "up": {
+      "x": 0,
+      "y": 0,
+      "z": 1
+    },
+    "center": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "eye": {
+      "x": 0.019532736557745855,
+      "y": 0.0129956552214404,
+      "z": 0.38062893458465025
+    },
+    "projection": {
+      "type": "perspective"
+    }
+  },
+  "preset": "Flower Set"
+}

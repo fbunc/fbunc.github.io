@@ -1,0 +1,31 @@
+{
+  "timestamp": "2025-11-25T15:27:07.818Z",
+  "parameters": {
+    "formula_set": "User's Formulas",
+    "num_points": 500,
+    "M_r_update": 1,
+    "delta_r_initial": 0.01,
+    "T_o_period": 3.14159265359,
+    "D_dimension": 4,
+    "M_c_color": 13,
+    "active_curves": [
+      "A"
+    ],
+    "highlight_primes": true,
+    "prime_marker": "diamond",
+    "line_between_dots": true,
+    "show_all_point_indices": false,
+    "show_prime_point_indices": false,
+    "show_index_mod_mc": false,
+    "animate_points": false,
+    "animation_fps": 1,
+    "scatter_size": 5,
+    "prime_size_factor": 2,
+    "line_width": 1,
+    "use_custom_function": false,
+    "custom_zn_function": "",
+    "custom_r_function": "",
+    "custom_theta_function": ""
+  },
+  "preset": "Custom"
+}

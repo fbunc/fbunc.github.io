@@ -11,9 +11,11 @@
     --bg-2: #161a22;
     --fg-0: #f4f6fb;
     --fg-1: #adb3c2;
+    --fg-2: #7d869a;
     --accent: #6dd3c4;
     --prime:  #ffb547;
     --docs:   #b48aff;
+    --star:   #ffd24c;
     --border: #2a2f3a;
   }
   * { box-sizing: border-box; }
@@ -32,7 +34,7 @@
   header .brand .eq { color: var(--accent); font-family: 'Cambria Math', 'Latin Modern Math', serif; }
   header .brand .om { color: var(--prime); }
   nav { display: flex; gap: .4rem; margin-left: auto; }
-  nav button {
+  nav button, .views-btn {
     background: transparent;
     color: var(--fg-1);
     border: 1px solid var(--border);
@@ -42,20 +44,13 @@
     cursor: pointer;
     transition: color .12s, border-color .12s, background .12s;
   }
-  nav button:hover { color: var(--fg-0); border-color: var(--accent); }
-  nav button.active {
-    color: var(--bg-0);
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  nav button.active.prime {
-    background: var(--prime);
-    border-color: var(--prime);
-  }
-  nav button.active.docs {
-    background: var(--docs);
-    border-color: var(--docs);
-  }
+  nav button:hover, .views-btn:hover { color: var(--fg-0); border-color: var(--accent); }
+  nav button.active { color: var(--bg-0); background: var(--accent); border-color: var(--accent); }
+  nav button.active.prime { background: var(--prime); border-color: var(--prime); }
+  nav button.active.docs  { background: var(--docs);  border-color: var(--docs);  }
+
+  .views-btn { margin-right: .4rem; color: var(--star); border-color: var(--star); }
+  .views-btn:hover { background: rgba(255,210,76,.1); }
 
   main { flex: 1 1 auto; position: relative; }
   iframe {
@@ -78,6 +73,139 @@
   }
   footer a { color: var(--accent); text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+
+  /* ── Views picker overlay ─────────────────────────────────────────── */
+  .v-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(3px);
+    display: none;
+    z-index: 1000;
+    justify-content: center; align-items: center;
+  }
+  .v-overlay.open { display: flex; }
+  .v-modal {
+    width: min(960px, 94vw);
+    height: min(80vh, 720px);
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  }
+  .v-head {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .7rem .9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .v-head h2 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--fg-0); }
+  .v-head .count { color: var(--fg-2); font-size: .85rem; }
+  .v-head .close {
+    margin-left: auto;
+    background: transparent; color: var(--fg-1);
+    border: 1px solid var(--border);
+    border-radius: .3rem;
+    padding: .25rem .6rem; cursor: pointer;
+  }
+  .v-head .close:hover { color: var(--fg-0); border-color: var(--accent); }
+
+  .v-toolbar {
+    display: flex; gap: .4rem; flex-wrap: wrap;
+    padding: .55rem .9rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-0);
+  }
+  .v-toolbar input[type=search] {
+    flex: 1 1 240px;
+    background: var(--bg-2); color: var(--fg-0);
+    border: 1px solid var(--border);
+    border-radius: .3rem;
+    padding: .4rem .6rem;
+    font: inherit;
+  }
+  .v-toolbar input[type=search]:focus { outline: none; border-color: var(--accent); }
+  .v-filter {
+    background: var(--bg-2); color: var(--fg-1);
+    border: 1px solid var(--border);
+    border-radius: .3rem;
+    padding: .35rem .7rem;
+    cursor: pointer;
+    font: inherit;
+  }
+  .v-filter.active { color: var(--bg-0); background: var(--accent); border-color: var(--accent); }
+  .v-filter.star { color: var(--star); border-color: var(--star); }
+  .v-filter.star.active { background: var(--star); color: var(--bg-0); }
+
+  .v-body { flex: 1 1 auto; overflow-y: auto; }
+  .v-list { list-style: none; margin: 0; padding: 0; }
+  .v-row {
+    display: grid;
+    grid-template-columns: 1.7rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .v-row:hover { background: var(--bg-2); }
+  .v-star {
+    background: transparent; border: 0; cursor: pointer;
+    color: var(--fg-2); font-size: 1.05rem; padding: 0;
+  }
+  .v-star.on { color: var(--star); }
+  .v-info { min-width: 0; }
+  .v-info .v-name {
+    color: var(--fg-0);
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .v-info .v-name input {
+    width: 100%; font: inherit; color: var(--fg-0);
+    background: var(--bg-0); border: 1px solid var(--accent);
+    border-radius: .25rem; padding: .1rem .3rem;
+  }
+  .v-info .v-meta {
+    font-size: .78rem; color: var(--fg-2);
+    margin-top: .15rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .v-info .v-meta .app {
+    display: inline-block;
+    font-size: .68rem; letter-spacing: .05em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: .4rem;
+    text-transform: uppercase;
+  }
+  .v-info .v-meta .app.curve  { background: rgba(109,211,196,.15); color: var(--accent); }
+  .v-info .v-meta .app.factor { background: rgba(255,181,71,.15);  color: var(--prime);  }
+  .v-info .v-meta .app.unknown{ background: rgba(125,134,154,.15); color: var(--fg-2);   }
+  .v-actions { display: flex; gap: .35rem; }
+  .v-actions button {
+    background: var(--bg-2); color: var(--fg-1);
+    border: 1px solid var(--border);
+    border-radius: .25rem;
+    padding: .25rem .55rem;
+    cursor: pointer; font: inherit;
+  }
+  .v-actions button:hover { color: var(--fg-0); border-color: var(--accent); }
+  .v-actions button.load { color: var(--accent); border-color: var(--accent); }
+  .v-actions button.load:hover { background: var(--accent); color: var(--bg-0); }
+
+  .v-empty, .v-loading {
+    padding: 2rem 1rem;
+    color: var(--fg-2);
+    text-align: center;
+    font-style: italic;
+  }
+  .v-foot {
+    padding: .4rem .9rem;
+    border-top: 1px solid var(--border);
+    font-size: .76rem;
+    color: var(--fg-2);
+    display: flex; gap: 1rem; justify-content: space-between;
+  }
 </style>
 </head>
 <body>
@@ -90,9 +218,10 @@
     &nbsp;·&nbsp; fbunc
   </div>
   <nav>
-    <button id="tab-curve"  class="active"       data-target="frame-curve">Curve Playground</button>
-    <button id="tab-factor" class="prime"        data-target="frame-factor">Factorization in 2D</button>
-    <button id="tab-docs"   class="docs"         data-target="frame-docs">Math Docs</button>
+    <button class="views-btn" id="btn-views" title="Browse saved views">📁 Views</button>
+    <button id="tab-curve"  class="active" data-target="frame-curve">Curve Playground</button>
+    <button id="tab-factor" class="prime"  data-target="frame-factor">Factorization in 2D</button>
+    <button id="tab-docs"   class="docs"   data-target="frame-docs">Math Docs</button>
   </nav>
 </header>
 
@@ -106,19 +235,45 @@
   <span>Direct links:
     <a href="StartHere.html">StartHere.html</a> ·
     <a href="FactorizationIn2D.html">FactorizationIn2D.html</a> ·
-    <a href="docs/">Math Docs</a>
+    <a href="docs/">Math Docs</a> ·
+    <a href="views/manifest.json">views manifest</a>
   </span>
   <span style="margin-left:auto;">deep-link: <code>#curve</code> · <code>#factor</code> · <code>#docs</code></span>
 </footer>
 
+<div class="v-overlay" id="v-overlay" role="dialog" aria-modal="true" aria-labelledby="v-title">
+  <div class="v-modal">
+    <div class="v-head">
+      <h2 id="v-title">📁 Saved Views</h2>
+      <span class="count" id="v-count"></span>
+      <button class="close" id="v-close">✕</button>
+    </div>
+    <div class="v-toolbar">
+      <input type="search" id="v-search" placeholder="Search by name, N, Mc, T₀, preset…" />
+      <button class="v-filter active" data-filter="all">All</button>
+      <button class="v-filter" data-filter="curve">Curve</button>
+      <button class="v-filter" data-filter="factor">Factor</button>
+      <button class="v-filter star" data-filter="star">★ Favorites</button>
+    </div>
+    <div class="v-body">
+      <div class="v-loading" id="v-loading">Loading manifest…</div>
+      <ul class="v-list" id="v-list" hidden></ul>
+    </div>
+    <div class="v-foot">
+      <span>Renames &amp; favorites are stored locally in your browser (localStorage).</span>
+      <span>Esc / click outside to close</span>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
+  // ── Tab switching ─────────────────────────────────────────────────
   const tabs = {
     curve:  { btn: document.getElementById('tab-curve'),  frame: document.getElementById('frame-curve')  },
     factor: { btn: document.getElementById('tab-factor'), frame: document.getElementById('frame-factor') },
     docs:   { btn: document.getElementById('tab-docs'),   frame: document.getElementById('frame-docs')   },
   };
-
   function activate(key, pushHash) {
     if (!tabs[key]) key = 'curve';
     for (const k of Object.keys(tabs)) {
@@ -128,13 +283,236 @@
     }
     if (pushHash) history.replaceState(null, '', '#' + key);
   }
-
   for (const [key, t] of Object.entries(tabs)) {
     t.btn.addEventListener('click', () => activate(key, true));
   }
   window.addEventListener('hashchange', () => activate(location.hash.replace('#',''), false));
-
   activate(location.hash.replace('#','') || 'curve', false);
+
+  // ── Views picker ──────────────────────────────────────────────────
+  const LS_LABELS = 'fbunc.views.labels';
+  const LS_FAVS   = 'fbunc.views.favorites';
+  const storage = {
+    getLabels: () => { try { return JSON.parse(localStorage.getItem(LS_LABELS) || '{}'); } catch { return {}; } },
+    setLabels: (v) => localStorage.setItem(LS_LABELS, JSON.stringify(v)),
+    getFavs:   () => { try { return new Set(JSON.parse(localStorage.getItem(LS_FAVS) || '[]')); } catch { return new Set(); } },
+    setFavs:   (s) => localStorage.setItem(LS_FAVS, JSON.stringify([...s])),
+  };
+
+  let manifest = null;
+  let filter = 'all';
+  let query = '';
+
+  const overlay = document.getElementById('v-overlay');
+  const listEl  = document.getElementById('v-list');
+  const loadEl  = document.getElementById('v-loading');
+  const countEl = document.getElementById('v-count');
+  const searchEl= document.getElementById('v-search');
+
+  function defaultLabel(item) {
+    // Strip the flat name back to something readable.
+    const name = item.file.replace(/^.+?__/, '').replace(/\.json$/, '').replace(/_/g, ' ');
+    return name;
+  }
+
+  function openPicker() {
+    overlay.classList.add('open');
+    if (!manifest) loadManifest();
+    else render();
+    setTimeout(() => searchEl.focus(), 60);
+  }
+  function closePicker() { overlay.classList.remove('open'); }
+
+  document.getElementById('btn-views').addEventListener('click', openPicker);
+  document.getElementById('v-close').addEventListener('click', closePicker);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closePicker(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closePicker();
+  });
+
+  for (const btn of document.querySelectorAll('.v-filter')) {
+    btn.addEventListener('click', () => {
+      filter = btn.dataset.filter;
+      for (const b of document.querySelectorAll('.v-filter')) b.classList.toggle('active', b === btn);
+      render();
+    });
+  }
+  searchEl.addEventListener('input', () => { query = searchEl.value.trim().toLowerCase(); render(); });
+
+  async function loadManifest() {
+    try {
+      const res = await fetch('views/manifest.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      manifest = await res.json();
+      render();
+    } catch (err) {
+      loadEl.textContent = 'Failed to load views/manifest.json: ' + err.message;
+    }
+  }
+
+  function passFilter(item, favs) {
+    if (filter === 'star')  return favs.has(item.file);
+    if (filter === 'curve') return item.app === 'curve';
+    if (filter === 'factor')return item.app === 'factor';
+    return true;
+  }
+
+  function render() {
+    if (!manifest) return;
+    const labels = storage.getLabels();
+    const favs   = storage.getFavs();
+
+    loadEl.hidden = true;
+    listEl.hidden = false;
+    listEl.innerHTML = '';
+
+    const rows = manifest.items
+      .filter(it => passFilter(it, favs))
+      .map(it => ({ it, label: labels[it.file] || defaultLabel(it) }))
+      .filter(({ it, label }) => {
+        if (!query) return true;
+        const m = it.meta || {};
+        const hay = [
+          label, it.file, it.app,
+          m.preset, m.formula_set, m.source,
+          'N=' + (m.N || ''), 'Mc=' + (m.Mc || ''), 'To=' + (m.To || ''),
+          m.timestamp || ''
+        ].join(' ').toLowerCase();
+        return hay.includes(query);
+      });
+
+    countEl.textContent = `${rows.length} of ${manifest.items.length}`;
+    if (rows.length === 0) {
+      listEl.innerHTML = '<li class="v-empty">No views match.</li>';
+      return;
+    }
+
+    for (const { it, label } of rows) {
+      listEl.appendChild(makeRow(it, label, favs.has(it.file)));
+    }
+  }
+
+  function fmtMeta(it) {
+    const m = it.meta || {};
+    const bits = [];
+    if (it.app) bits.push(`<span class="app ${it.app}">${it.app}</span>`);
+    if (m.N  != null) bits.push('N=' + m.N);
+    if (m.Mc != null) bits.push('Mc=' + m.Mc);
+    if (m.To != null) bits.push('T₀=' + (typeof m.To === 'number' ? m.To.toFixed(4).replace(/\.?0+$/, '') : m.To));
+    if (m.preset)     bits.push(m.preset);
+    if (m.source)     bits.push('src=' + m.source);
+    if (m.timestamp)  bits.push(new Date(m.timestamp).toLocaleString());
+    return bits.join(' · ');
+  }
+
+  function makeRow(item, label, starred) {
+    const li = document.createElement('li');
+    li.className = 'v-row';
+
+    const star = document.createElement('button');
+    star.className = 'v-star' + (starred ? ' on' : '');
+    star.title = starred ? 'Unfavorite' : 'Favorite';
+    star.textContent = starred ? '★' : '☆';
+    star.addEventListener('click', () => {
+      const favs = storage.getFavs();
+      if (favs.has(item.file)) favs.delete(item.file); else favs.add(item.file);
+      storage.setFavs(favs);
+      render();
+    });
+
+    const info = document.createElement('div');
+    info.className = 'v-info';
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'v-name';
+    nameDiv.textContent = label;
+    nameDiv.title = label + '\n' + item.file;
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'v-meta';
+    metaDiv.innerHTML = fmtMeta(item);
+    info.appendChild(nameDiv);
+    info.appendChild(metaDiv);
+
+    const actions = document.createElement('div');
+    actions.className = 'v-actions';
+
+    const renameBtn = document.createElement('button');
+    renameBtn.textContent = '✎';
+    renameBtn.title = 'Rename (label only)';
+    renameBtn.addEventListener('click', () => beginRename(nameDiv, item, label));
+
+    const loadBtn = document.createElement('button');
+    loadBtn.textContent = '▶ Load';
+    loadBtn.className = 'load';
+    loadBtn.title = 'Load into ' + item.app;
+    loadBtn.addEventListener('click', () => loadView(item));
+
+    actions.appendChild(renameBtn);
+    actions.appendChild(loadBtn);
+
+    li.appendChild(star);
+    li.appendChild(info);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function beginRename(nameDiv, item, currentLabel) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentLabel;
+    nameDiv.textContent = '';
+    nameDiv.appendChild(input);
+    input.focus(); input.select();
+    const commit = (save) => {
+      const newLabel = input.value.trim();
+      const labels = storage.getLabels();
+      if (save && newLabel && newLabel !== defaultLabel(item)) labels[item.file] = newLabel;
+      else delete labels[item.file];
+      storage.setLabels(labels);
+      render();
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter')  { e.preventDefault(); commit(true); }
+      if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+    });
+    input.addEventListener('blur', () => commit(true));
+  }
+
+  async function loadView(item) {
+    if (item.app !== 'curve' && item.app !== 'factor') {
+      alert('This view has an unknown format and cannot be auto-loaded.');
+      return;
+    }
+    let res;
+    try {
+      res = await fetch('views/' + encodeURIComponent(item.file), { cache: 'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+    } catch (err) {
+      alert('Failed to fetch view: ' + err.message);
+      return;
+    }
+    const obj = await res.json();
+
+    // Switch to the matching tab.
+    activate(item.app === 'curve' ? 'curve' : 'factor', true);
+
+    // Wait for the iframe to expose its loader, then call it.
+    const frame = item.app === 'curve' ? tabs.curve.frame : tabs.factor.frame;
+    const fnName = item.app === 'curve' ? 'fbuncLoadView' : 'fbuncLoadSession';
+
+    const tryCall = (attemptsLeft) => {
+      try {
+        const w = frame.contentWindow;
+        if (w && typeof w[fnName] === 'function') {
+          w[fnName](obj);
+          closePicker();
+          return;
+        }
+      } catch (e) { /* cross-origin shouldn't happen, same origin */ }
+      if (attemptsLeft > 0) setTimeout(() => tryCall(attemptsLeft - 1), 150);
+      else alert('Loader is not available in the target app yet. Try again in a moment.');
+    };
+    tryCall(40); // ~6s total
+  }
 })();
 </script>
 

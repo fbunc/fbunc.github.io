@@ -3110,42 +3110,53 @@ function applyCurveConfigsToUi(curveConfigs) {
     }
 }
 
+function applyMidiSessionObject(parsed, label) {
+    try {
+        const gen = parsed && parsed.generator ? parsed.generator : null;
+        const cfg = parsed && parsed.midiConfig ? parsed.midiConfig : null;
+
+        if (gen && Number.isFinite(Number(gen.N)) && Number.isFinite(Number(gen.To))) {
+            const nextN = Math.max(1, Math.min(parseInt(gen.N), MAX_N_SUPPORTED));
+            const nextTo = Math.max(2, parseFloat(gen.To));
+            const nInput = document.getElementById('inp-n');
+            const toInput = document.getElementById('inp-to');
+            if (nInput) nInput.value = String(nextN);
+            if (toInput) toInput.value = String(nextTo);
+            params.N = nextN;
+            params.To = nextTo;
+            recompute();
+        }
+
+        if (cfg) {
+            applyMidiConfigToUi(cfg);
+            applyCurveConfigsToUi(cfg.curveConfigs || []);
+            if (typeof applyFxPresetToUi === 'function' && cfg.fxPreset) applyFxPresetToUi(cfg.fxPreset);
+        }
+
+        midiState.needsRebuild = true;
+        buildMidiSequence();
+        updateMidiSummary(`Session JSON loaded${label ? ': ' + label : ''}. Mapping rebuilt.`);
+    } catch (err) {
+        updateMidiSummary(`Session JSON import failed: ${err && err.message ? err.message : 'Unknown error'}`);
+    }
+}
+
 function importMidiSessionJson(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
         try {
             const parsed = JSON.parse(reader.result);
-            const gen = parsed && parsed.generator ? parsed.generator : null;
-            const cfg = parsed && parsed.midiConfig ? parsed.midiConfig : null;
-
-            if (gen && Number.isFinite(Number(gen.N)) && Number.isFinite(Number(gen.To))) {
-                const nextN = Math.max(1, Math.min(parseInt(gen.N), MAX_N_SUPPORTED));
-                const nextTo = Math.max(2, parseFloat(gen.To));
-                const nInput = document.getElementById('inp-n');
-                const toInput = document.getElementById('inp-to');
-                if (nInput) nInput.value = String(nextN);
-                if (toInput) toInput.value = String(nextTo);
-                params.N = nextN;
-                params.To = nextTo;
-                recompute();
-            }
-
-            if (cfg) {
-                applyMidiConfigToUi(cfg);
-                applyCurveConfigsToUi(cfg.curveConfigs || []);
-                if (typeof applyFxPresetToUi === 'function' && cfg.fxPreset) applyFxPresetToUi(cfg.fxPreset);
-            }
-
-            midiState.needsRebuild = true;
-            buildMidiSequence();
-            updateMidiSummary(`Session JSON loaded: ${file.name}. Mapping rebuilt.`);
+            applyMidiSessionObject(parsed, file.name);
         } catch (err) {
             updateMidiSummary(`Session JSON import failed: ${err && err.message ? err.message : 'Unknown error'}`);
         }
     };
     reader.readAsText(file);
 }
+
+// Parent-window bridge: wrapper's Views picker loads by object.
+window.fbuncLoadSession = (parsedObj) => applyMidiSessionObject(parsedObj, null);
 
 function buildMidiFileBytes(timelineSteps, curveSequences, bpm, subdivision) {
     const tpq = 480;

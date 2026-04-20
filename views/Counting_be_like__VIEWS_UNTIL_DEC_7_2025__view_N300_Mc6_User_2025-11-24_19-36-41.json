@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-11-24T22:36:41.836Z",
+  "parameters": {
+    "formula_set": "User's Formulas",
+    "num_points": 300,
+    "M_r_update": 1,
+    "delta_r_initial": 0.1,
+    "T_o_period": 1.618033988749895,
+    "D_dimension": 4,
+    "M_c_color": 6,
+    "active_curves": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H"
+    ],
+    "highlight_primes": true,
+    "line_between_dots": true,
+    "show_all_point_indices": true,
+    "show_prime_point_indices": false,
+    "show_index_mod_mc": true,
+    "animate_points": false,
+    "animation_fps": 1,
+    "scatter_size": 9.8,
+    "prime_size_factor": 1.9,
+    "line_width": 0.3,
+    "use_custom_function": false,
+    "custom_zn_function": "",
+    "custom_r_function": "",
+    "custom_theta_function": ""
+  },
+  "camera": {
+    "up": {
+      "x": 0.4250057625071295,
+      "y": 0.782946517305984,
+      "z": -0.45427398436864513
+    },
+    "center": {
+      "x": -7.703719777548943e-34,
+      "y": -6.162975822039155e-33,
+      "z": 1.1102230246251565e-16
+    },
+    "eye": {
+      "x": -0.02275564939896352,
+      "y": -0.036529321685327125,
+      "z": -0.08424824804884815
+    },
+    "projection": {
+      "type": "perspective"
+    }
+  },
+  "preset": "Custom"
+}

@@ -1,0 +1,1715 @@
+{
+  "generated_from": "/home/phione/Desktop/ALL_MATH",
+  "count_scanned": 134,
+  "count_unique": 98,
+  "count_bad": 0,
+  "by_app": {
+    "curve": 98,
+    "factor": 0,
+    "unknown": 0
+  },
+  "items": [
+    {
+      "file": "Counting_be_like__0_LOVE__00___GOLDview_N3000_Mc3_User_2026-02-24_14-21-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 3000,
+        "Mc": 3,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-24T17:21:18.483Z"
+      },
+      "sources": [
+        "Counting_be_like/0_LOVE/00___GOLDview_N3000_Mc3_User_2026-02-24_14-21-18.json"
+      ],
+      "hash": "2e667f26b9bc",
+      "bytes": 13126162
+    },
+    {
+      "file": "Counting_be_like__0_LOVE__01___GOLDview_N3000_Mc3_User_2026-02-24_14-21-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 3,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-24T18:20:09.192Z"
+      },
+      "sources": [
+        "Counting_be_like/0_LOVE/01___GOLDview_N3000_Mc3_User_2026-02-24_14-21-18.json"
+      ],
+      "hash": "a96acbd8a6b3",
+      "bytes": 3679219
+    },
+    {
+      "file": "Counting_be_like__0_LOVE__Mod6_color_view_N1000_Mc6_User_2026-02-21_21-14-28.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-21T00:14:28.235Z"
+      },
+      "sources": [
+        "Counting_be_like/0_LOVE/Mod6_color_view_N1000_Mc6_User_2026-02-21_21-14-28.json"
+      ],
+      "hash": "756c67d711cc",
+      "bytes": 4415334
+    },
+    {
+      "file": "Counting_be_like__0_LOVE__view_N4920_Mc6_Insp_2026-02-20_20-45-19.json",
+      "app": "curve",
+      "meta": {
+        "N": 4920,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Inspirational Formulas",
+        "timestamp": "2026-02-20T23:45:19.526Z"
+      },
+      "sources": [
+        "Counting_be_like/0_LOVE/view_N4920_Mc6_Insp_2026-02-20_20-45-19.json"
+      ],
+      "hash": "a7d5c66b7df4",
+      "bytes": 21736649
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N1000_Mc6_User_2026-01-01_21-18-05.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-01T00:18:05.334Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N1000_Mc6_User_2026-01-01_21-18-05.json"
+      ],
+      "hash": "2aaf97b7d4ab",
+      "bytes": 4630733
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N10_Mc13_User_2026-01-01_21-05-48.json",
+      "app": "curve",
+      "meta": {
+        "N": 10,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-01T00:05:48.505Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N10_Mc13_User_2026-01-01_21-05-48.json"
+      ],
+      "hash": "53d193ba196d",
+      "bytes": 48544
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N10_Mc6_Insp_2026-01-01_22-50-52.json",
+      "app": "curve",
+      "meta": {
+        "N": 10,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Inspirational Formulas",
+        "timestamp": "2026-01-01T01:50:52.226Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N10_Mc6_Insp_2026-01-01_22-50-52.json"
+      ],
+      "hash": "800e4728a2f7",
+      "bytes": 54004
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N10_Mc6_User_2026-01-01_09-22-55.json",
+      "app": "curve",
+      "meta": {
+        "N": 10,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-01T12:22:55.574Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N10_Mc6_User_2026-01-01_09-22-55.json"
+      ],
+      "hash": "49020beffb4b",
+      "bytes": 48247
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N128_Mc6_User_2026-01-01_09-28-37.json",
+      "app": "curve",
+      "meta": {
+        "N": 128,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-01T12:28:37.110Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N128_Mc6_User_2026-01-01_09-28-37.json"
+      ],
+      "hash": "d4adfaf52031",
+      "bytes": 588762
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N13_Mc6_User_2026-01-01_21-08-36.json",
+      "app": "curve",
+      "meta": {
+        "N": 13,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-01T00:08:36.664Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N13_Mc6_User_2026-01-01_21-08-36.json"
+      ],
+      "hash": "750f109ee457",
+      "bytes": 62240
+    },
+    {
+      "file": "Counting_be_like__ATOMS__view_N8740_Mc13_Insp_2026-01-01_22-13-19.json",
+      "app": "curve",
+      "meta": {
+        "N": 8740,
+        "Mc": 13,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Compass Numbers",
+        "timestamp": "2026-01-01T01:13:19.959Z"
+      },
+      "sources": [
+        "Counting_be_like/ATOMS/view_N8740_Mc13_Insp_2026-01-01_22-13-19.json"
+      ],
+      "hash": "1da133e0c701",
+      "bytes": 38803061
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__AMAZING_MOD_18_view_N1800_Mc18_User_2026-01-27_13-35-34.json",
+      "app": "curve",
+      "meta": {
+        "N": 1800,
+        "Mc": 18,
+        "To": 18,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-27T16:35:34.740Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/AMAZING_MOD_18_view_N1800_Mc18_User_2026-01-27_13-35-34.json"
+      ],
+      "hash": "6951c57830ce",
+      "bytes": 7982139
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__INCLUDE_view_N180_Mc18_User_2026-01-27_13-18-59.json",
+      "app": "curve",
+      "meta": {
+        "N": 180,
+        "Mc": 18,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-27T16:18:59.385Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/INCLUDE_view_N180_Mc18_User_2026-01-27_13-18-59.json"
+      ],
+      "hash": "e45f965a692a",
+      "bytes": 807916
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__INCLUDE_view_N180_Mc18_User_2026-01-27_13-31-59.json",
+      "app": "curve",
+      "meta": {
+        "N": 180,
+        "Mc": 18,
+        "To": 18,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-27T16:31:59.428Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/INCLUDE_view_N180_Mc18_User_2026-01-27_13-31-59.json"
+      ],
+      "hash": "a874746682cb",
+      "bytes": 808451
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__INCLUDE_view_N3700_Mc18_User_2026-01-27_11-51-45.json",
+      "app": "curve",
+      "meta": {
+        "N": 3700,
+        "Mc": 18,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-27T14:51:45.976Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/INCLUDE_view_N3700_Mc18_User_2026-01-27_11-51-45.json"
+      ],
+      "hash": "d7758f24d5b9",
+      "bytes": 16333274
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N1000_Mc6_User_2026-01-15_18-44-08.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-15T21:44:08.089Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N1000_Mc6_User_2026-01-15_18-44-08.json"
+      ],
+      "hash": "8e56b571be40",
+      "bytes": 4527383
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N180_Mc18_User_2026-01-27_13-26-00.json",
+      "app": "curve",
+      "meta": {
+        "N": 180,
+        "Mc": 18,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-27T16:26:00.761Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N180_Mc18_User_2026-01-27_13-26-00.json"
+      ],
+      "hash": "d69c90d99622",
+      "bytes": 807916
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N2310_Mc13_User_2026-01-17_18-49-57.json",
+      "app": "curve",
+      "meta": {
+        "N": 2310,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-17T21:49:57.612Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N2310_Mc13_User_2026-01-17_18-49-57.json"
+      ],
+      "hash": "4a326345fb52",
+      "bytes": 10353516
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N2310_Mc13_User_2026-01-17_18-52-29.json",
+      "app": "curve",
+      "meta": {
+        "N": 2310,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-17T21:52:29.909Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N2310_Mc13_User_2026-01-17_18-52-29.json"
+      ],
+      "hash": "64b1707ae7fc",
+      "bytes": 10353519
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N2310_Mc13_User_2026-01-17_18-56-42.json",
+      "app": "curve",
+      "meta": {
+        "N": 2310,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-17T21:56:42.479Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N2310_Mc13_User_2026-01-17_18-56-42.json"
+      ],
+      "hash": "96a887ccba9f",
+      "bytes": 10354048
+    },
+    {
+      "file": "Counting_be_like__MSE_QUESTION__view_N2310_Mc13_User_2026-01-17_18-58-31.json",
+      "app": "curve",
+      "meta": {
+        "N": 2310,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-17T21:58:31.567Z"
+      },
+      "sources": [
+        "Counting_be_like/MSE_QUESTION/view_N2310_Mc13_User_2026-01-17_18-58-31.json"
+      ],
+      "hash": "5c32f61bf3f5",
+      "bytes": 10354047
+    },
+    {
+      "file": "Counting_be_like__SELECTION_ERNESTO__MSE_QUESTION_THE_PRIMES_HEXAGON_view_N1000_Mc6_User_2026-01-15_01-23-47.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-01-15T04:23:47.598Z"
+      },
+      "sources": [
+        "Counting_be_like/SELECTION_ERNESTO/MSE_QUESTION_THE_PRIMES_HEXAGON_view_N1000_Mc6_User_2026-01-15_01-23-47.json"
+      ],
+      "hash": "6c50eac45097",
+      "bytes": 4669215
+    },
+    {
+      "file": "Counting_be_like__sooogoood__view_N8980_Mc13_Insp_2026-02-07_07-15-15.json",
+      "app": "curve",
+      "meta": {
+        "N": 8980,
+        "Mc": 13,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Inspirational Formulas",
+        "timestamp": "2026-02-07T10:15:15.921Z"
+      },
+      "sources": [
+        "Counting_be_like/sooogoood/view_N8980_Mc13_Insp_2026-02-07_07-15-15.json"
+      ],
+      "hash": "bd0278ed26b7",
+      "bytes": 39836757
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__0_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T14:54:40.654Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/0_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/0_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "f0ecb870f5e3",
+      "bytes": 1692
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__10_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 6,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:20:44.780Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/10_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/10_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "722caaf28475",
+      "bytes": 1097
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__11_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 2260,
+        "Mc": 6,
+        "To": 13,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:30:23.600Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/11_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/11_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "4cd418908b2e",
+      "bytes": 1708
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__12_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 39,
+        "Mc": 6,
+        "To": 13,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:32:43.350Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/12_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/12_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "41ac2b6c00de",
+      "bytes": 1650
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__13_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 99,
+        "Mc": 6,
+        "To": 1.618,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:39:54.856Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/13_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/13_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "c9a31a600136",
+      "bytes": 1784
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__14_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1200,
+        "Mc": 6,
+        "To": 1.618,
+        "preset": "Custom",
+        "formula_set": "Inspirational Formulas",
+        "timestamp": "2025-11-25T16:50:16.786Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/14_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/14_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "77b11a1bd8d2",
+      "bytes": 1186
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__15_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1200,
+        "Mc": 6,
+        "To": 1.618,
+        "preset": "Custom",
+        "formula_set": "Inspirational Formulas",
+        "timestamp": "2025-11-25T17:00:59.715Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/15_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/15_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "ed51fe63cfce",
+      "bytes": 1783
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__16_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 13,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T17:30:18.353Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/16_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/16_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "adf5b5477679",
+      "bytes": 1794
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__17_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 39,
+        "Mc": 13,
+        "To": 13,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-28T02:42:06.968Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/17_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/17_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "ab82e909eb88",
+      "bytes": 1463
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__18_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 130,
+        "Mc": 13,
+        "To": 13,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-30T21:53:50.735Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/18_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/18_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "f6ff26f5fcd8",
+      "bytes": 587147
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__19_IN_THE_MIDDLE_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1300,
+        "Mc": 6,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-30T22:01:10.803Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/19_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/19_IN_THE_MIDDLE_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "015725c7b249",
+      "bytes": 5816780
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__1_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T14:57:54.984Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/1_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/1_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "722e617645fb",
+      "bytes": 1701
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__2_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:10:12.409Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/2_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/2_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "64ccc2e25349",
+      "bytes": 1701
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__3_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:14:31.867Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/3_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/3_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "dd2382b7440a",
+      "bytes": 1703
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__4_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:16:18.066Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/4_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/4_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "267a81885897",
+      "bytes": 1715
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__5_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 6,
+        "To": 3.14159265359,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:31:13.429Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/5_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/5_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "84881ff3bcb0",
+      "bytes": 768
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__6_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 6,
+        "To": 1.41421356237,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:37:15.345Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/6_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/6_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "0d3c70e0de63",
+      "bytes": 1380
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__7_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 6,
+        "To": 6,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:40:12.265Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/7_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/7_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "9e22350d304f",
+      "bytes": 1366
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__8_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 2,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:14:33.364Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/8_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/8_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "7f23f1857f0e",
+      "bytes": 1089
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__9_FOR_A_MSE_QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T16:18:20.797Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/9_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json",
+        "LOOK/VIEWS/9_FOR A MSE QUESTIONview_N1000_Mc6_User_2025-11-25_11-54-40.json"
+      ],
+      "hash": "f0e849d08221",
+      "bytes": 1097
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__Atomic_view_N500_Mc6_User_2025-11-25_11-43-39.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 6,
+        "To": 1.618,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T14:43:39.871Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/Atomic_view_N500_Mc6_User_2025-11-25_11-43-39.json",
+        "LOOK/VIEWS/Atomic_view_N500_Mc6_User_2025-11-25_11-43-39.json"
+      ],
+      "hash": "231a87bdf4cb",
+      "bytes": 1678
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__ATOMS__view_N10_Mc6_User_2025-11-30_19-05-15.json",
+      "app": "curve",
+      "meta": {
+        "N": 10,
+        "Mc": 6,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-30T22:05:15.866Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/ATOMS/view_N10_Mc6_User_2025-11-30_19-05-15.json",
+        "LOOK/VIEWS/ATOMS/view_N10_Mc6_User_2025-11-30_19-05-15.json"
+      ],
+      "hash": "18f8372e4f0d",
+      "bytes": 50837
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__MOOOOD_13_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json",
+      "app": "curve",
+      "meta": {
+        "N": 1618,
+        "Mc": 13,
+        "To": 1.61803398875,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-12-07T21:06:01.116Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/MOOOOD_13_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json"
+      ],
+      "hash": "d17aaf48efff",
+      "bytes": 7141995
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__MOOOOD_6_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 6,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-12-07T18:48:56.090Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/MOOOOD_6_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json"
+      ],
+      "hash": "c2a9cc32011f",
+      "bytes": 2247976
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__MOOOOD_X_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json",
+      "app": "curve",
+      "meta": {
+        "N": 10000,
+        "Mc": 27,
+        "To": 3,
+        "preset": "Custom",
+        "formula_set": "Compass Numbers",
+        "timestamp": "2025-12-07T19:26:27.698Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/MOOOOD_X_AND_PRIMES_view_N500_Mc6_User_2025-12-07_15-48-56.json"
+      ],
+      "hash": "f8770099ad8b",
+      "bytes": 45208314
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__PI_PERIOD_view_N500_Mc13_User_2025-11-25_12-27-07.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 3.14159265359,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T15:27:07.818Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/PI PERIOD_view_N500_Mc13_User_2025-11-25_12-27-07.json",
+        "LOOK/VIEWS/PI PERIOD_view_N500_Mc13_User_2025-11-25_12-27-07.json"
+      ],
+      "hash": "9a84efd7a1d0",
+      "bytes": 767
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N1000_Mc6_SIX_IS_SPECIAL_FOR_PRIME_HUNTING_User_2025-11-24_19-01-00.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:01:00.238Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N1000_Mc6_SIX_IS_SPECIAL_FOR_PRIME_HUNTING_User_2025-11-24_19-01-00.json",
+        "LOOK/VIEWS/view_N1000_Mc6_SIX_IS_SPECIAL_FOR_PRIME_HUNTING_User_2025-11-24_19-01-00.json"
+      ],
+      "hash": "a5b9f1dc9492",
+      "bytes": 1660
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N1000_Mc6_User_2025-11-24_18-31-48.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:31:48.923Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N1000_Mc6_User_2025-11-24_18-31-48.json",
+        "LOOK/VIEWS/view_N1000_Mc6_User_2025-11-24_18-31-48.json"
+      ],
+      "hash": "2840fa81d2ea",
+      "bytes": 1660
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N210_Mc13_User_2025-11-24_18-46-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 210,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:46:18.105Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N210_Mc13_User_2025-11-24_18-46-18.json",
+        "LOOK/VIEWS/view_N210_Mc13_User_2025-11-24_18-46-18.json"
+      ],
+      "hash": "ac6b2fbe0628",
+      "bytes": 1665
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N26_Mc13_User_2025-11-24_18-38-58.json",
+      "app": "curve",
+      "meta": {
+        "N": 26,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:38:58.548Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N26_Mc13_User_2025-11-24_18-38-58.json",
+        "LOOK/VIEWS/view_N26_Mc13_User_2025-11-24_18-38-58.json"
+      ],
+      "hash": "f14222613795",
+      "bytes": 1659
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N300_Mc13_User_2025-11-24_19-26-09.json",
+      "app": "curve",
+      "meta": {
+        "N": 300,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:26:09.647Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N300_Mc13_User_2025-11-24_19-26-09.json",
+        "LOOK/VIEWS/view_N300_Mc13_User_2025-11-24_19-26-09.json"
+      ],
+      "hash": "393d8257aa16",
+      "bytes": 1057
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N300_Mc6_User_2025-11-24_19-36-41.json",
+      "app": "curve",
+      "meta": {
+        "N": 300,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:36:41.836Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N300_Mc6_User_2025-11-24_19-36-41.json",
+        "LOOK/VIEWS/view_N300_Mc6_User_2025-11-24_19-36-41.json"
+      ],
+      "hash": "b9c325a57bf9",
+      "bytes": 1250
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N39_Mc6_User_2025-11-24_18-52-07.json",
+      "app": "curve",
+      "meta": {
+        "N": 39,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:52:07.506Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N39_Mc6_User_2025-11-24_18-52-07.json",
+        "LOOK/VIEWS/view_N39_Mc6_User_2025-11-24_18-52-07.json"
+      ],
+      "hash": "c91efc839891",
+      "bytes": 1662
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N500_Mc13_User_2025-11-24_18-13-27.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 13,
+        "preset": "Flower Set",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:13:27.165Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N500_Mc13_User_2025-11-24_18-13-27.json",
+        "LOOK/VIEWS/view_N500_Mc13_User_2025-11-24_18-13-27.json"
+      ],
+      "hash": "e9f35b9be3e4",
+      "bytes": 1015
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N500_Mc13_User_2025-11-24_18-14-08.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 13,
+        "preset": "Flower Set",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T21:14:08.912Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N500_Mc13_User_2025-11-24_18-14-08.json",
+        "LOOK/VIEWS/view_N500_Mc13_User_2025-11-24_18-14-08.json"
+      ],
+      "hash": "da8538a07abb",
+      "bytes": 1118
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N500_Mc6_User_2025-11-25_11-42-27.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 6,
+        "To": 1.618,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-25T14:42:27.854Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N500_Mc6_User_2025-11-25_11-42-27.json",
+        "LOOK/VIEWS/view_N500_Mc6_User_2025-11-25_11-42-27.json"
+      ],
+      "hash": "f6d267cd328f",
+      "bytes": 1678
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N600_Mc6_User_2025-11-24_19-13-04.json",
+      "app": "curve",
+      "meta": {
+        "N": 600,
+        "Mc": 6,
+        "To": 0.012,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:13:04.081Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N600_Mc6_User_2025-11-24_19-13-04.json",
+        "LOOK/VIEWS/view_N600_Mc6_User_2025-11-24_19-13-04.json"
+      ],
+      "hash": "e81fb9006e19",
+      "bytes": 1647
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N60_Mc13_User_2025-11-24_19-23-01.json",
+      "app": "curve",
+      "meta": {
+        "N": 60,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:23:01.637Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N60_Mc13_User_2025-11-24_19-23-01.json",
+        "LOOK/VIEWS/view_N60_Mc13_User_2025-11-24_19-23-01.json"
+      ],
+      "hash": "05d718b60f90",
+      "bytes": 1659
+    },
+    {
+      "file": "Counting_be_like__VIEWS_UNTIL_DEC_7_2025__view_N900_Mc3_User_2025-11-24_19-00-17.json",
+      "app": "curve",
+      "meta": {
+        "N": 900,
+        "Mc": 3,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2025-11-24T22:00:17.003Z"
+      },
+      "sources": [
+        "Counting_be_like/VIEWS_UNTIL_DEC_7_2025/view_N900_Mc3_User_2025-11-24_19-00-17.json",
+        "LOOK/VIEWS/view_N900_Mc3_User_2025-11-24_19-00-17.json"
+      ],
+      "hash": "f27a73aff1df",
+      "bytes": 1661
+    },
+    {
+      "file": "Counting_be_like__zeta__0_ZerosOfRiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T21:34:05.371Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/0_ZerosOfRiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json"
+      ],
+      "hash": "88989e3312fc",
+      "bytes": 2898714
+    },
+    {
+      "file": "Counting_be_like__zeta__RiemmannZeta_view__v2_N39_Mc6_User_2026-02-03_17-24-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 1430,
+        "Mc": 6,
+        "To": 8,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T20:53:35.464Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/RiemmannZeta_view__v2_N39_Mc6_User_2026-02-03_17-24-18.json"
+      ],
+      "hash": "230fb7db8536",
+      "bytes": 6324844
+    },
+    {
+      "file": "Counting_be_like__zeta__RiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 1430,
+        "Mc": 6,
+        "To": 1,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T21:08:52.220Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/RiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json"
+      ],
+      "hash": "c7762719e5fa",
+      "bytes": 6340216
+    },
+    {
+      "file": "Counting_be_like__zeta__RiemmannZeta_view_N39_Mc6_User_2026-02-03_17-24-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 39,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T20:24:18.459Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/RiemmannZeta_view_N39_Mc6_User_2026-02-03_17-24-18.json"
+      ],
+      "hash": "70e070002a19",
+      "bytes": 179684
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N1000_Mc10_User_2026-02-03_15-56-34.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 10,
+        "To": 29.34,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T18:56:34.971Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N1000_Mc10_User_2026-02-03_15-56-34.json"
+      ],
+      "hash": "d367d0c7b70e",
+      "bytes": 4390945
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N3000_Mc6_User_2026-02-03_16-15-26.json",
+      "app": "curve",
+      "meta": {
+        "N": 3000,
+        "Mc": 6,
+        "To": 19.03,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:15:26.907Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N3000_Mc6_User_2026-02-03_16-15-26.json"
+      ],
+      "hash": "44874c532338",
+      "bytes": 13304033
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N3000_Mc6_User_2026-02-03_16-16-02.json",
+      "app": "curve",
+      "meta": {
+        "N": 3000,
+        "Mc": 6,
+        "To": 19.03,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:16:02.252Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N3000_Mc6_User_2026-02-03_16-16-02.json"
+      ],
+      "hash": "f9edba421807",
+      "bytes": 14161831
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N3500_Mc6_User_2026-02-03_16-43-14.json",
+      "app": "curve",
+      "meta": {
+        "N": 3500,
+        "Mc": 6,
+        "To": 48,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:43:14.505Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N3500_Mc6_User_2026-02-03_16-43-14.json"
+      ],
+      "hash": "9cce8eb4d97e",
+      "bytes": 15428068
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-19-34.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 3.33,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:19:34.951Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-19-34.json"
+      ],
+      "hash": "e6582d60eb79",
+      "bytes": 39099598
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-24-06.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 20,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:24:06.407Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-24-06.json"
+      ],
+      "hash": "a9280c677f69",
+      "bytes": 39094410
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-25-03.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 7,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:25:03.585Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-25-03.json"
+      ],
+      "hash": "7fed0e1ff9c7",
+      "bytes": 39096082
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-29-01.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 7,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:29:01.399Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-29-01.json"
+      ],
+      "hash": "7e4a52fcca30",
+      "bytes": 39096083
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-32-36.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:32:36.139Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-32-36.json"
+      ],
+      "hash": "a710d2f2e42e",
+      "bytes": 39104463
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-35-46.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:35:46.403Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-35-46.json"
+      ],
+      "hash": "11e742e43498",
+      "bytes": 37437843
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-36-44.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:36:45.030Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-36-44.json"
+      ],
+      "hash": "1a2913ee3c01",
+      "bytes": 36967637
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-37-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:37:18.585Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-37-18.json"
+      ],
+      "hash": "3fb6fd1a817a",
+      "bytes": 36373204
+    },
+    {
+      "file": "Counting_be_like__zeta__view_N8100_Mc6_User_2026-02-03_16-39-03.json",
+      "app": "curve",
+      "meta": {
+        "N": 8100,
+        "Mc": 6,
+        "To": 39,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T19:39:03.236Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/view_N8100_Mc6_User_2026-02-03_16-39-03.json"
+      ],
+      "hash": "44d2526a878f",
+      "bytes": 30308617
+    },
+    {
+      "file": "Counting_be_like__zeta__ZerosOfRiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json",
+      "app": "curve",
+      "meta": {
+        "N": 1000,
+        "Mc": 6,
+        "To": 1,
+        "preset": "Custom",
+        "formula_set": "User's Formulas",
+        "timestamp": "2026-02-03T21:27:59.975Z"
+      },
+      "sources": [
+        "Counting_be_like/zeta/ZerosOfRiemmannZeta_view__v3_N39_Mc6_User_2026-02-03_17-24-18.json"
+      ],
+      "hash": "74cdabe2e197",
+      "bytes": 3714815
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N1060_Mc6_Insp_2026-03-13_02-56-10.json",
+      "app": "curve",
+      "meta": {
+        "N": 1060,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-13T05:56:10.126Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N1060_Mc6_Insp_2026-03-13_02-56-10.json"
+      ],
+      "hash": "a4a3ac89b74b",
+      "bytes": 4011130
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N2049_Mc6_Insp_2026-03-13_03-10-00.json",
+      "app": "curve",
+      "meta": {
+        "N": 2049,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-13T06:10:00.899Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N2049_Mc6_Insp_2026-03-13_03-10-00.json"
+      ],
+      "hash": "eed30a39c722",
+      "bytes": 6564702
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N4980_Mc13_Insp_2026-03-15_17-02-23.json",
+      "app": "curve",
+      "meta": {
+        "N": 4980,
+        "Mc": 13,
+        "To": 3.141592653589793,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-15T20:02:23.267Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N4980_Mc13_Insp_2026-03-15_17-02-23.json"
+      ],
+      "hash": "d7e1a42ba548",
+      "bytes": 22326068
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5000_Mc12_Insp_2026-03-20_00-53-07.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T03:53:07.923Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5000_Mc12_Insp_2026-03-20_00-53-07.json"
+      ],
+      "hash": "ca0a538aa0d8",
+      "bytes": 19437313
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5000_Mc12_Insp_2026-03-20_00-56-16.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T03:56:16.026Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5000_Mc12_Insp_2026-03-20_00-56-16.json"
+      ],
+      "hash": "e1a7fba4f0bd",
+      "bytes": 19438531
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5000_Mc12_Insp_2026-03-20_00-58-23.json",
+      "app": "curve",
+      "meta": {
+        "N": 5000,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T03:58:23.456Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5000_Mc12_Insp_2026-03-20_00-58-23.json"
+      ],
+      "hash": "339266d3bcca",
+      "bytes": 22780641
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N500_Mc13_Insp_2026-03-15_12-03-47.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-15T15:03:47.079Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N500_Mc13_Insp_2026-03-15_12-03-47.json"
+      ],
+      "hash": "15338285e21e",
+      "bytes": 2242987
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N500_Mc13_Insp_2026-03-22_18-59-43.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-22T21:59:43.452Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N500_Mc13_Insp_2026-03-22_18-59-43.json"
+      ],
+      "hash": "bf09f0e9f65e",
+      "bytes": 1832216
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N500_Mc3_Insp_2026-03-13_13-56-38.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 3,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-13T16:56:38.658Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N500_Mc3_Insp_2026-03-13_13-56-38.json"
+      ],
+      "hash": "30522191388d",
+      "bytes": 2248853
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5250_Mc12_Insp_2026-03-20_01-24-08.json",
+      "app": "curve",
+      "meta": {
+        "N": 5250,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T04:24:08.393Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5250_Mc12_Insp_2026-03-20_01-24-08.json"
+      ],
+      "hash": "608eb61ff910",
+      "bytes": 19566355
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5250_Mc12_Insp_2026-03-20_01-26-05.json",
+      "app": "curve",
+      "meta": {
+        "N": 5250,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T04:26:05.999Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5250_Mc12_Insp_2026-03-20_01-26-05.json"
+      ],
+      "hash": "894c98dea510",
+      "bytes": 19221733
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__000_FACTORIZATION_MAN__view_N5250_Mc12_Insp_2026-03-20_01-29-35.json",
+      "app": "curve",
+      "meta": {
+        "N": 5250,
+        "Mc": 12,
+        "To": 1.618033988749895,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-03-20T04:29:35.184Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/000_FACTORIZATION_MAN/view_N5250_Mc12_Insp_2026-03-20_01-29-35.json"
+      ],
+      "hash": "4a1f877912eb",
+      "bytes": 23572469
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__000_ATOM_MOD_10_view_N900_Mc6_Insp_2026-02-28_21-13-51.json",
+      "app": "curve",
+      "meta": {
+        "N": 900,
+        "Mc": 6,
+        "To": 10,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-28T00:13:51.515Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/000_ATOM_MOD_10_view_N900_Mc6_Insp_2026-02-28_21-13-51.json"
+      ],
+      "hash": "9fe4fae396aa",
+      "bytes": 4053576
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__0_Factorization_inSpace_MAIN_view_N500_Mc6_Insp_2026-02-27_12-28-31.json",
+      "app": "curve",
+      "meta": {
+        "N": 2750,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-27T16:49:39.913Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/0_Factorization_inSpace_MAIN_view_N500_Mc6_Insp_2026-02-27_12-28-31.json"
+      ],
+      "hash": "457fd1392876",
+      "bytes": 12271816
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__0_Factorization_inSpaceview_N500_Mc13_Insp_2026-02-27_12-28-31.json",
+      "app": "curve",
+      "meta": {
+        "N": 500,
+        "Mc": 13,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-27T15:28:31.472Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/0_Factorization_inSpaceview_N500_Mc13_Insp_2026-02-27_12-28-31.json"
+      ],
+      "hash": "54d9ff79281f",
+      "bytes": 1886567
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__GOLD_view_N1260_Mc6_Insp_2026-02-28_22-07-47.json",
+      "app": "curve",
+      "meta": {
+        "N": 1260,
+        "Mc": 6,
+        "To": 10,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-28T01:07:47.812Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/GOLD_view_N1260_Mc6_Insp_2026-02-28_22-07-47.json"
+      ],
+      "hash": "ee879d0bfb5f",
+      "bytes": 5662223
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__view_N2750_Mc6_Insp_2026-02-27_20-18-39.json",
+      "app": "curve",
+      "meta": {
+        "N": 2750,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-27T23:18:39.879Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/view_N2750_Mc6_Insp_2026-02-27_20-18-39.json"
+      ],
+      "hash": "4fed24805c68",
+      "bytes": 8642434
+    },
+    {
+      "file": "QUESTIONS_ABOUT_PRIMES__golden_views__view_N3770_Mc6_Insp_2026-02-27_12-59-38.json",
+      "app": "curve",
+      "meta": {
+        "N": 3770,
+        "Mc": 6,
+        "To": 1.62,
+        "preset": "Custom",
+        "formula_set": "Factorization in 2D",
+        "timestamp": "2026-02-27T15:59:38.709Z"
+      },
+      "sources": [
+        "QUESTIONS ABOUT PRIMES/golden_views/view_N3770_Mc6_Insp_2026-02-27_12-59-38.json"
+      ],
+      "hash": "80bef7ceb638",
+      "bytes": 14523272
+    }
+  ]
+}
