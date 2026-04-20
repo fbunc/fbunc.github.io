@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Math Docs — fbunc</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+
+<style>
+  :root {
+    --bg-0: #050608;
+    --bg-1: #0e1116;
+    --bg-2: #161a22;
+    --fg-0: #f4f6fb;
+    --fg-1: #adb3c2;
+    --fg-2: #7d869a;
+    --accent: #6dd3c4;
+    --prime:  #ffb547;
+    --border: #2a2f3a;
+    --code-bg: #0a0c11;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg-0); color: var(--fg-0);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { display: flex; flex-direction: row; }
+
+  aside {
+    flex: 0 0 260px;
+    background: var(--bg-1);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: .9rem .7rem;
+  }
+  aside h1 {
+    font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+    color: var(--fg-2); text-transform: uppercase;
+    margin: 0 .4rem .5rem; padding: 0;
+  }
+  aside nav { display: flex; flex-direction: column; gap: .15rem; }
+  aside nav a {
+    display: block;
+    padding: .45rem .55rem;
+    color: var(--fg-1);
+    text-decoration: none;
+    border-radius: .3rem;
+    font-size: .92rem;
+    line-height: 1.3;
+    border: 1px solid transparent;
+  }
+  aside nav a:hover { color: var(--fg-0); background: var(--bg-2); }
+  aside nav a.active {
+    color: var(--fg-0);
+    background: var(--bg-2);
+    border-color: var(--accent);
+  }
+  aside nav a .tag {
+    display: inline-block;
+    font-size: .68rem;
+    color: var(--accent);
+    letter-spacing: .05em;
+    margin-right: .35rem;
+    min-width: 1.5em;
+  }
+  aside nav a.answer .tag { color: var(--prime); }
+
+  aside .back {
+    display: block;
+    margin-top: 1rem;
+    padding: .4rem .55rem;
+    color: var(--fg-2);
+    font-size: .82rem;
+    text-decoration: none;
+    border-top: 1px solid var(--border);
+  }
+  aside .back:hover { color: var(--accent); }
+
+  main { flex: 1 1 auto; overflow-y: auto; padding: 2rem 2.6rem 4rem; }
+  article {
+    max-width: 860px;
+    margin: 0 auto;
+    line-height: 1.65;
+    color: var(--fg-0);
+  }
+
+  article h1, article h2, article h3, article h4 {
+    color: var(--fg-0);
+    line-height: 1.25;
+    margin-top: 1.8em;
+  }
+  article h1 { font-size: 1.85rem; border-bottom: 1px solid var(--border); padding-bottom: .35em; margin-top: 0; }
+  article h2 { font-size: 1.4rem;  border-bottom: 1px solid var(--border); padding-bottom: .25em; }
+  article h3 { font-size: 1.15rem; color: var(--accent); }
+  article h4 { font-size: 1.02rem; color: var(--fg-1); }
+
+  article p { margin: .7em 0; }
+  article a { color: var(--accent); text-decoration: none; }
+  article a:hover { text-decoration: underline; }
+
+  article code {
+    background: var(--code-bg);
+    color: var(--prime);
+    padding: .1em .35em;
+    border-radius: .25em;
+    font-size: .9em;
+    font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Consolas, monospace;
+  }
+  article pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: .4em;
+    padding: .9em 1em;
+    overflow-x: auto;
+    font-size: .88em;
+  }
+  article pre code { background: transparent; color: var(--fg-0); padding: 0; }
+
+  article blockquote {
+    border-left: 3px solid var(--accent);
+    padding: .2em 1em;
+    color: var(--fg-1);
+    background: var(--bg-1);
+    margin: 1em 0;
+    border-radius: 0 .3em .3em 0;
+  }
+
+  article img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1em auto;
+    background: #fff;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
+  article table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    font-size: .92em;
+  }
+  article th, article td {
+    border: 1px solid var(--border);
+    padding: .4em .7em;
+    text-align: left;
+  }
+  article th { background: var(--bg-1); color: var(--fg-0); }
+  article hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+
+  article ul, article ol { padding-left: 1.6em; }
+  article li { margin: .2em 0; }
+
+  /* KaTeX dark-theme tweaks */
+  .katex { color: var(--fg-0); }
+  .katex-display { overflow-x: auto; overflow-y: hidden; padding: .4em 0; }
+
+  .loading, .err {
+    color: var(--fg-2);
+    font-style: italic;
+    padding: 2rem 0;
+  }
+  .err { color: #ff6b6b; font-style: normal; }
+
+  @media (max-width: 720px) {
+    body { flex-direction: column; }
+    aside { flex: 0 0 auto; max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--border); }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <h1>Math Docs</h1>
+  <nav id="doc-nav"></nav>
+  <a class="back" href="../index.html">← Back to fbunc</a>
+</aside>
+
+<main>
+  <article id="article">
+    <div class="loading">Loading…</div>
+  </article>
+</main>
+
+<!-- Libraries (defer so they run after the DOM is parsed) -->
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<script>
+const DOCS = [
+  { slug: 'main-question',  file: '01-main-question.md',  title: 'Main MSE question',          kind: 'q', tag: 'Q1' },
+  { slug: 'main-answer',    file: '02-main-answer.md',    title: 'Main MSE answer',            kind: 'a', tag: 'A1' },
+  { slug: 'mse-2026',       file: '03-mse-2026.md',       title: '2026 MSE revision',          kind: 'q', tag: 'Q2' },
+  { slug: 'mse-2026-copy',  file: '04-mse-2026-copy.md',  title: '2026 MSE (variant copy)',    kind: 'q', tag: 'Q2′' },
+  { slug: 'last-version',   file: '05-last-version.md',   title: 'Last Version / Questions About Primes', kind: 'q', tag: 'Q3' },
+  { slug: 'euler-product',  file: '06-euler-product.md',  title: 'Euler Product',              kind: 'q', tag: 'Q4' },
+  { slug: 'dirichlet',      file: '07-dirichlet.md',      title: 'Dirichlet',                  kind: 'q', tag: 'Q5' },
+];
+
+// ── Sidebar ────────────────────────────────────────────────────────────
+const nav = document.getElementById('doc-nav');
+for (const d of DOCS) {
+  const a = document.createElement('a');
+  a.href = '#' + d.slug;
+  a.dataset.slug = d.slug;
+  if (d.kind === 'a') a.classList.add('answer');
+  a.innerHTML = `<span class="tag">${d.tag}</span>${d.title}`;
+  nav.appendChild(a);
+}
+
+// ── Protect $…$ / $$…$$ from marked, restore after render ──────────────
+function renderMarkdown(raw) {
+  const math = [];
+  // Escape with a placeholder token marked won't touch.
+  const stashed = raw
+    .replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => { math.push({ display: true,  body: m }); return `@@MATH${math.length - 1}@@`; })
+    .replace(/(^|[^\\])\$([^\n$]+?)\$/g, (_, pre, m) => {
+      math.push({ display: false, body: m });
+      return pre + `@@MATH${math.length - 1}@@`;
+    });
+
+  let html = marked.parse(stashed, { gfm: true, breaks: false });
+
+  html = html.replace(/@@MATH(\d+)@@/g, (_, i) => {
+    const { display, body } = math[+i];
+    const delim = display ? '$$' : '$';
+    return delim + body + delim;
+  });
+
+  return html;
+}
+
+// ── Load + render a doc ────────────────────────────────────────────────
+async function loadDoc(slug) {
+  const doc = DOCS.find(d => d.slug === slug) || DOCS[0];
+
+  for (const a of nav.querySelectorAll('a')) {
+    a.classList.toggle('active', a.dataset.slug === doc.slug);
+  }
+
+  const art = document.getElementById('article');
+  art.innerHTML = '<div class="loading">Loading…</div>';
+  document.title = doc.title + ' — fbunc';
+
+  try {
+    const res = await fetch(doc.file, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    art.innerHTML = renderMarkdown(raw);
+
+    // Run KaTeX once it has loaded.
+    const renderMath = () => {
+      if (window.renderMathInElement) {
+        renderMathInElement(art, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$',  right: '$',  display: false },
+            { left: '\\[', right: '\\]', display: true },
+            { left: '\\(', right: '\\)', display: false },
+          ],
+          throwOnError: false,
+          strict: 'ignore',
+        });
+      } else {
+        setTimeout(renderMath, 60);
+      }
+    };
+    renderMath();
+
+    art.scrollTop = 0;
+    document.querySelector('main').scrollTop = 0;
+  } catch (e) {
+    art.innerHTML = `<div class="err">Failed to load <code>${doc.file}</code>: ${e.message}</div>`;
+  }
+}
+
+window.addEventListener('hashchange', () => loadDoc(location.hash.replace('#', '')));
+loadDoc(location.hash.replace('#', '') || DOCS[0].slug);
+</script>
+
+</body>
+</html>

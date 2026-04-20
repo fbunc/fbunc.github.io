@@ -1,0 +1,276 @@
+# Playing with bounded logs and prime orbits
+
+I need to check and confirm if what I'm doing here is correct.
+
+https://math.stackexchange.com/questions/585154/taylor-series-for-logx/3535630#3535630
+
+Consider:
+
+$$r_n=\frac{(n-1)}{(n+1)}+k_o$$
+
+for $n \geq 0 \in \mathbb{N}$ and the first prime as the initial probe $k_o=2$
+
+$$r_n=\frac{p_n}{q_n}$$
+
+The gcd between $p_n$ and $q_n$ $\in \mathbb{N}$ has to be 1.
+
+I created a script that checks if either $p_n$ or $q_n$ is prime and compared it with different prime frequency expressions based on log() or Li() up to 10^5.
+## table 
+[![enter image description here][1]][1]
+
+## plots
+
+[![enter image description here][2]][2]
+
+
+## comparisons
+For the comparisons here I improved previous script to filter for unique primes found in $q_n$
+[![enter image description here][4]][4]
+
+### Question 1
+
+Why are $q_n$ unique prime events matching so perfectly the real frequency? 
+It looks that for $p_n$ is the same shape but shifted
+
+[![enter image description here][5]][5]
+
+[![enter image description here][6]][6]
+
+## Question 2
+
+Consider a hexagonal spiral with a radius $r_n$ that grows forever but never reaches 3.
+
+$$r_n\omega^n$$
+$$\omega=e^{\frac{2\pi i}{T_o}}$$
+$$s_n=r_n\omega^n$$
+
+### Plot of the oscillation between primes that are either 1 or 5 modulo 6
+
+* The gray lines are between consecutive number events starting from 1
+
+* The red lines are between consecutive prime number events
+
+Is this graph somehow proof that all primes $p \geq 5$ are either $p \equiv 5 \mod{6}$ or $p \equiv 1 \mod{6}$? 
+I'm aware this is a known fact. But I came into this adding more symmetries to the following plots, as I will explain in the final question:
+
+Can we expect to find predictable patterns (of the same kind as before with initial spikes in the densities) by playing with another starting probe prime different than $k_o=2$ and trying, for example, $k_o=2^{100}$? I found that for manageable sizes it is easy to predict, if you see the animation, when the next prime is about to happen, you can test it by converting these plots into animations that go at 1 FPS or add step-by-step functionality.
+
+[![enter image description here][7]][7]
+
+## The periodic table of numbers and a proposed microscope
+
+The last plot is the top view of the $\vec{A_n}$ curve of the following atomic shape that emerges from the act of counting with $T_o=6$, coloring modulo 6 with $M_c=6$ different colors so color $C_n \equiv n \mod{M_c}$:
+
+$$\vec{\mathbf{A_n}}=(u_n,v_n,w_n)$$
+
+
+$$\Omega_o=\frac{2\pi }{T_o}$$
+
+And the spatial coordinates arrays for index $n$
+
+$$u_n=\frac{1}{2}(s_n+\overline{s_n})=r_n \cos(\Omega_o n)$$
+
+$$v_n=\frac{1}{2i}(s_n-\overline{s_n})=r_n \sin(\Omega_o n)$$
+
+$$w_n=r_n$$
+
+## Atomic structure created by 48 reflections of a main guide curve
+
+Can playing with structures like this help in the quest of predicting the next primes for manageable sizes? 
+
+I see superposed orbits that may or may not have some information associated with them that can be thought of as "interactions" between numbers, especially the red line prime oscillation inside the eternally growing bounded log radius hexagon.
+#### $F_0$
+
+* xyz x4
+
+$$\vec{A_n}=(u_n,v_n,w_n)$$
+
+$$\vec{B_n}=(u_n,-v_n,w_n)$$
+
+$$\vec{C_n}=(-u_n,v_n,w_n)$$
+
+$$\vec{D_n}=(-u_n,-v_n,w_n)$$
+
+* yxz x4
+
+$$\vec{E_n}=(v_n,u_n,w_n)$$
+
+$$\vec{F_n}=(v_n,-u_n,w_n)$$
+
+$$\vec{G_n}=(-v_n,u_n,w_n)$$
+
+$$\vec{H_n}=(-v_n,-u_n,w_n)$$
+
+#### $F_1$
+
+* xy(-z) x4
+$$\vec{I_n}=(u_n,v_n,-w_n)$$
+
+$$\vec{J_n}=(u_n,-v_n,-w_n)$$
+
+$$\vec{K_n}=(-u_n,v_n,-w_n)$$
+
+$$\vec{L_n}=(-u_n,-v_n,-w_n)$$
+
+
+
+* yx(-z) x4
+$$\vec{M_n}=(v_n,u_n,-w_n)$$
+
+$$\vec{N_n}=(v_n,-u_n,-w_n)$$
+
+$$\vec{O_n}=(-v_n,u_n,-w_n)$$
+
+$$\vec{P_n}=(-v_n,-u_n,-w_n)$$
+
+#### $F_2$
+* zxy x4
+
+$$\vec{Q_n}=(w_n,u_n,v_n)$$
+
+$$\vec{R_n}=(w_n,u_n,-v_n)$$
+
+$$\vec{S_n}=(w_n,-u_n,v_n)$$
+
+$$\vec{T_n}=(w_n,-u_n,-v_n)$$
+
+
+* zyx x4
+
+$$\vec{U_n}=(w_n,v_n,u_n)$$
+
+$$\vec{V_n}=(w_n,v_n,-u_n)$$
+
+$$\vec{W_n}=(w_n,-v_n,u_n)$$
+
+$$\vec{X_n}=(w_n,-v_n,-u_n)$$
+  
+
+#### $F_3$
+
+* (-z)xy x4
+
+$$\vec{\alpha_n}=(-w_n,u_n,v_n)$$
+
+$$\vec{\beta_n}=(-w_n,u_n,-v_n)$$
+
+$$\vec{\gamma_n}=(-w_n,-u_n,v_n)$$
+
+$$\vec{\delta_n}=(-w_n,-u_n,-v_n)$$
+
+
+
+* (-z)yx x4
+
+$$\vec{\epsilon_n}=(-w_n,v_n,u_n)$$
+
+$$\vec{\zeta_n}=(-w_n,v_n,-u_n)$$
+
+$$\vec{\eta_n}=(-w_n,-v_n,u_n)$$
+
+$$\vec{\theta_n}=(-w_n,-v_n,-u_n)$$
+
+#### $F_4$
+
+* xzy x4
+
+$$\vec{\iota_n}=(u_n,w_n,v_n)$$
+
+$$\vec{\kappa_n}=(u_n,w_n,-v_n)$$
+
+$$\vec{\lambda_n}=(-u_n,w_n,v_n)$$
+
+$$\vec{\mu_n}=(-u_n,w_n,-v_n)$$
+
+
+* yzx x4
+
+$$\vec{\nu_n}=(v_n,w_n,u_n)$$
+
+$$\vec{\xi_n}=(v_n,w_n,-u_n)$$
+
+$$\vec{O_n}=(-v_n,w_n,u_n)$$
+
+$$\vec{\pi_n}=(-v_n,w_n,-u_n)$$
+
+
+
+
+#### $F_5$
+* x(-z)y x4
+
+
+$$\vec{\rho_n}=(u_n,-w_n,v_n)$$
+
+$$\vec{\sigma_n}=(u_n,-w_n,-v_n)$$
+
+$$\vec{\tau_n}=(-u_n,-w_n,v_n)$$
+
+$$\vec{\upsilon_n}=(-u_n,-w_n,-v_n)$$
+
+
+
+
+* y(-z)x x4
+
+$$\vec{\phi_n}=(v_n,-w_n,u_n)$$
+
+$$\vec{\chi_n}=(v_n,-w_n,-u_n)$$
+
+$$\vec{\psi_n}=(-v_n,-w_n,u_n)$$
+
+$$\vec{\omega_n}=(-v_n,-w_n,-u_n)$$
+
+
+
+## Some examples of atoms for different numbers following the previous logic
+
+The same $s_n$ as in the hexagon plot of one curve, but now with its 47 seven reflections added, seen in 3 dimensions.
+
+### Atom for $N=1000$ with $T_o=6$ and $M_c=6$
+
+[![enter image description here][8]][8]
+
+### View from inside of the previous atom
+
+[![enter image description here][9]][9]
+
+### Better view of the same structure without prime oscillations
+
+[![enter image description here][10]][10]
+
+### Now using an irrational $T_o=\varphi$ and with $n$ up to $N=39$ and then $N=1000$
+
+
+[![enter image description here][11]][11]
+
+[![enter image description here][12]][12]
+
+[![enter image description here][13]][13]
+
+### Added prime oscillations
+
+[![enter image description here][14]][14]
+
+#### From the inside of previous plot
+
+What is the radius of this emergent circumference?
+
+[![enter image description here][15]][15] 
+
+
+  [1]: https://i.sstatic.net/9nGdQxfK.png
+  [2]: https://i.sstatic.net/g8YtywIz.png
+  [3]: https://i.sstatic.net/JB8PT52C.png
+  [4]: https://i.sstatic.net/KO2zPGyI.png
+  [5]: https://i.sstatic.net/0k6Pl3AC.png
+  [6]: https://i.sstatic.net/CU6MtyPr.png
+  [7]: https://i.sstatic.net/KnSxmHeG.png
+  [8]: https://i.sstatic.net/pzIyqx9f.png
+  [9]: https://i.sstatic.net/OPgiMO18.png
+  [10]: https://i.sstatic.net/JLNPWY2C.png
+  [11]: https://i.sstatic.net/82Ni4hmT.png
+  [12]: https://i.sstatic.net/CbeDfGqr.png
+  [13]: https://i.sstatic.net/gYVCB9OI.png
+  [14]: https://i.sstatic.net/pz9evDYf.png
+  [15]: https://i.sstatic.net/zOCUFID5.png
