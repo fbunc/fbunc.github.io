@@ -4255,7 +4255,9 @@ document.addEventListener('keydown', function(e) {
     applyFxSettings(cfg);
 }
 updateMidiSummary();
-initWebMidi();
+// Don't call initWebMidi() eagerly — it triggers the browser's MIDI permission
+// prompt on every page load. We defer until the user opens the MIDI Playground
+// (see showMidiPlayground() where initWebMidi() is called lazily).
 
 // Initialize
 resize();
