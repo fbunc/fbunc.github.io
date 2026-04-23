@@ -234,7 +234,7 @@
             <select id="colorMode">
                 <option value="position">position (field)</option>
                 <option value="birth">lock at birth</option>
-                <option value="inherit">inherit from parents</option>
+                <option value="inherit" selected>inherit from parents</option>
             </select>
         </label>
     </div>
@@ -283,7 +283,7 @@
         let animationId = null;
         let isDrawing = false;
         let drawMode = 1; // 1 = alive, 0 = dead
-        let colorMode = 'position'; // 'position' | 'birth' | 'inherit'
+        let colorMode = 'inherit'; // 'position' | 'birth' | 'inherit'
 
         // ============================================
         // DOM Elements
