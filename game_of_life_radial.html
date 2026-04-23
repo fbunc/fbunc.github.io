@@ -102,6 +102,15 @@
             accent-color: #00bc8c;
             cursor: pointer;
         }
+        .toggle-control select {
+            background: #1a1a2e;
+            color: #00bc8c;
+            border: 1px solid #00bc8c;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font: inherit;
+            cursor: pointer;
+        }
 
         input[type="range"] {
             width: 120px;
@@ -220,9 +229,13 @@
             <input type="range" id="speedSlider" min="1" max="60" value="15">
             <span id="speedValue">15</span> fps
         </div>
-        <label class="toggle-control" title="When on, each cell keeps the color it had when it was born, until it dies.">
-            <input type="checkbox" id="lockColorToggle">
-            🔒 Lock birth color
+        <label class="toggle-control" title="How newborn cells choose their color">
+            🎨 Color:
+            <select id="colorMode">
+                <option value="position">position (field)</option>
+                <option value="birth">lock at birth</option>
+                <option value="inherit">inherit from parents</option>
+            </select>
         </label>
     </div>
 
@@ -270,7 +283,7 @@
         let animationId = null;
         let isDrawing = false;
         let drawMode = 1; // 1 = alive, 0 = dead
-        let lockBirthColor = false;
+        let colorMode = 'position'; // 'position' | 'birth' | 'inherit'
 
         // ============================================
         // DOM Elements
@@ -289,7 +302,7 @@
         const clearBtn = document.getElementById('clearBtn');
         const randomBtn = document.getElementById('randomBtn');
         const dismissBtn = document.getElementById('dismissBtn');
-        const lockColorToggle = document.getElementById('lockColorToggle');
+        const lockColorToggle = document.getElementById('colorMode');
 
         // ============================================
         // Initialize
@@ -352,10 +365,10 @@
                         const y = i * CELL_SIZE;
 
                         let hue;
-                        if (lockBirthColor && !Number.isNaN(colorGrid[i][j])) {
-                            hue = colorGrid[i][j];
-                        } else {
+                        if (colorMode === 'position' || Number.isNaN(colorGrid[i][j])) {
                             hue = getHueForCell(i, j);
+                        } else {
+                            hue = colorGrid[i][j];
                         }
                         ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
                         ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
@@ -384,6 +397,31 @@
             return count;
         }
 
+        // Circular mean of hues of live neighbors (hues in degrees, 0..360).
+        // Returns NaN if no live neighbor has a defined hue.
+        function inheritedHue(row, col) {
+            let sx = 0, sy = 0, k = 0;
+            for (let di = -1; di <= 1; di++) {
+                for (let dj = -1; dj <= 1; dj++) {
+                    if (di === 0 && dj === 0) continue;
+                    const ni = row + di, nj = col + dj;
+                    if (ni < 0 || ni >= ROWS || nj < 0 || nj >= COLS) continue;
+                    if (grid[ni][nj] !== 1) continue;
+                    const h = Number.isNaN(colorGrid[ni][nj])
+                        ? getHueForCell(ni, nj)
+                        : colorGrid[ni][nj];
+                    const a = h * Math.PI / 180;
+                    sx += Math.cos(a);
+                    sy += Math.sin(a);
+                    k++;
+                }
+            }
+            if (k === 0) return NaN;
+            let deg = Math.atan2(sy, sx) * 180 / Math.PI;
+            if (deg < 0) deg += 360;
+            return deg;
+        }
+
         function nextGeneration() {
             const newGrid = Array.from({ length: ROWS }, () => 
                 Array.from({ length: COLS }, () => 0)
@@ -410,8 +448,17 @@
                         // Reproduction: exactly 3 neighbors
                         if (neighbors === 3) {
                             newGrid[i][j] = 1;
-                            // Newborn: assign color from current position
-                            newColorGrid[i][j] = getHueForCell(i, j);
+                            // Newborn color:
+                            //   'inherit' -> circular mean of the 3 live parents' hues
+                            //   otherwise -> sampled from current position
+                            if (colorMode === 'inherit') {
+                                const h = inheritedHue(i, j);
+                                newColorGrid[i][j] = Number.isNaN(h)
+                                    ? getHueForCell(i, j)
+                                    : h;
+                            } else {
+                                newColorGrid[i][j] = getHueForCell(i, j);
+                            }
                         }
                     }
                 }
@@ -632,7 +679,7 @@
         });
 
         lockColorToggle.addEventListener('change', (e) => {
-            lockBirthColor = e.target.checked;
+            colorMode = e.target.value;
             render();
         });
 
