@@ -123,6 +123,8 @@
                 <button type="button" class="btn btn-outline-primary w-100 mb-3" id="loadViewButton">
                     Load Saved View
                 </button>
+                <button type="button" class="btn w-100 mb-3" id="exportLife3dTopBtn" style="color:#4ed5a3;border:1px solid #4ed5a3;background:transparent;font-weight:600;" title="Export the current 3D plot as JSON for the Game of Life 3D tab. One voxel per point.">⬢ Export 3D → Life 3D
+                </button>
                 <input type="file" id="loadViewFileInput" accept=".json" style="display: none;">
                 <hr>
                 <div>
@@ -2681,62 +2683,123 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                 });
             }
 
+            // Shared "Export 3D plot to Life 3D JSON" — used by both the top button and the modal button.
+            // Strategy: 1 voxel per monad. Auto-size grid in [16, 256] until distinct input points map to
+            // distinct voxels (or hit the hard cap, in which case we accept some collisions).
+            function buildLife3dExportPayload() {
+                const gd = document.getElementById('plotDiv');
+                if (!gd || !gd.data) throw new Error('No plot data.');
+                const cssToHue = (css) => {
+                    if (typeof css !== 'string') return NaN;
+                    const probe = document.createElement('div');
+                    probe.style.color = css;
+                    document.body.appendChild(probe);
+                    const rgb = getComputedStyle(probe).color;
+                    document.body.removeChild(probe);
+                    const m = rgb.match(/rgba?\(([^)]+)\)/);
+                    if (!m) return NaN;
+                    const [r, g, b] = m[1].split(',').map(s => parseFloat(s) / 255);
+                    const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+                    if (d === 0) return 0;
+                    let h;
+                    if (max === r) h = ((g-b)/d) % 6;
+                    else if (max === g) h = (b-r)/d + 2;
+                    else h = (r-g)/d + 4;
+                    h *= 60; if (h < 0) h += 360;
+                    return h;
+                };
+                const raw = [];
+                for (const tr of gd.data) {
+                    if (tr.type !== 'scatter3d' || !tr.x || !tr.y || !tr.z) continue;
+                    const colors = tr.marker && tr.marker.color;
+                    const N = tr.x.length;
+                    for (let i = 0; i < N; i++) {
+                        const x = tr.x[i], y = tr.y[i], z = tr.z[i];
+                        if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') continue;
+                        const c = Array.isArray(colors) ? colors[i] : colors;
+                        const h = cssToHue(c);
+                        const pt = { x, y, z };
+                        if (!Number.isNaN(h)) pt.hue = +h.toFixed(2);
+                        raw.push(pt);
+                    }
+                }
+                if (!raw.length) throw new Error('No 3D points found in current plot.');
+                // Collapse exact duplicates (same monad sent multiple times)
+                const dedup = new Map();
+                for (const p of raw) {
+                    const k = `${p.x}|${p.y}|${p.z}`;
+                    if (!dedup.has(k)) dedup.set(k, p);
+                }
+                const points = [...dedup.values()];
+                // Bounding box
+                let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+                for (const p of points) {
+                    if (p.x<minX) minX=p.x; if (p.x>maxX) maxX=p.x;
+                    if (p.y<minY) minY=p.y; if (p.y>maxY) maxY=p.y;
+                    if (p.z<minZ) minZ=p.z; if (p.z>maxZ) maxZ=p.z;
+                }
+                const dx = maxX-minX || 1, dy = maxY-minY || 1, dz = maxZ-minZ || 1;
+                const D = Math.max(dx, dy, dz);
+                // Search smallest cubic side that yields no voxel collisions among unique points.
+                const HARD_CAP = 256;
+                let chosen = HARD_CAP, collisions = 0;
+                let side = Math.max(16, Math.min(HARD_CAP, Math.ceil(Math.cbrt(points.length) * 1.5)));
+                while (true) {
+                    const scale = (side - 1) / D;
+                    const seen = new Set();
+                    let coll = 0;
+                    for (const p of points) {
+                        const xi = Math.round((p.x - minX) * scale);
+                        const yi = Math.round((p.y - minY) * scale);
+                        const zi = Math.round((p.z - minZ) * scale);
+                        const k = (zi*side + yi)*side + xi;
+                        if (seen.has(k)) coll++; else seen.add(k);
+                    }
+                    if (coll === 0) { chosen = side; collisions = 0; break; }
+                    if (side >= HARD_CAP) { chosen = HARD_CAP; collisions = coll; break; }
+                    side = Math.min(HARD_CAP, Math.ceil(side * 1.4));
+                }
+                return { points, side: chosen, collisions };
+            }
+
+            function downloadLife3dExport(statusFn) {
+                try {
+                    const { points, side, collisions } = buildLife3dExportPayload();
+                    const data = { grid: [side, side, side], rule: 'B6/S5,6,7', wrap: true, points };
+                    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `curve_to_life3d_${Date.now()}.json`;
+                    document.body.appendChild(a); a.click(); a.remove();
+                    URL.revokeObjectURL(a.href);
+                    const msg = collisions
+                        ? `Exported ${points.length} points → ${side}³ grid (capped; ${collisions} monads share voxels).`
+                        : `Exported ${points.length} points → ${side}³ grid (1 voxel per monad). Open Life 3D → Init JSON.`;
+                    if (statusFn) statusFn(msg);
+                    return msg;
+                } catch (e) {
+                    console.error(e);
+                    const m = `Export failed: ${e.message || e}`;
+                    if (statusFn) statusFn(m); else alert(m);
+                }
+            }
+
+            const exportLife3dTopBtn = document.getElementById('exportLife3dTopBtn');
+            if (exportLife3dTopBtn) {
+                exportLife3dTopBtn.addEventListener('click', () => {
+                    const status = downloadLife3dExport(setFactorizationExportStatus);
+                    if (status) {
+                        const old = exportLife3dTopBtn.textContent;
+                        exportLife3dTopBtn.textContent = '✓ Sent!';
+                        setTimeout(() => { exportLife3dTopBtn.textContent = old; }, 1400);
+                    }
+                });
+            }
+
             const factorizationExportLife3dBtn = document.getElementById('factorization-export-life3d-btn');
             if (factorizationExportLife3dBtn) {
                 factorizationExportLife3dBtn.addEventListener('click', () => {
-                    try {
-                        const gd = document.getElementById('plotDiv');
-                        if (!gd || !gd.data) { setFactorizationExportStatus('No plot data.'); return; }
-                        const points = [];
-                        // CSS color -> hue (HSL angle 0..360). Returns NaN if not parseable.
-                        const cssToHue = (css) => {
-                            if (typeof css !== 'string') return NaN;
-                            const probe = document.createElement('div');
-                            probe.style.color = css;
-                            document.body.appendChild(probe);
-                            const rgb = getComputedStyle(probe).color;
-                            document.body.removeChild(probe);
-                            const m = rgb.match(/rgba?\(([^)]+)\)/);
-                            if (!m) return NaN;
-                            const [r, g, b] = m[1].split(',').map(s => parseFloat(s) / 255);
-                            const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
-                            if (d === 0) return 0;
-                            let h;
-                            if (max === r) h = ((g-b)/d) % 6;
-                            else if (max === g) h = (b-r)/d + 2;
-                            else h = (r-g)/d + 4;
-                            h *= 60; if (h < 0) h += 360;
-                            return h;
-                        };
-                        for (const tr of gd.data) {
-                            if (tr.type !== 'scatter3d' || !tr.x || !tr.y || !tr.z) continue;
-                            const colors = tr.marker && tr.marker.color;
-                            const N = tr.x.length;
-                            for (let i = 0; i < N; i++) {
-                                const x = tr.x[i], y = tr.y[i], z = tr.z[i];
-                                if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') continue;
-                                const c = Array.isArray(colors) ? colors[i] : colors;
-                                const h = cssToHue(c);
-                                const pt = { x, y, z };
-                                if (!Number.isNaN(h)) pt.hue = +h.toFixed(2);
-                                points.push(pt);
-                            }
-                        }
-                        if (!points.length) { setFactorizationExportStatus('No 3D points to export.'); return; }
-                        // Suggest a cubic grid sized to the cube root of point count, capped 96.
-                        const side = Math.max(16, Math.min(96, Math.ceil(Math.cbrt(points.length) * 1.5)));
-                        const data = { grid: [side, side, side], rule: 'B6/S5,6,7', wrap: true, points };
-                        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob);
-                        a.download = `curve_to_life3d_${Date.now()}.json`;
-                        document.body.appendChild(a); a.click(); a.remove();
-                        URL.revokeObjectURL(a.href);
-                        setFactorizationExportStatus(`Exported ${points.length} points as JSON. Open the Game of Life 3D tab and load it via "Init JSON".`);
-                    } catch (e) {
-                        console.error(e);
-                        setFactorizationExportStatus(`Export failed: ${e.message || e}`);
-                    }
+                    downloadLife3dExport(setFactorizationExportStatus);
                 });
             }
 
