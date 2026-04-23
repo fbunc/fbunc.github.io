@@ -68,6 +68,33 @@
   .stats span { color: #8ee36b; }
 
   .canvas-wrapper:fullscreen { border: 0; border-radius: 0; }
+
+  details.rules-help {
+    background: #11131a; border: 1px solid #2a2f3a; border-radius: 6px;
+    padding: 8px 12px; color: #c8d0d8; font-size: 12.5px; line-height: 1.5;
+    max-width: 1100px; margin: 0 auto;
+  }
+  details.rules-help > summary {
+    cursor: pointer; color: #8ee36b; font-weight: 600; font-size: 13px;
+    list-style: none; user-select: none;
+  }
+  details.rules-help > summary::before { content: '▸ '; display: inline-block; transition: transform .15s; }
+  details.rules-help[open] > summary::before { content: '▾ '; }
+  details.rules-help h4 { color: #8ee36b; margin: 10px 0 4px; font-size: 12.5px; }
+  details.rules-help code {
+    background: #1a1d26; color: #ffd479; padding: 1px 5px; border-radius: 3px;
+    font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12px;
+  }
+  details.rules-help table { border-collapse: collapse; margin: 6px 0; font-size: 12px; }
+  details.rules-help th, details.rules-help td {
+    border: 1px solid #2a2f3a; padding: 3px 8px; text-align: left;
+  }
+  details.rules-help th { color: #8ee36b; background: #161922; }
+  details.rules-help ul { margin: 4px 0 4px 20px; }
+  details.rules-help .kbd {
+    background: #1a1d26; border: 1px solid #2a2f3a; border-bottom-width: 2px;
+    border-radius: 3px; padding: 0 5px; font-family: monospace; font-size: 11px;
+  }
 </style>
 </head>
 <body>
@@ -134,6 +161,61 @@
     <div>Grid: <span id="gridLabel">48³</span></div>
     <div>Mode: <span id="modeIndicator">EDIT</span></div>
   </div>
+
+  <details class="rules-help">
+    <summary>📘 How the 3D rules work — click to expand</summary>
+
+    <h4>The neighborhood</h4>
+    <p>Every voxel <code>(x,y,z)</code> in the cubic grid has a <b>Moore neighborhood</b> of <b>26 neighbors</b>
+       (the 3³ − 1 cells touching it on faces, edges, and corners). With <b>wrap (T³)</b> on, the grid is a 3-torus —
+       the right face wraps to the left, top to bottom, front to back. With wrap off, neighbors past the wall count as dead.</p>
+
+    <h4>The rule string: <code>B&lt;born&gt;/S&lt;survive&gt;</code></h4>
+    <p>This is the 3D analog of Conway's <code>B3/S23</code>. For each voxel, we count its <i>n</i> live neighbors (0–26):</p>
+    <ul>
+      <li>If the voxel is <b>dead</b> and <i>n</i> ∈ <code>B</code> set → it is <b>born</b> next step.</li>
+      <li>If the voxel is <b>alive</b> and <i>n</i> ∈ <code>S</code> set → it <b>survives</b>.</li>
+      <li>Otherwise → dead next step.</li>
+    </ul>
+    <p>Counts are <b>comma-separated</b> because in 3D you regularly need two-digit numbers. Examples:</p>
+    <table>
+      <tr><th>Rule</th><th>Name</th><th>Behavior</th></tr>
+      <tr><td><code>B6/S5,6,7</code></td><td>Bays 5766 (default)</td><td>Canonical "3D Life" — has gliders, oscillators, still lifes.</td></tr>
+      <tr><td><code>B5/S4,5</code></td><td>Bays 4555</td><td>Bays' second well-studied rule; gliders + spaceships.</td></tr>
+      <tr><td><code>B4,5/S5</code></td><td>—</td><td>Sparse, crystal-like growth.</td></tr>
+      <tr><td><code>B3/S4,5,6,7</code></td><td>—</td><td>Explosive, tends to fill space.</td></tr>
+      <tr><td><code>B2/S</code></td><td>3D "seeds"</td><td>Pure birth, never survives — fast diffusing front.</td></tr>
+    </table>
+    <p><b>To change the rule:</b> type a new string into the <code>Rule</code> textbox and press <span class="kbd">Tab</span> or
+       <span class="kbd">Enter</span>. Spaces are ignored. Both <code>B6/S567</code> and <code>B6/S5,6,7</code> work for single-digit counts;
+       use commas for 10+ (<code>B6/S10,11</code>).</p>
+
+    <h4>Color rule (independent of the life/death rule)</h4>
+    <p>Each live voxel carries a <b>hue</b> ∈ [0°, 360°). The <b>Color</b> dropdown decides what newborn voxels get:</p>
+    <ul>
+      <li><b>position (azimuth)</b> — hue from <code>atan2(y−c, x−c)</code> (angle around the central z-axis). The grid behaves like a fixed colored field; "motion" is just births sampling that field.</li>
+      <li><b>lock at birth</b> — newborn hue from its position, then frozen until death. Each pattern keeps its birthplace tint.</li>
+      <li><b>inherit from parents</b> (default) — newborn hue = <i>circular mean</i> of its live neighbors' hues, i.e. <code>atan2(Σ sin h, Σ cos h)</code>. Color advects along the discrete flow, so gliders visibly carry their color across the grid.</li>
+    </ul>
+    <p>Survivors always keep their previous hue.</p>
+
+    <h4>Controls</h4>
+    <ul>
+      <li><span class="kbd">drag</span> rotate · <span class="kbd">shift+drag</span> pan · <span class="kbd">wheel</span> zoom</li>
+      <li><span class="kbd">Space</span> run/pause · <span class="kbd">S</span> step · <span class="kbd">R</span> random ·
+          <span class="kbd">C</span> clear · <span class="kbd">Enter</span> start · <span class="kbd">F</span> fullscreen</li>
+      <li><b>Init JSON</b> loads <code>{ grid:[Lx,Ly,Lz], points:[{x,y,z,hue?}], rule?, wrap? }</code>.
+          Out-of-grid points are bbox-fit; multiple points per voxel get circular-mean hue.</li>
+      <li><b>Save JSON</b> dumps the current state in the same format.</li>
+    </ul>
+
+    <h4>Performance budget</h4>
+    <ul>
+      <li>≤ 64³ — smooth animation</li>
+      <li>96³ — borderline; consider Step</li>
+      <li>≥ 128³ — Step-only (160³ is the hard cap)</li>
+    </ul>
+  </details>
 
 <script>
 // ============================================================================

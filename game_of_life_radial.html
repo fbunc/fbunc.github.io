@@ -283,6 +283,32 @@
             border-radius: 0;
             box-shadow: none;
         }
+        details.rules-help {
+            background: #11131a; border: 1px solid #2a2f3a; border-radius: 6px;
+            padding: 8px 12px; color: #c8d0d8; font-size: 12.5px; line-height: 1.5;
+            max-width: 1100px; margin: 0 auto;
+        }
+        details.rules-help > summary {
+            cursor: pointer; color: #ff79c6; font-weight: 600; font-size: 13px;
+            list-style: none; user-select: none;
+        }
+        details.rules-help > summary::before { content: '▸ '; }
+        details.rules-help[open] > summary::before { content: '▾ '; }
+        details.rules-help h4 { color: #ff79c6; margin: 10px 0 4px; font-size: 12.5px; }
+        details.rules-help code {
+            background: #1a1d26; color: #ffd479; padding: 1px 5px; border-radius: 3px;
+            font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12px;
+        }
+        details.rules-help table { border-collapse: collapse; margin: 6px 0; font-size: 12px; }
+        details.rules-help th, details.rules-help td {
+            border: 1px solid #2a2f3a; padding: 3px 8px; text-align: left;
+        }
+        details.rules-help th { color: #ff79c6; background: #161922; }
+        details.rules-help ul { margin: 4px 0 4px 20px; }
+        details.rules-help .kbd {
+            background: #1a1d26; border: 1px solid #2a2f3a; border-bottom-width: 2px;
+            border-radius: 3px; padding: 0 5px; font-family: monospace; font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -347,6 +373,57 @@
         <div>Generation: <span id="genCount">0</span></div>
         <div>Population: <span id="popCount">0</span></div>
     </div>
+
+    <details class="rules-help">
+        <summary>📘 How the 2D rules work — click to expand</summary>
+
+        <h4>The neighborhood</h4>
+        <p>Every cell <code>(x,y)</code> in the rectangular grid has a <b>Moore neighborhood</b> of <b>8 neighbors</b>
+           (the 3×3 − 1 cells touching it). The grid wraps as a torus <i>T²</i> by default — the right edge
+           connects to the left, top to bottom.</p>
+
+        <h4>Conway's rule: <code>B3/S23</code></h4>
+        <p>For each cell, count its <i>n</i> live neighbors (0–8):</p>
+        <ul>
+            <li>If <b>dead</b> and <i>n</i> = 3 → <b>born</b> next step (the <code>B</code> set).</li>
+            <li>If <b>alive</b> and <i>n</i> ∈ {2, 3} → <b>survives</b> (the <code>S</code> set).</li>
+            <li>Otherwise → dead (loneliness if <i>n</i> &lt; 2, overcrowding if <i>n</i> &gt; 3).</li>
+        </ul>
+        <p>This single rule produces gliders, oscillators, still lifes, glider guns — Conway proved it Turing-complete.</p>
+
+        <table>
+            <tr><th><i>n</i></th><th>Dead → ?</th><th>Alive → ?</th></tr>
+            <tr><td>0–1</td><td>stays dead</td><td>dies (lonely)</td></tr>
+            <tr><td>2</td><td>stays dead</td><td><b>survives</b></td></tr>
+            <tr><td>3</td><td><b>born</b></td><td><b>survives</b></td></tr>
+            <tr><td>4–8</td><td>stays dead</td><td>dies (crowded)</td></tr>
+        </table>
+
+        <h4>Color rule (independent of life/death)</h4>
+        <p>Each live cell carries a <b>hue</b> ∈ [0°, 360°). The <b>Color</b> dropdown picks how newborns get colored:</p>
+        <ul>
+            <li><b>position (field)</b> — hue from <code>atan2(y−cy, x−cx)</code> (angle from grid center). The grid is a fixed colored field; cells just sample it on birth.</li>
+            <li><b>lock at birth</b> — newborn hue from its position, then frozen until death.</li>
+            <li><b>inherit from parents</b> (default) — newborn hue = <i>circular mean</i> of its 3 live parents: <code>atan2(Σ sin h, Σ cos h)</code>. Color advects with the discrete flow — gliders visibly carry their color.</li>
+        </ul>
+        <p>Survivors always keep their previous hue. Cells are fixed grid points; what "moves" is the birth/death pattern, and the inherit mode makes the color ride along that flow.</p>
+
+        <h4>Controls</h4>
+        <ul>
+            <li><span class="kbd">Left click</span> draw · <span class="kbd">Right click</span> erase · <span class="kbd">Wheel</span> zoom · <span class="kbd">Middle drag</span> pan</li>
+            <li><span class="kbd">Space</span> run/pause · <span class="kbd">S</span> step · <span class="kbd">R</span> random ·
+                <span class="kbd">C</span> clear · <span class="kbd">Enter</span> start · <span class="kbd">F</span> fit-zoom</li>
+            <li><b>Image</b> upload sets the initial state: pixels above <i>threshold</i> become alive, hue copied from the pixel.</li>
+        </ul>
+
+        <h4>Performance budget</h4>
+        <ul>
+            <li>≤ 600² — smooth animation</li>
+            <li>≥ 1200² — Step-only (hard cap)</li>
+        </ul>
+
+        <p style="margin-top:8px;color:#888;">Want 3D? Try the <b>Game of Life 3D</b> tab — same idea but with 26 neighbors and Bays' rule <code>B6/S5,6,7</code>.</p>
+    </details>
 
     <!-- Instructions Overlay -->
     <div class="overlay" id="overlay">
