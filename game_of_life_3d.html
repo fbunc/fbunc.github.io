@@ -135,9 +135,9 @@
   </div>
 
   <div class="controls">
-    <div class="group" title="Cubic grid. >96³ is Step-only on most laptops. Hard cap 256³.">
+    <div class="group" title="Cubic grid. Practical cap 128³ (≈2M voxels). >96³ is Step-only on most laptops.">
       📐 Size
-      <input type="number" id="sizeInput" min="8" max="256" step="1" value="48">
+      <input type="number" id="sizeInput" min="8" max="128" step="1" value="48">
       <button id="applySizeBtn">Apply</button>
     </div>
     <div class="group" title="Random fill density">
@@ -568,8 +568,8 @@ colorModeSel.addEventListener('change', e => { colorMode = e.target.value; rende
 wrapToggle.addEventListener('change', e => { wrap = e.target.checked; });
 
 applySizeBtn.addEventListener('click', () => {
-  const s = Math.max(8, Math.min(256, parseInt(sizeInput.value,10) || 48));
-  if (s*s*s > 256*256*256) { alert('Too large.'); return; }
+  const s = Math.max(8, Math.min(128, parseInt(sizeInput.value,10) || 48));
+  if (s > 96 && !confirm(`Allocate ${s}³ = ${(s*s*s/1e6).toFixed(1)}M voxels? Animation will be Step-only.`)) return;
   allocGrid(s);
   render();
 });
@@ -593,9 +593,9 @@ function importInitState(data) {
   stop();
   let Lx = N, Ly = N, Lz = N;
   if (Array.isArray(data.grid) && data.grid.length === 3) {
-    Lx = Math.max(8, Math.min(256, data.grid[0]|0));
-    Ly = Math.max(8, Math.min(256, data.grid[1]|0));
-    Lz = Math.max(8, Math.min(256, data.grid[2]|0));
+    Lx = Math.max(8, Math.min(128, data.grid[0]|0));
+    Ly = Math.max(8, Math.min(128, data.grid[1]|0));
+    Lz = Math.max(8, Math.min(128, data.grid[2]|0));
   }
   // For now we use a cubic grid: max of provided dims
   const side = Math.max(Lx, Ly, Lz);

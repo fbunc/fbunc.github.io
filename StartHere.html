@@ -2741,7 +2741,8 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                 const dx = maxX-minX || 1, dy = maxY-minY || 1, dz = maxZ-minZ || 1;
                 const D = Math.max(dx, dy, dz);
                 // Search smallest cubic side that yields no voxel collisions among unique points.
-                const HARD_CAP = 256;
+                // Capped at 128 (Life 3D practical max — bigger than that hangs the tab).
+                const HARD_CAP = 128;
                 let chosen = HARD_CAP, collisions = 0;
                 let side = Math.max(16, Math.min(HARD_CAP, Math.ceil(Math.cbrt(points.length) * 1.5)));
                 while (true) {
