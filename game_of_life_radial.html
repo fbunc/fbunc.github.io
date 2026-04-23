@@ -89,6 +89,20 @@
             font-size: 14px;
         }
 
+        .toggle-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #888;
+            font-size: 14px;
+            user-select: none;
+            cursor: pointer;
+        }
+        .toggle-control input {
+            accent-color: #00bc8c;
+            cursor: pointer;
+        }
+
         input[type="range"] {
             width: 120px;
             accent-color: #00bc8c;
@@ -206,6 +220,10 @@
             <input type="range" id="speedSlider" min="1" max="60" value="15">
             <span id="speedValue">15</span> fps
         </div>
+        <label class="toggle-control" title="When on, each cell keeps the color it had when it was born, until it dies.">
+            <input type="checkbox" id="lockColorToggle">
+            🔒 Lock birth color
+        </label>
     </div>
 
     <div class="stats">
@@ -244,6 +262,7 @@
         // State
         // ============================================
         let grid = [];
+        let colorGrid = []; // hue (0..360) for each cell, NaN if dead
         let isRunning = false;
         let generation = 0;
         let fps = 15;
@@ -251,6 +270,7 @@
         let animationId = null;
         let isDrawing = false;
         let drawMode = 1; // 1 = alive, 0 = dead
+        let lockBirthColor = false;
 
         // ============================================
         // DOM Elements
@@ -269,6 +289,7 @@
         const clearBtn = document.getElementById('clearBtn');
         const randomBtn = document.getElementById('randomBtn');
         const dismissBtn = document.getElementById('dismissBtn');
+        const lockColorToggle = document.getElementById('lockColorToggle');
 
         // ============================================
         // Initialize
@@ -281,6 +302,9 @@
             grid = Array.from({ length: ROWS }, () => 
                 Array.from({ length: COLS }, () => 0)
             );
+            colorGrid = Array.from({ length: ROWS }, () =>
+                Array.from({ length: COLS }, () => NaN)
+            );
 
             render();
             updateStats();
@@ -289,6 +313,15 @@
         // ============================================
         // HSL Color from Position
         // ============================================
+        function getHueForCell(row, col) {
+            const x = col * CELL_SIZE + CELL_SIZE / 2;
+            const y = row * CELL_SIZE + CELL_SIZE / 2;
+            const dx = x - canvas.width / 2;
+            const dy = y - canvas.height / 2;
+            const angle = Math.atan2(dy, dx);
+            return ((angle * 180 / Math.PI) + 180) % 360;
+        }
+
         function getColorForPosition(x, y) {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
@@ -317,8 +350,14 @@
                     if (grid[i][j] === 1) {
                         const x = j * CELL_SIZE;
                         const y = i * CELL_SIZE;
-                        
-                        ctx.fillStyle = getColorForPosition(x + CELL_SIZE/2, y + CELL_SIZE/2);
+
+                        let hue;
+                        if (lockBirthColor && !Number.isNaN(colorGrid[i][j])) {
+                            hue = colorGrid[i][j];
+                        } else {
+                            hue = getHueForCell(i, j);
+                        }
+                        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
                         ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                     }
                 }
@@ -349,6 +388,9 @@
             const newGrid = Array.from({ length: ROWS }, () => 
                 Array.from({ length: COLS }, () => 0)
             );
+            const newColorGrid = Array.from({ length: ROWS }, () =>
+                Array.from({ length: COLS }, () => NaN)
+            );
 
             for (let i = 0; i < ROWS; i++) {
                 for (let j = 0; j < COLS; j++) {
@@ -357,15 +399,26 @@
 
                     if (alive) {
                         // Survival: 2 or 3 neighbors
-                        newGrid[i][j] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+                        if (neighbors === 2 || neighbors === 3) {
+                            newGrid[i][j] = 1;
+                            // Carry the birth color forward for surviving cells
+                            newColorGrid[i][j] = Number.isNaN(colorGrid[i][j])
+                                ? getHueForCell(i, j)
+                                : colorGrid[i][j];
+                        }
                     } else {
                         // Reproduction: exactly 3 neighbors
-                        newGrid[i][j] = (neighbors === 3) ? 1 : 0;
+                        if (neighbors === 3) {
+                            newGrid[i][j] = 1;
+                            // Newborn: assign color from current position
+                            newColorGrid[i][j] = getHueForCell(i, j);
+                        }
                     }
                 }
             }
 
             grid = newGrid;
+            colorGrid = newColorGrid;
             generation++;
         }
 
@@ -434,6 +487,9 @@
             grid = Array.from({ length: ROWS }, () => 
                 Array.from({ length: COLS }, () => 0)
             );
+            colorGrid = Array.from({ length: ROWS }, () =>
+                Array.from({ length: COLS }, () => NaN)
+            );
             generation = 0;
             render();
             updateStats();
@@ -444,6 +500,11 @@
                 grid = Array.from({ length: ROWS }, () => 
                     Array.from({ length: COLS }, () => 
                         Math.random() < RANDOM_DENSITY ? 1 : 0
+                    )
+                );
+                colorGrid = Array.from({ length: ROWS }, (_, i) =>
+                    Array.from({ length: COLS }, (_, j) =>
+                        grid[i][j] === 1 ? getHueForCell(i, j) : NaN
                     )
                 );
                 generation = 0;
@@ -480,6 +541,14 @@
         function setCell(row, col, value) {
             if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
                 grid[row][col] = value;
+                if (value === 1) {
+                    // Only set a birth color if the cell wasn't already alive
+                    if (Number.isNaN(colorGrid[row][col])) {
+                        colorGrid[row][col] = getHueForCell(row, col);
+                    }
+                } else {
+                    colorGrid[row][col] = NaN;
+                }
                 render();
                 updateStats();
             }
@@ -560,6 +629,11 @@
         speedSlider.addEventListener('input', (e) => {
             fps = parseInt(e.target.value);
             speedValue.textContent = fps;
+        });
+
+        lockColorToggle.addEventListener('change', (e) => {
+            lockBirthColor = e.target.checked;
+            render();
         });
 
         // ============================================
