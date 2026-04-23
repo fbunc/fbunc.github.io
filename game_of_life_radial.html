@@ -18,48 +18,66 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            align-items: stretch;
+            padding: 8px 12px;
+            gap: 8px;
         }
 
         h1 {
             color: #00bc8c;
-            margin-bottom: 15px;
-            font-size: 1.8rem;
+            margin: 0;
+            font-size: 1.2rem;
             text-shadow: 0 0 20px rgba(0, 188, 140, 0.3);
+            text-align: center;
+            flex: 0 0 auto;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            flex: 1 1 auto;
+            min-height: 300px;
+            display: flex;
+            background: #000;
         }
 
         .canvas-container {
             border: 2px solid #333;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: auto;
             box-shadow: 0 0 30px rgba(0, 188, 140, 0.1);
+            flex: 1 1 auto;
+            display: flex;
+            background: #000;
         }
 
         canvas {
             display: block;
             background-color: #000;
             cursor: crosshair;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin: auto;
         }
 
         .controls {
             display: flex;
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 4px;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
+            flex: 0 0 auto;
         }
 
         button {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #00bc8c;
             border: 1px solid #00bc8c;
-            padding: 10px 20px;
-            font-size: 14px;
+            padding: 6px 12px;
+            font-size: 13px;
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.15s ease;
             font-weight: 500;
         }
 
@@ -120,9 +138,10 @@
         .stats {
             display: flex;
             gap: 20px;
-            margin-top: 15px;
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
+            justify-content: center;
+            flex: 0 0 auto;
         }
 
         .stats span {
@@ -229,16 +248,59 @@
             max-width: 180px;
         }
         .res-control input[type=range] { width: 100px; }
+
+        .zoom-hud {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 4px;
+            background: rgba(0,0,0,.7);
+            border-radius: 4px;
+            padding: 4px;
+            z-index: 10;
+        }
+        .zoom-hud button {
+            padding: 4px 8px;
+            font-size: 12px;
+            background: #1a1a2e;
+        }
+        .zoom-hud .zoom-label {
+            color: #00bc8c;
+            font-size: 12px;
+            padding: 4px 6px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        /* Fullscreen styling: hide page chrome so canvas dominates */
+        .canvas-wrapper:fullscreen {
+            background: #000;
+            padding: 0;
+        }
+        .canvas-wrapper:fullscreen .canvas-container {
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
     <h1>🌈 Conway's Game of Life</h1>
     
-    <div class="canvas-wrapper">
-        <div class="canvas-container">
+    <div class="canvas-wrapper" id="canvasWrapper">
+        <div class="canvas-container" id="canvasContainer">
             <canvas id="gameCanvas"></canvas>
         </div>
         <div class="mode-indicator" id="modeIndicator">EDIT MODE</div>
+        <div class="zoom-hud">
+            <button id="zoomOutBtn" title="Zoom out (-)">−</button>
+            <span class="zoom-label" id="zoomLabel">100%</span>
+            <button id="zoomInBtn" title="Zoom in (+)">+</button>
+            <button id="zoomFitBtn" title="Fit to view (F)">Fit</button>
+            <button id="zoom1Btn" title="1:1 pixel (0)">1:1</button>
+            <button id="fullscreenBtn" title="Toggle fullscreen (⤢)">⤢</button>
+        </div>
     </div>
 
     <div class="controls">
@@ -327,6 +389,7 @@
         let isDrawing = false;
         let drawMode = 1; // 1 = alive, 0 = dead
         let colorMode = 'inherit'; // 'position' | 'birth' | 'inherit'
+        let zoom = 1; // CSS display scale, independent from CELL_SIZE (logical resolution)
 
         // ============================================
         // DOM Elements
@@ -355,6 +418,14 @@
         const thresholdSlider = document.getElementById('thresholdSlider');
         const thresholdValue = document.getElementById('thresholdValue');
         const invertToggle = document.getElementById('invertToggle');
+        const canvasWrapper = document.getElementById('canvasWrapper');
+        const canvasContainer = document.getElementById('canvasContainer');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const zoomFitBtn = document.getElementById('zoomFitBtn');
+        const zoom1Btn = document.getElementById('zoom1Btn');
+        const zoomLabel = document.getElementById('zoomLabel');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
 
         // ============================================
         // Initialize
@@ -371,8 +442,42 @@
                 Array.from({ length: COLS }, () => NaN)
             );
 
+            applyZoom();
             render();
             updateStats();
+        }
+
+        function applyZoom() {
+            canvas.style.width  = (canvas.width  * zoom) + 'px';
+            canvas.style.height = (canvas.height * zoom) + 'px';
+            if (zoomLabel) zoomLabel.textContent = Math.round(zoom * 100) + '%';
+        }
+        function setZoom(z, cx, cy) {
+            // cx, cy: optional pivot in container-client coords to keep fixed.
+            const oldZoom = zoom;
+            zoom = Math.max(0.05, Math.min(16, z));
+            if (cx !== undefined && oldZoom > 0) {
+                const sx = canvasContainer.scrollLeft;
+                const sy = canvasContainer.scrollTop;
+                const rect = canvasContainer.getBoundingClientRect();
+                const mx = (cx - rect.left) + sx;
+                const my = (cy - rect.top)  + sy;
+                const ratio = zoom / oldZoom;
+                applyZoom();
+                canvasContainer.scrollLeft = mx * ratio - (cx - rect.left);
+                canvasContainer.scrollTop  = my * ratio - (cy - rect.top);
+            } else {
+                applyZoom();
+            }
+        }
+        function fitZoom() {
+            const rect = canvasContainer.getBoundingClientRect();
+            const pad = 4;
+            const fx = (rect.width  - pad) / canvas.width;
+            const fy = (rect.height - pad) / canvas.height;
+            setZoom(Math.max(0.05, Math.min(fx, fy)));
+            canvasContainer.scrollLeft = 0;
+            canvasContainer.scrollTop  = 0;
         }
 
         function resize(newCols, newRows, newCell) {
@@ -708,12 +813,12 @@
         // ============================================
         function getCellFromMouse(e) {
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
+            const x = (e.clientX - rect.left) * (canvas.width  / rect.width);
+            const y = (e.clientY - rect.top)  * (canvas.height / rect.height);
+
             const col = Math.floor(x / CELL_SIZE);
             const row = Math.floor(y / CELL_SIZE);
-            
+
             return { row, col };
         }
 
@@ -824,6 +929,7 @@
                 parseInt(rowsInput.value, 10),
                 parseInt(cellSizeSlider.value, 10)
             );
+            requestAnimationFrame(fitZoom);
         });
         thresholdSlider.addEventListener('input', (e) => {
             thresholdValue.textContent = e.target.value;
@@ -833,10 +939,81 @@
             if (file) loadImageFile(file);
         });
 
+        // Zoom buttons
+        zoomInBtn.addEventListener('click',  () => setZoom(zoom * 1.25));
+        zoomOutBtn.addEventListener('click', () => setZoom(zoom / 1.25));
+        zoom1Btn.addEventListener('click',   () => setZoom(1));
+        zoomFitBtn.addEventListener('click', () => fitZoom());
+
+        // Wheel-zoom on the canvas container (Ctrl/Cmd+wheel, or plain wheel when Shift held)
+        canvasContainer.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) {
+                e.preventDefault();
+                const factor = Math.exp(-e.deltaY * 0.0015);
+                setZoom(zoom * factor, e.clientX, e.clientY);
+            }
+        }, { passive: false });
+
+        // Middle-mouse pan
+        let panning = false, panStartX = 0, panStartY = 0, panScrollX = 0, panScrollY = 0;
+        canvasContainer.addEventListener('mousedown', (e) => {
+            if (e.button === 1) {
+                e.preventDefault();
+                panning = true;
+                panStartX = e.clientX; panStartY = e.clientY;
+                panScrollX = canvasContainer.scrollLeft;
+                panScrollY = canvasContainer.scrollTop;
+                canvasContainer.style.cursor = 'grabbing';
+            }
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!panning) return;
+            canvasContainer.scrollLeft = panScrollX - (e.clientX - panStartX);
+            canvasContainer.scrollTop  = panScrollY - (e.clientY - panStartY);
+        });
+        window.addEventListener('mouseup', (e) => {
+            if (panning && e.button === 1) {
+                panning = false;
+                canvasContainer.style.cursor = '';
+            }
+        });
+
+        // Fullscreen
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                canvasWrapper.requestFullscreen && canvasWrapper.requestFullscreen();
+            } else {
+                document.exitFullscreen && document.exitFullscreen();
+            }
+        });
+        document.addEventListener('fullscreenchange', () => {
+            // Re-fit when entering/leaving fullscreen
+            requestAnimationFrame(fitZoom);
+        });
+
+        // Keyboard: +/-/0/F for zoom/fullscreen
+        document.addEventListener('keydown', (e) => {
+            if (!overlay.classList.contains('hidden')) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+            switch (e.key) {
+                case '+': case '=': setZoom(zoom * 1.25); break;
+                case '-': case '_': setZoom(zoom / 1.25); break;
+                case '0':           setZoom(1); break;
+                case 'f': case 'F':
+                    if (!document.fullscreenElement) canvasWrapper.requestFullscreen && canvasWrapper.requestFullscreen();
+                    else document.exitFullscreen && document.exitFullscreen();
+                    break;
+            }
+        });
+
+        // Fit on first paint + on resize
+        window.addEventListener('resize', () => { /* layout only; user controls zoom */ });
+
         // ============================================
         // Start
         // ============================================
         init();
+        requestAnimationFrame(fitZoom);
     </script>
 </body>
 </html>
