@@ -37,14 +37,20 @@
     color: var(--fg-2); text-transform: uppercase;
     margin: 0 .4rem .5rem; padding: 0;
   }
-  aside nav { display: flex; flex-direction: column; gap: .15rem; }
+  aside nav { display: flex; flex-direction: column; gap: .05rem; }
+  aside nav .section {
+    font-size: .68rem; font-weight: 600; letter-spacing: .08em;
+    color: var(--fg-2); text-transform: uppercase;
+    margin: .9rem .4rem .25rem; padding: 0;
+  }
+  aside nav .section:first-child { margin-top: 0; }
   aside nav a {
     display: block;
-    padding: .45rem .55rem;
+    padding: .38rem .55rem;
     color: var(--fg-1);
     text-decoration: none;
     border-radius: .3rem;
-    font-size: .92rem;
+    font-size: .9rem;
     line-height: 1.3;
     border: 1px solid transparent;
   }
@@ -63,6 +69,20 @@
     min-width: 1.5em;
   }
   aside nav a.answer .tag { color: var(--prime); }
+  aside nav a.archive .tag { color: #888; }
+  aside nav a.essay .tag { color: #9f8eff; }
+  aside nav a.lab .tag { color: #ff8fb9; }
+  aside nav a.conv .tag { color: #ffd467; }
+
+  article audio { width: 100%; max-width: 640px; display: block; margin: 1em 0; }
+  article iframe.lab-frame {
+    width: 100%;
+    height: calc(100vh - 120px);
+    min-height: 520px;
+    border: 1px solid var(--border);
+    border-radius: .4em;
+    background: var(--bg-1);
+  }
 
   aside .back {
     display: block;
@@ -189,50 +209,141 @@
 
 <script>
 const DOCS = [
-  { slug: 'main-question',  file: '01-main-question.md',  title: 'Main MSE question',          kind: 'q', tag: 'Q1' },
-  { slug: 'main-answer',    file: '02-main-answer.md',    title: 'Main MSE answer',            kind: 'a', tag: 'A1' },
-  { slug: 'last-version',   file: '05-last-version.md',   title: 'Last Version / Questions About Primes', kind: 'q', tag: 'Q3' },
-  { slug: 'last-version-answer-1', file: '08-last-version-answer-1.md', title: 'Last Version — answer 1 (mod 10 vs mod 6)', kind: 'a', tag: 'A3' },
-  { slug: 'counting-and-geometry',    file: '09-counting-and-geometry.md',    title: 'Counting and Geometry (draft)', kind: 'a', tag: 'A4' },
-  { slug: 'sn-plotting-in-starthere', file: '10-sn-plotting-in-starthere.md', title: 's_n plotting in StartHere',     kind: 'q', tag: 'T1' },
-  { slug: 'mobius-bloch',              file: '11-mobius-bloch.md',             title: 'Möbius band from the Bloch sphere',  kind: 'q', tag: 'Q6' },
-  { slug: 'binary-tetrahedral-24cell', file: '12-binary-tetrahedral-24cell.md',title: 'Binary Tetrahedral group & 24-cell', kind: 'q', tag: 'Q7' },
-  { slug: 'binary-tetrahedral-24cell-answer', file: '15-binary-tetrahedral-24cell-answer.md', title: '24-cell — answer (R. J. Mathar)', kind: 'a', tag: 'A7' },
-  { slug: 'periodic-map-orbits',       file: '13-periodic-map-orbits.md',      title: 'Periodic map orbits of 2x mod 1',    kind: 'q', tag: 'Q8' },
-  { slug: 'periodic-map-orbits-answer', file: '16-periodic-map-orbits-answer.md', title: '2x mod 1 orbits — answer (zwim)', kind: 'a', tag: 'A8' },
-  { slug: 'irrational-periods',        file: '14-irrational-periods.md',       title: 'Irrational numbers as periods',      kind: 'q', tag: 'Q9' },
-  { slug: 'irrational-periods-self-answer', file: '17-irrational-periods-self-answer.md', title: 'Irrational periods — self-answer', kind: 'a', tag: 'A9' },
-  { slug: 'last-nonzero-digit-30-2345', file: '18-last-nonzero-digit-30-2345.md', title: 'Last non-zero digit of 30^2345 — answer', kind: 'a', tag: 'A10' },
-  { slug: 'monty-hall-simulation',      file: '19-monty-hall-simulation.md',      title: 'Monty Hall simulation — answer',         kind: 'a', tag: 'A11' },
-  { slug: 'mobius-transform-halfdisc',  file: '20-mobius-transform-halfdisc.md',  title: 'Möbius transform half-disc — answer',    kind: 'a', tag: 'A12' },
-  { slug: 'complex-exponents-eq',       file: '21-complex-exponents-eq.md',       title: 'Complex exponents equation — answer',    kind: 'a', tag: 'A13' },
+  // ── START HERE ────────────────────────────────────────────────
+  { section: 'Start here' },
+  { slug: 'cleanest-intro',           file: '70-essay-cleanest-intro.md',           title: 'The cleanest intro to the construction', kind: 'essay', tag: '★' },
+  { slug: 'factorization-notation',   file: '71-essay-factorization-notation.md',   title: 'Notation — $s_n$, $\\dot s_n$, $\\ddot s_n$', kind: 'essay', tag: '§' },
+  { slug: 'sn-plotting-in-starthere', file: '10-sn-plotting-in-starthere.md',       title: 'How $s_n$ is plotted in StartHere',       kind: 'q',     tag: 'T1' },
+  { slug: 'lab-walkthrough',          file: '72-lab-walkthrough.md',                title: 'Factorization Lab — visual walkthrough',  kind: 'essay', tag: '▶' },
+
+  // ── NARRATIVE ESSAYS ──────────────────────────────────────────
+  { section: 'Essays & narratives' },
+  { slug: 'numbers-and-energy',           file: '40-essay-numbers-and-energy.md',           title: 'Numbers and Energy — $E=mc^2$ pun',       kind: 'essay', tag: 'E1' },
+  { slug: 'big-drum-manin',               file: '41-essay-big-drum-manin.md',               title: 'Irrational periods & the Big Drum',       kind: 'essay', tag: 'E2' },
+  { slug: 'math-is-poetry',               file: '42-essay-math-is-poetry.md',               title: 'Alpha, Omega, and the Big Drum (poem)',   kind: 'essay', tag: 'E3' },
+  { slug: 'numbers-live-in-space-and-time', file: '60-essay-numbers-live-in-space-and-time.md', title: 'Numbers live in space and time',      kind: 'essay', tag: 'E4' },
+  { slug: 'why-mod-10',                   file: '62-factorization-why-mod-10.md',           title: 'Why mod 10? — the factorization compass', kind: 'essay', tag: 'E5' },
+  { slug: 'periodic-table-for-numbers',   file: '63-periodic-table-for-numbers.md',         title: 'A periodic table for numbers',            kind: 'essay', tag: 'E6' },
+
+  // ── MSE — LIVE QUESTIONS ──────────────────────────────────────
+  { section: 'MSE — live questions' },
+  { slug: 'mobius-bloch',              file: '11-mobius-bloch.md',              title: 'Möbius band from the Bloch sphere',  kind: 'q', tag: 'Q6' },
+  { slug: 'binary-tetrahedral-24cell', file: '12-binary-tetrahedral-24cell.md', title: 'Binary Tetrahedral group & 24-cell', kind: 'q', tag: 'Q7' },
+  { slug: 'periodic-map-orbits',       file: '13-periodic-map-orbits.md',       title: 'Periodic map orbits of 2x mod 1',    kind: 'q', tag: 'Q8' },
+  { slug: 'irrational-periods',        file: '14-irrational-periods.md',        title: 'Irrational numbers as periods',      kind: 'q', tag: 'Q9' },
+
+  // ── MSE — LIVE ANSWERS ────────────────────────────────────────
+  { section: 'MSE — live answers' },
+  { slug: 'irrational-periods-self-answer',   file: '17-irrational-periods-self-answer.md',   title: 'Irrational periods — self-answer',       kind: 'a', tag: 'A9' },
+  { slug: 'last-nonzero-digit-30-2345',       file: '18-last-nonzero-digit-30-2345.md',       title: 'Last non-zero digit of $30^{2345}$',     kind: 'a', tag: 'A10' },
+  { slug: 'monty-hall-simulation',            file: '19-monty-hall-simulation.md',            title: 'Monty Hall simulation',                  kind: 'a', tag: 'A11' },
+  { slug: 'mobius-transform-halfdisc',        file: '20-mobius-transform-halfdisc.md',        title: 'Möbius transform half-disc',             kind: 'a', tag: 'A12' },
+  { slug: 'complex-exponents-eq',             file: '21-complex-exponents-eq.md',             title: 'Complex exponents equation',             kind: 'a', tag: 'A13' },
+  { slug: 'binary-tetrahedral-24cell-answer', file: '15-binary-tetrahedral-24cell-answer.md', title: '24-cell — answer by R. J. Mathar',       kind: 'a', tag: 'A7' },
+  { slug: 'periodic-map-orbits-answer',       file: '16-periodic-map-orbits-answer.md',       title: '2x mod 1 orbits — answer by zwim',       kind: 'a', tag: 'A8' },
+
+  // ── MSE — ARCHIVED / DELETED ──────────────────────────────────
+  { section: 'MSE — archived (deleted)' },
+  { slug: 'archive-complex-sequences',      file: '30-archive-complex-sequences.md',      title: 'Complex sequences from initial rules',   kind: 'archive', tag: 'D1' },
+  { slug: 'archive-phi-gons',               file: '31-archive-phi-gons.md',               title: '$\\varphi$-gons & sampling rate',         kind: 'archive', tag: 'D2' },
+  { slug: 'archive-moire-pattern',          file: '32-archive-moire-pattern.md',          title: 'Moiré pattern in circular orbits',       kind: 'archive', tag: 'D3' },
+  { slug: 'archive-quaternions',            file: '33-archive-quaternions.md',            title: 'Quaternions from 3 complex numbers',     kind: 'archive', tag: 'D4' },
+  { slug: 'archive-energy-soft-question',   file: '34-archive-energy-soft-question.md',   title: 'Numbers associated with "energy"',       kind: 'archive', tag: 'D5' },
+  { slug: 'archive-prime-frequency-plots',  file: '35-archive-prime-frequency-plots.md',  title: 'Prime frequency plots (bi-linear log)',  kind: 'archive', tag: 'D6' },
+
+  // ── MAIN-QUESTION DRAFTS (RAW) ────────────────────────────────
+  { section: 'Main question — raw drafts' },
+  { slug: 'main-question',         file: '01-main-question.md',         title: 'Main MSE question — oldest draft',         kind: 'q', tag: 'Q1' },
+  { slug: 'main-answer',           file: '02-main-answer.md',           title: 'Main MSE answer — oldest draft',           kind: 'a', tag: 'A1' },
+  { slug: 'mse-2026',              file: '03-mse-2026.md',              title: 'Bounded logs & prime orbits (2026 draft)', kind: 'q', tag: 'Q3a' },
+  { slug: 'mse-2026-copy',         file: '04-mse-2026-copy.md',         title: 'Bounded logs (variant)',                   kind: 'q', tag: 'Q3b' },
+  { slug: 'last-version',          file: '05-last-version.md',          title: 'Last Version — long form',                 kind: 'q', tag: 'Q3c' },
+  { slug: 'euler-product',         file: '06-euler-product.md',         title: 'Euler product side-note',                  kind: 'essay', tag: '§6' },
+  { slug: 'dirichlet',             file: '07-dirichlet.md',             title: 'Dirichlet bridge side-note',               kind: 'essay', tag: '§7' },
+  { slug: 'last-version-answer-1', file: '08-last-version-answer-1.md', title: 'Last Version — answer draft 1',            kind: 'a', tag: 'A3' },
+  { slug: 'counting-and-geometry', file: '09-counting-and-geometry.md', title: 'Counting and Geometry (draft)',            kind: 'a', tag: 'A4' },
+
+  // ── EXPERIMENTS ───────────────────────────────────────────────
+  { section: 'Experiments' },
+  { slug: 'roulette',                file: '61-experiment-roulette.md',                title: 'Roulette experiments',             kind: 'essay', tag: 'X1' },
+
+  // ── INTERACTIVE LABS ──────────────────────────────────────────
+  // These live at the repo root; from docs/, paths are one level up.
+  { section: 'Interactive labs' },
+  { slug: 'curve-playground',        url: '../StartHere.html',             title: 'Curve Playground (StartHere)',        kind: 'lab', tag: '⚙' },
+  { slug: 'factorization-in-2d',     url: '../FactorizationIn2D.html',     title: 'Factorization in 2D — the Lab',       kind: 'lab', tag: '⚙' },
+  { slug: 'game-of-life-radial',     url: '../game_of_life_radial.html',   title: "Conway's Game of Life (radial HSL)",  kind: 'lab', tag: '⚙' },
+  { slug: 'game-of-life-3d',         url: '../game_of_life_3d.html',       title: 'Game of Life 3D (Bays B6/S5,6,7)',    kind: 'lab', tag: '⚙' },
+
+  // ── CONVERSATIONS ─────────────────────────────────────────────
+  { section: 'Conversations' },
+  { slug: 'tnarg-calculators',       file: '50-conversation-tnarg-calculators.md',     title: 'Tnarg explains how a calculator works', kind: 'conv', tag: '♪' },
 ];
+
+// Filter out section-marker entries to get a flat list of real docs for lookup.
+const REAL_DOCS = DOCS.filter(d => d.slug);
 
 // ── Sidebar ────────────────────────────────────────────────────────────
 const nav = document.getElementById('doc-nav');
 for (const d of DOCS) {
+  if (d.section) {
+    const h = document.createElement('div');
+    h.className = 'section';
+    h.textContent = d.section;
+    nav.appendChild(h);
+    continue;
+  }
   const a = document.createElement('a');
   a.href = '#' + d.slug;
   a.dataset.slug = d.slug;
-  if (d.kind === 'a') a.classList.add('answer');
+  const kindMap = { a: 'answer', archive: 'archive', essay: 'essay', lab: 'lab', conv: 'conv' };
+  if (kindMap[d.kind]) a.classList.add(kindMap[d.kind]);
+  // Render tag + title as text (titles are plain text; KaTeX will render any $...$ later)
   a.innerHTML = `<span class="tag">${d.tag}</span>${d.title}`;
   nav.appendChild(a);
 }
+// Render any $...$ in sidebar titles with KaTeX once it's available
+function renderSidebarMath() {
+  if (!window.renderMathInElement) return setTimeout(renderSidebarMath, 60);
+  renderMathInElement(nav, {
+    delimiters: [{ left: '$', right: '$', display: false }],
+    throwOnError: false, strict: 'ignore',
+  });
+}
+renderSidebarMath();
 
-// ── Protect $…$ / $$…$$ from marked, restore after render ──────────────
+// ── Protect $…$ / $$…$$ from marked (incl. $...|...$ in pipe-tables) ──
+// Marked's GFM pipe-table parser splits cells on raw `|`, which breaks math
+// like $|R_p|$ in a cell. We stash every math range with an ASCII-safe token
+// that's also safe inside pipe-tables, then restore before KaTeX auto-render.
 function renderMarkdown(raw) {
   const math = [];
-  // Escape with a placeholder token marked won't touch.
-  const stashed = raw
-    .replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => { math.push({ display: true,  body: m }); return `@@MATH${math.length - 1}@@`; })
-    .replace(/(^|[^\\])\$([^\n$]+?)\$/g, (_, pre, m) => {
-      math.push({ display: false, body: m });
-      return pre + `@@MATH${math.length - 1}@@`;
-    });
+  const stash = (display, body) => {
+    const i = math.push({ display, body }) - 1;
+    // Use a token that contains no `|`, no `$`, no backslashes, no markdown
+    // specials. Upper/lowercase letters + digits only.
+    return `xMATHx${i}xEND`;
+  };
 
-  let html = marked.parse(stashed, { gfm: true, breaks: false });
+  // 1) $$...$$ displayed math (multiline ok)
+  let src = raw.replace(/\$\$([\s\S]+?)\$\$/g, (_, m) => stash(true, m));
 
-  html = html.replace(/@@MATH(\d+)@@/g, (_, i) => {
+  // 2) Fenced inline math $...$ — allow the expression to contain `|`
+  //    (as long as it doesn't contain a literal newline or another unescaped $).
+  //    The previous form disallowed `|` implicitly via the [^\n$] class? Actually
+  //    it only forbade newline and $, so `|` was fine — but `marked`'s GFM
+  //    pipe-table scanner ran FIRST and ate the `|` as a column separator
+  //    before our placeholder was in place. By doing this stash BEFORE
+  //    `marked.parse`, the `|` is safely hidden inside our token.
+  src = src.replace(/(^|[^\\])\$([^\n$]+?)\$/g, (_, pre, m) => pre + stash(false, m));
+
+  // 3) \[...\] and \(...\) — optional, mirrors the KaTeX delimiters we accept
+  src = src.replace(/\\\[([\s\S]+?)\\\]/g, (_, m) => stash(true, m));
+  src = src.replace(/\\\(([^\n]+?)\\\)/g, (_, m) => stash(false, m));
+
+  let html = marked.parse(src, { gfm: true, breaks: false });
+
+  html = html.replace(/xMATHx(\d+)xEND/g, (_, i) => {
     const { display, body } = math[+i];
     const delim = display ? '$$' : '$';
     return delim + body + delim;
@@ -241,9 +352,9 @@ function renderMarkdown(raw) {
   return html;
 }
 
-// ── Load + render a doc ────────────────────────────────────────────────
+// ── Load + render a doc (markdown) or embed a lab (html) ──────────────
 async function loadDoc(slug) {
-  const doc = DOCS.find(d => d.slug === slug) || DOCS[0];
+  const doc = REAL_DOCS.find(d => d.slug === slug) || REAL_DOCS[0];
 
   for (const a of nav.querySelectorAll('a')) {
     a.classList.toggle('active', a.dataset.slug === doc.slug);
@@ -251,7 +362,20 @@ async function loadDoc(slug) {
 
   const art = document.getElementById('article');
   art.innerHTML = '<div class="loading">Loading…</div>';
-  document.title = doc.title + ' — fbunc';
+  // Strip inline math markers from title for the document title
+  document.title = doc.title.replace(/\$/g, '') + ' — fbunc';
+
+  // Lab pages are embedded as iframes so the interactive HTML runs
+  // inside its own sandbox.
+  if (doc.kind === 'lab' && doc.url) {
+    art.innerHTML = `
+      <h1>${doc.title}</h1>
+      <p><a href="${doc.url}" target="_blank" rel="noopener">Open in full tab ↗</a></p>
+      <iframe class="lab-frame" src="${doc.url}" title="${doc.title}"></iframe>
+    `;
+    document.querySelector('main').scrollTop = 0;
+    return;
+  }
 
   try {
     const res = await fetch(doc.file, { cache: 'no-cache' });
@@ -281,12 +405,12 @@ async function loadDoc(slug) {
     art.scrollTop = 0;
     document.querySelector('main').scrollTop = 0;
   } catch (e) {
-    art.innerHTML = `<div class="err">Failed to load <code>${doc.file}</code>: ${e.message}</div>`;
+    art.innerHTML = `<div class="err">Failed to load <code>${doc.file || doc.url}</code>: ${e.message}</div>`;
   }
 }
 
 window.addEventListener('hashchange', () => loadDoc(location.hash.replace('#', '')));
-loadDoc(location.hash.replace('#', '') || DOCS[0].slug);
+loadDoc(location.hash.replace('#', '') || REAL_DOCS[0].slug);
 </script>
 
 </body>
