@@ -15,6 +15,7 @@
     --accent: #6dd3c4;
     --prime:  #ffb547;
     --docs:   #b48aff;
+    --life:   #8ee36b;
     --star:   #ffd24c;
     --border: #2a2f3a;
   }
@@ -48,6 +49,7 @@
   nav button.active { color: var(--bg-0); background: var(--accent); border-color: var(--accent); }
   nav button.active.prime { background: var(--prime); border-color: var(--prime); }
   nav button.active.docs  { background: var(--docs);  border-color: var(--docs);  }
+  nav button.active.life  { background: var(--life);  border-color: var(--life);  }
 
   .views-btn { margin-right: .4rem; color: var(--star); border-color: var(--star); }
   .views-btn:hover { background: rgba(255,210,76,.1); }
@@ -221,6 +223,7 @@
     <button class="views-btn" id="btn-views" title="Browse saved views">📁 Views</button>
     <button id="tab-curve"  class="active" data-target="frame-curve">Curve Playground</button>
     <button id="tab-factor" class="prime"  data-target="frame-factor">Factorization in 2D</button>
+    <button id="tab-life"   class="life"   data-target="frame-life">Game of Life</button>
     <button id="tab-docs"   class="docs"   data-target="frame-docs">Math Docs</button>
   </nav>
 </header>
@@ -228,6 +231,7 @@
 <main>
   <iframe id="frame-curve"  class="active" src="StartHere.html"         title="Curve Playground v6"></iframe>
   <iframe id="frame-factor"                src="FactorizationIn2D.html" title="Factorization in 2D"></iframe>
+  <iframe id="frame-life"                  src="game_of_life_radial.html" title="Radial Game of Life"></iframe>
   <iframe id="frame-docs"                  src="docs/"                  title="Math Docs"></iframe>
 </main>
 
@@ -235,10 +239,11 @@
   <span>Direct links:
     <a href="StartHere.html">StartHere.html</a> ·
     <a href="FactorizationIn2D.html">FactorizationIn2D.html</a> ·
+    <a href="game_of_life_radial.html">game_of_life_radial.html</a> ·
     <a href="docs/">Math Docs</a> ·
     <a href="views/manifest.json">views manifest</a>
   </span>
-  <span style="margin-left:auto;">deep-link: <code>#curve</code> · <code>#factor</code> · <code>#docs</code></span>
+    <span style="margin-left:auto;">deep-link: <code>#curve</code> · <code>#factor</code> · <code>#life</code> · <code>#docs</code></span>
 </footer>
 
 <div class="v-overlay" id="v-overlay" role="dialog" aria-modal="true" aria-labelledby="v-title">
@@ -272,6 +277,7 @@
   const tabs = {
     curve:  { btn: document.getElementById('tab-curve'),  frame: document.getElementById('frame-curve')  },
     factor: { btn: document.getElementById('tab-factor'), frame: document.getElementById('frame-factor') },
+    life:   { btn: document.getElementById('tab-life'),   frame: document.getElementById('frame-life')   },
     docs:   { btn: document.getElementById('tab-docs'),   frame: document.getElementById('frame-docs')   },
   };
   function activate(key, pushHash) {
