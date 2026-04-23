@@ -516,6 +516,7 @@
                             <button type="button" class="btn btn-sm btn-outline-primary" id="factorization-download-image-btn">Download Image</button>
                             <button type="button" class="btn btn-sm btn-outline-warning" id="factorization-download-gif-btn">Download GIF</button>
                             <button type="button" class="btn btn-sm btn-outline-info" id="factorization-download-zip-btn">Download ZIP Frames</button>
+                            <button type="button" class="btn btn-sm btn-outline-light" id="factorization-export-life3d-btn" title="Export current 3D plot points as JSON for the Game of Life 3D tab">⬢ Send to Life 3D (JSON)</button>
                         </div>
                     </div>
                     <div id="factorization-export-status" class="mt-2" style="font-size: 0.9rem; color: #00bc8c;"></div>
@@ -2676,6 +2677,65 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
                     } catch (e) {
                         console.error(e);
                         setFactorizationExportStatus(`ZIP export failed: ${e.message || e}`);
+                    }
+                });
+            }
+
+            const factorizationExportLife3dBtn = document.getElementById('factorization-export-life3d-btn');
+            if (factorizationExportLife3dBtn) {
+                factorizationExportLife3dBtn.addEventListener('click', () => {
+                    try {
+                        const gd = document.getElementById('plotDiv');
+                        if (!gd || !gd.data) { setFactorizationExportStatus('No plot data.'); return; }
+                        const points = [];
+                        // CSS color -> hue (HSL angle 0..360). Returns NaN if not parseable.
+                        const cssToHue = (css) => {
+                            if (typeof css !== 'string') return NaN;
+                            const probe = document.createElement('div');
+                            probe.style.color = css;
+                            document.body.appendChild(probe);
+                            const rgb = getComputedStyle(probe).color;
+                            document.body.removeChild(probe);
+                            const m = rgb.match(/rgba?\(([^)]+)\)/);
+                            if (!m) return NaN;
+                            const [r, g, b] = m[1].split(',').map(s => parseFloat(s) / 255);
+                            const max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+                            if (d === 0) return 0;
+                            let h;
+                            if (max === r) h = ((g-b)/d) % 6;
+                            else if (max === g) h = (b-r)/d + 2;
+                            else h = (r-g)/d + 4;
+                            h *= 60; if (h < 0) h += 360;
+                            return h;
+                        };
+                        for (const tr of gd.data) {
+                            if (tr.type !== 'scatter3d' || !tr.x || !tr.y || !tr.z) continue;
+                            const colors = tr.marker && tr.marker.color;
+                            const N = tr.x.length;
+                            for (let i = 0; i < N; i++) {
+                                const x = tr.x[i], y = tr.y[i], z = tr.z[i];
+                                if (typeof x !== 'number' || typeof y !== 'number' || typeof z !== 'number') continue;
+                                const c = Array.isArray(colors) ? colors[i] : colors;
+                                const h = cssToHue(c);
+                                const pt = { x, y, z };
+                                if (!Number.isNaN(h)) pt.hue = +h.toFixed(2);
+                                points.push(pt);
+                            }
+                        }
+                        if (!points.length) { setFactorizationExportStatus('No 3D points to export.'); return; }
+                        // Suggest a cubic grid sized to the cube root of point count, capped 96.
+                        const side = Math.max(16, Math.min(96, Math.ceil(Math.cbrt(points.length) * 1.5)));
+                        const data = { grid: [side, side, side], rule: 'B6/S5,6,7', wrap: true, points };
+                        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `curve_to_life3d_${Date.now()}.json`;
+                        document.body.appendChild(a); a.click(); a.remove();
+                        URL.revokeObjectURL(a.href);
+                        setFactorizationExportStatus(`Exported ${points.length} points as JSON. Open the Game of Life 3D tab and load it via "Init JSON".`);
+                    } catch (e) {
+                        console.error(e);
+                        setFactorizationExportStatus(`Export failed: ${e.message || e}`);
                     }
                 });
             }

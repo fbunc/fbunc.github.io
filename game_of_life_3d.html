@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Game of Life 3D — Radial HSL</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f; color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+    padding: 8px 12px; gap: 8px;
+  }
+  h1 {
+    color: #8ee36b; margin: 0; font-size: 1.2rem; text-align: center;
+    text-shadow: 0 0 20px rgba(142,227,107,.3);
+  }
+  .canvas-wrapper {
+    position: relative; flex: 1 1 auto; min-height: 320px;
+    display: flex; background: #000;
+    border: 2px solid #333; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 0 30px rgba(142,227,107,.1);
+  }
+  canvas { display: block; background: #000; cursor: grab; flex: 1 1 auto; }
+  canvas:active { cursor: grabbing; }
+  .hud {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,.7); color: #8ee36b;
+    padding: 4px 10px; border-radius: 4px; font-size: 12px;
+    pointer-events: none;
+  }
+  .hud.right { left: auto; right: 10px; pointer-events: auto; display: flex; gap: 4px; }
+  .hud.right button { padding: 3px 8px; font-size: 12px; background: #1a1a2e; color: #8ee36b;
+    border: 1px solid #8ee36b; border-radius: 4px; cursor: pointer; }
+  .hud.right button:hover { background: #8ee36b; color: #0a0a0f; }
+
+  .controls {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    justify-content: center; align-items: center; flex: 0 0 auto;
+  }
+  .controls button {
+    background: linear-gradient(135deg,#1a1a2e,#16213e);
+    color: #8ee36b; border: 1px solid #8ee36b;
+    padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer;
+    transition: all .15s ease; font-weight: 500;
+  }
+  .controls button:hover { background: #8ee36b; color: #0a0a0f; }
+  .group {
+    display: flex; align-items: center; gap: 6px;
+    color: #888; font-size: 13px;
+  }
+  .group select, .group input[type=text], .group input[type=number] {
+    background: #1a1a2e; color: #8ee36b;
+    border: 1px solid #8ee36b; border-radius: 4px;
+    padding: 3px 6px; font: inherit;
+  }
+  .group input[type=text] { width: 110px; }
+  .group input[type=number] { width: 60px; }
+  .group input[type=range] { accent-color: #8ee36b; width: 100px; }
+  .group input[type=file] { color: #888; font-size: 12px; max-width: 180px; }
+  .group input[type=checkbox] { accent-color: #8ee36b; }
+
+  .stats {
+    display: flex; gap: 18px; font-size: 13px; color: #888;
+    justify-content: center; flex: 0 0 auto;
+  }
+  .stats span { color: #8ee36b; }
+
+  .canvas-wrapper:fullscreen { border: 0; border-radius: 0; }
+</style>
+</head>
+<body>
+  <h1>🧊 Game of Life 3D — Bays rule + radial HSL</h1>
+
+  <div class="canvas-wrapper" id="wrap">
+    <canvas id="cv"></canvas>
+    <div class="hud" id="hudL">drag to rotate · wheel to zoom · shift+drag to pan</div>
+    <div class="hud right">
+      <button id="fitBtn" title="Fit (F)">Fit</button>
+      <button id="fsBtn" title="Fullscreen (F)">⤢</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="startBtn">▶ Start</button>
+    <button id="pauseBtn">⏸ Pause</button>
+    <button id="stepBtn">⏭ Step</button>
+    <button id="clearBtn">🗑 Clear</button>
+    <button id="randBtn">🎲 Random</button>
+    <div class="group">
+      Speed
+      <input type="range" id="fpsSlider" min="1" max="30" value="6">
+      <span id="fpsVal">6</span> fps
+    </div>
+    <div class="group" title="Bays-style rule. Comma-separated counts. e.g. B6/S5,6,7 (Bays 5766) is the canonical 3D Life.">
+      Rule
+      <input type="text" id="ruleInput" value="B6/S5,6,7">
+    </div>
+    <div class="group" title="How newborn voxels choose their color">
+      🎨 Color
+      <select id="colorMode">
+        <option value="position">position (azimuth)</option>
+        <option value="birth">lock at birth</option>
+        <option value="inherit" selected>inherit from parents</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="group" title="Cubic grid. >96³ is Step-only on most laptops.">
+      📐 Size
+      <input type="number" id="sizeInput" min="8" max="160" step="1" value="48">
+      <button id="applySizeBtn">Apply</button>
+    </div>
+    <div class="group" title="Random fill density">
+      Density
+      <input type="range" id="densSlider" min="0" max="50" step="1" value="12">
+      <span id="densVal">12</span>%
+    </div>
+    <div class="group" title="Wrap around boundary (toroidal). Off = clipped (cells past the wall die).">
+      <input type="checkbox" id="wrapToggle" checked> wrap (T³)
+    </div>
+    <div class="group" title="Load a JSON of points {grid:[Lx,Ly,Lz], points:[{x,y,z,hue}]}. Voxelizes into the grid.">
+      🧩 Init JSON
+      <input type="file" id="jsonInput" accept="application/json,.json">
+      <button id="exportJsonBtn" title="Download current state as JSON">⤓ Save JSON</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>Generation: <span id="genCount">0</span></div>
+    <div>Population: <span id="popCount">0</span></div>
+    <div>Grid: <span id="gridLabel">48³</span></div>
+    <div>Mode: <span id="modeIndicator">EDIT</span></div>
+  </div>
+
+<script>
+// ============================================================================
+// Game of Life 3D
+//   Rule: Bays-style B<born>/S<survive> on 3D Moore neighborhood (26 neighbors)
+//   Default: B6/S5,6,7 (Bays 5766) — has gliders and stable spaceships.
+//   Color: per-voxel hue (radial map / lock at birth / circular-mean inherit).
+//   Renderer: isometric Canvas2D voxel projection with depth sort and trackball.
+// ============================================================================
+
+// ----- state -----
+let N = 48;                      // cubic grid side
+let grid;                        // Uint8Array length N*N*N
+let hue;                         // Float32Array length N*N*N (-1 = no hue)
+let bornSet = new Set([6]);      // birth counts
+let surviveSet = new Set([5,6,7]);
+let wrap = true;
+let colorMode = 'inherit';       // 'position' | 'birth' | 'inherit'
+let generation = 0;
+let isRunning = false;
+let fps = 6;
+let lastFrame = 0;
+let animId = null;
+
+// Camera (trackball)
+let camYaw = 0.7, camPitch = -0.45;
+let camZoom = 1, camPanX = 0, camPanY = 0;
+
+// ----- DOM -----
+const wrapEl = document.getElementById('wrap');
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const genCountEl = document.getElementById('genCount');
+const popCountEl = document.getElementById('popCount');
+const gridLabel = document.getElementById('gridLabel');
+const modeIndicator = document.getElementById('modeIndicator');
+const fpsSlider = document.getElementById('fpsSlider');
+const fpsVal = document.getElementById('fpsVal');
+const ruleInput = document.getElementById('ruleInput');
+const colorModeSel = document.getElementById('colorMode');
+const sizeInput = document.getElementById('sizeInput');
+const applySizeBtn = document.getElementById('applySizeBtn');
+const densSlider = document.getElementById('densSlider');
+const densVal = document.getElementById('densVal');
+const wrapToggle = document.getElementById('wrapToggle');
+const jsonInput = document.getElementById('jsonInput');
+const exportJsonBtn = document.getElementById('exportJsonBtn');
+const fitBtn = document.getElementById('fitBtn');
+const fsBtn = document.getElementById('fsBtn');
+
+// ----- helpers -----
+const idx = (x,y,z) => (z*N + y)*N + x;
+function allocGrid(size) {
+  N = size;
+  grid = new Uint8Array(N*N*N);
+  hue  = new Float32Array(N*N*N).fill(-1);
+  generation = 0;
+  gridLabel.textContent = `${N}³`;
+}
+
+function parseRule(s) {
+  // "B6/S5,6,7" -> bornSet={6}, surviveSet={5,6,7}
+  const parts = s.toUpperCase().replace(/\s+/g,'').split('/');
+  const b = new Set(), sv = new Set();
+  for (const p of parts) {
+    if (!p) continue;
+    if (p[0] === 'B') p.slice(1).split(',').forEach(n => { const k = parseInt(n,10); if (!isNaN(k)) b.add(k); });
+    else if (p[0] === 'S') p.slice(1).split(',').forEach(n => { const k = parseInt(n,10); if (!isNaN(k)) sv.add(k); });
+  }
+  return { b, sv };
+}
+
+function applyRule() {
+  const { b, sv } = parseRule(ruleInput.value);
+  bornSet = b; surviveSet = sv;
+}
+
+// ----- color rules -----
+function hueForPos(x,y,z) {
+  // Azimuth in xy plane (recovers the 2D radial coloring on the equator).
+  const cx = (N-1)/2, cy = (N-1)/2;
+  const dx = x - cx, dy = y - cy;
+  let deg = Math.atan2(dy, dx) * 180/Math.PI + 180;
+  return ((deg % 360) + 360) % 360;
+}
+
+function circMean(hues) {
+  let sx = 0, sy = 0;
+  for (const h of hues) { const a = h*Math.PI/180; sx += Math.cos(a); sy += Math.sin(a); }
+  let d = Math.atan2(sy, sx) * 180/Math.PI;
+  if (d < 0) d += 360;
+  return d;
+}
+
+// ----- physics -----
+function step() {
+  const newGrid = new Uint8Array(N*N*N);
+  const newHue  = new Float32Array(N*N*N).fill(-1);
+  const dirs = [];
+  for (let dz=-1; dz<=1; dz++)
+    for (let dy=-1; dy<=1; dy++)
+      for (let dx=-1; dx<=1; dx++)
+        if (dx||dy||dz) dirs.push([dx,dy,dz]);
+
+  for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+    let count = 0;
+    const parentHues = [];
+    for (const [dx,dy,dz] of dirs) {
+      let nx = x+dx, ny = y+dy, nz = z+dz;
+      if (wrap) {
+        if (nx<0) nx+=N; else if (nx>=N) nx-=N;
+        if (ny<0) ny+=N; else if (ny>=N) ny-=N;
+        if (nz<0) nz+=N; else if (nz>=N) nz-=N;
+      } else {
+        if (nx<0||nx>=N||ny<0||ny>=N||nz<0||nz>=N) continue;
+      }
+      const k = idx(nx,ny,nz);
+      if (grid[k]) {
+        count++;
+        if (colorMode === 'inherit') {
+          parentHues.push(hue[k] >= 0 ? hue[k] : hueForPos(nx,ny,nz));
+        }
+      }
+    }
+    const here = idx(x,y,z);
+    const alive = grid[here] === 1;
+    if (alive && surviveSet.has(count)) {
+      newGrid[here] = 1;
+      newHue[here] = hue[here] >= 0 ? hue[here] : hueForPos(x,y,z);
+    } else if (!alive && bornSet.has(count)) {
+      newGrid[here] = 1;
+      if (colorMode === 'inherit' && parentHues.length) newHue[here] = circMean(parentHues);
+      else newHue[here] = hueForPos(x,y,z);
+    }
+  }
+  grid = newGrid;
+  hue  = newHue;
+  generation++;
+}
+
+// ----- voxel renderer (isometric Canvas2D, back-to-front) -----
+function project(x, y, z, W, H) {
+  // Center grid at origin, rotate yaw (around Z) then pitch (around X), then orthographic.
+  const cx = (N-1)/2;
+  let X = x - cx, Y = y - cx, Z = z - cx;
+  // Yaw around Z
+  const cy_ = Math.cos(camYaw), sy_ = Math.sin(camYaw);
+  let X1 = X*cy_ - Y*sy_;
+  let Y1 = X*sy_ + Y*cy_;
+  let Z1 = Z;
+  // Pitch around X
+  const cp = Math.cos(camPitch), sp = Math.sin(camPitch);
+  const Y2 = Y1*cp - Z1*sp;
+  const Z2 = Y1*sp + Z1*cp;
+  // Orthographic projection
+  const fitScale = Math.min(W, H) / (N * 1.8);
+  const s = fitScale * camZoom;
+  return {
+    px: W/2 + camPanX + X1 * s,
+    py: H/2 + camPanY - Y2 * s,  // canvas y is down
+    depth: Z2,                   // for depth sort
+    size: s
+  };
+}
+
+function render() {
+  const W = cv.width, H = cv.height;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+
+  // Draw bounding box (subtle wireframe) so empty space isn't disorienting.
+  drawBox(W, H);
+
+  // Collect live voxels, depth-sort back-to-front.
+  const live = [];
+  for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+    if (!grid[idx(x,y,z)]) continue;
+    const p = project(x, y, z, W, H);
+    live.push({ p, x, y, z });
+  }
+  live.sort((a,b) => a.p.depth - b.p.depth);
+
+  for (const v of live) {
+    const { p, x, y, z } = v;
+    const h = (colorMode === 'position' || hue[idx(x,y,z)] < 0) ? hueForPos(x,y,z) : hue[idx(x,y,z)];
+    drawCube(p, h);
+  }
+
+  popCountEl.textContent = countPop();
+  genCountEl.textContent = generation;
+}
+
+function drawCube(p, h) {
+  const s = p.size;
+  // Three visible faces of an axis-aligned cube under the current camera.
+  // Compute the local face-shift vectors using the same projection (delta from center).
+  const cx = (N-1)/2;
+  // Express face normals in world space: +X, +Y, +Z.
+  // We project the 8 corners and pick the 3 frontmost faces.
+  // For speed: render a parallelogram sandwich (top + 2 sides) using simple shading.
+  const half = s * 0.5;
+  // Use sin/cos of camera to estimate "top face slant" without recomputing per-corner.
+  const topShade = 0.95;
+  const leftShade = 0.65;
+  const rightShade = 0.45;
+  // Single filled square (cheap, looks like glowing voxel; cube illusion comes from depth-sort).
+  ctx.fillStyle = `hsl(${h}, 100%, 55%)`;
+  ctx.fillRect(p.px - half, p.py - half, s, s);
+  // Top hint
+  ctx.fillStyle = `hsla(${h}, 100%, 75%, .45)`;
+  ctx.fillRect(p.px - half, p.py - half, s, s * 0.18);
+  // Right hint
+  ctx.fillStyle = `hsla(${h}, 100%, 30%, .45)`;
+  ctx.fillRect(p.px + half - s*0.18, p.py - half, s*0.18, s);
+}
+
+function drawBox(W, H) {
+  const corners = [
+    [0,0,0],[N-1,0,0],[N-1,N-1,0],[0,N-1,0],
+    [0,0,N-1],[N-1,0,N-1],[N-1,N-1,N-1],[0,N-1,N-1],
+  ].map(([x,y,z]) => project(x,y,z,W,H));
+  const edges = [
+    [0,1],[1,2],[2,3],[3,0],
+    [4,5],[5,6],[6,7],[7,4],
+    [0,4],[1,5],[2,6],[3,7],
+  ];
+  ctx.strokeStyle = '#1f2a1f';
+  ctx.lineWidth = 1;
+  for (const [a,b] of edges) {
+    ctx.beginPath();
+    ctx.moveTo(corners[a].px, corners[a].py);
+    ctx.lineTo(corners[b].px, corners[b].py);
+    ctx.stroke();
+  }
+}
+
+function countPop() {
+  let c = 0;
+  for (let i=0; i<grid.length; i++) c += grid[i];
+  return c;
+}
+
+// ----- run loop -----
+function loop(t) {
+  if (!isRunning) return;
+  animId = requestAnimationFrame(loop);
+  const delay = 1000/fps;
+  if (t - lastFrame >= delay) {
+    lastFrame = t;
+    step();
+    render();
+  }
+}
+function start() {
+  if (isRunning) return;
+  isRunning = true;
+  modeIndicator.textContent = 'RUNNING';
+  lastFrame = performance.now();
+  animId = requestAnimationFrame(loop);
+}
+function pause() {
+  isRunning = false;
+  modeIndicator.textContent = 'PAUSED';
+  if (animId) cancelAnimationFrame(animId);
+}
+function stop() {
+  isRunning = false;
+  modeIndicator.textContent = 'EDIT';
+  if (animId) cancelAnimationFrame(animId);
+}
+
+// ----- ops -----
+function clearGrid() { stop(); allocGrid(N); render(); }
+function randomize() {
+  stop();
+  const dens = parseInt(densSlider.value,10) / 100;
+  for (let i=0; i<grid.length; i++) {
+    if (Math.random() < dens) { grid[i] = 1; }
+    else { grid[i] = 0; hue[i] = -1; }
+  }
+  // Assign initial hues from position
+  for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+    const k = idx(x,y,z);
+    if (grid[k]) hue[k] = hueForPos(x,y,z);
+  }
+  generation = 0;
+  render();
+}
+
+// ----- canvas resize -----
+function resizeCanvas() {
+  const r = wrapEl.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = Math.max(100, Math.floor(r.width  * dpr));
+  cv.height = Math.max(100, Math.floor(r.height * dpr));
+  cv.style.width  = r.width  + 'px';
+  cv.style.height = r.height + 'px';
+  ctx.setTransform(1,0,0,1,0,0);
+  render();
+}
+window.addEventListener('resize', resizeCanvas);
+
+// ----- camera input -----
+let dragging = false, dragShift = false, lx = 0, ly = 0;
+cv.addEventListener('mousedown', e => {
+  dragging = true; dragShift = e.shiftKey;
+  lx = e.clientX; ly = e.clientY;
+});
+window.addEventListener('mouseup', () => dragging = false);
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - lx, dy = e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  if (dragShift) {
+    camPanX += dx; camPanY += dy;
+  } else {
+    camYaw   += dx * 0.01;
+    camPitch += dy * 0.01;
+    camPitch = Math.max(-Math.PI/2 + 0.05, Math.min(Math.PI/2 - 0.05, camPitch));
+  }
+  render();
+});
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const f = Math.exp(-e.deltaY * 0.0015);
+  camZoom = Math.max(0.1, Math.min(8, camZoom * f));
+  render();
+}, { passive: false });
+
+function fitView() { camZoom = 1; camPanX = 0; camPanY = 0; render(); }
+fitBtn.addEventListener('click', fitView);
+
+// ----- fullscreen -----
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) wrapEl.requestFullscreen && wrapEl.requestFullscreen();
+  else document.exitFullscreen && document.exitFullscreen();
+});
+document.addEventListener('fullscreenchange', () => requestAnimationFrame(resizeCanvas));
+
+// ----- buttons -----
+document.getElementById('startBtn').addEventListener('click', start);
+document.getElementById('pauseBtn').addEventListener('click', pause);
+document.getElementById('stepBtn').addEventListener('click', () => { if (!isRunning) { step(); render(); } });
+document.getElementById('clearBtn').addEventListener('click', clearGrid);
+document.getElementById('randBtn').addEventListener('click', randomize);
+
+fpsSlider.addEventListener('input', e => { fps = parseInt(e.target.value,10); fpsVal.textContent = fps; });
+densSlider.addEventListener('input', e => { densVal.textContent = e.target.value; });
+ruleInput.addEventListener('change', applyRule);
+colorModeSel.addEventListener('change', e => { colorMode = e.target.value; render(); });
+wrapToggle.addEventListener('change', e => { wrap = e.target.checked; });
+
+applySizeBtn.addEventListener('click', () => {
+  const s = Math.max(8, Math.min(160, parseInt(sizeInput.value,10) || 48));
+  if (s*s*s > 160*160*160) { alert('Too large.'); return; }
+  allocGrid(s);
+  render();
+});
+
+// ----- JSON I/O -----
+// Schema: { grid: [Lx, Ly, Lz], points: [{ x, y, z, hue? }, ...], rule?: 'B6/S5,6,7', wrap?: bool }
+// Coordinates are voxel indices; out-of-range are clipped. Multiple points in one voxel -> circular mean of hues.
+jsonInput.addEventListener('change', async e => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  try {
+    const txt = await file.text();
+    const data = JSON.parse(txt);
+    importInitState(data);
+  } catch (err) {
+    alert('Failed to parse JSON: ' + err.message);
+  }
+});
+
+function importInitState(data) {
+  stop();
+  let Lx = N, Ly = N, Lz = N;
+  if (Array.isArray(data.grid) && data.grid.length === 3) {
+    Lx = Math.max(8, Math.min(160, data.grid[0]|0));
+    Ly = Math.max(8, Math.min(160, data.grid[1]|0));
+    Lz = Math.max(8, Math.min(160, data.grid[2]|0));
+  }
+  // For now we use a cubic grid: max of provided dims
+  const side = Math.max(Lx, Ly, Lz);
+  allocGrid(side);
+  // If points come from continuous coordinates, treat them as already mapped to voxel space.
+  // If they look outside [0..N), fit them to [0..N) by bounding box.
+  const pts = Array.isArray(data.points) ? data.points : [];
+  if (!pts.length) { render(); return; }
+  // Bounding box
+  let minX= Infinity, minY=Infinity, minZ=Infinity, maxX=-Infinity, maxY=-Infinity, maxZ=-Infinity;
+  for (const p of pts) {
+    if (typeof p.x !== 'number' || typeof p.y !== 'number' || typeof p.z !== 'number') continue;
+    if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y; if (p.y > maxY) maxY = p.y;
+    if (p.z < minZ) minZ = p.z; if (p.z > maxZ) maxZ = p.z;
+  }
+  const dx = maxX-minX || 1, dy = maxY-minY || 1, dz = maxZ-minZ || 1;
+  const scale = (N - 1) / Math.max(dx, dy, dz);
+  const offX = (N - 1 - dx*scale) / 2;
+  const offY = (N - 1 - dy*scale) / 2;
+  const offZ = (N - 1 - dz*scale) / 2;
+  // Per-voxel hue accumulator (circular mean)
+  const accCos = new Float32Array(N*N*N);
+  const accSin = new Float32Array(N*N*N);
+  const accCnt = new Uint32Array(N*N*N);
+  for (const p of pts) {
+    if (typeof p.x !== 'number' || typeof p.y !== 'number' || typeof p.z !== 'number') continue;
+    const xi = Math.round((p.x - minX) * scale + offX);
+    const yi = Math.round((p.y - minY) * scale + offY);
+    const zi = Math.round((p.z - minZ) * scale + offZ);
+    if (xi<0||xi>=N||yi<0||yi>=N||zi<0||zi>=N) continue;
+    const k = idx(xi, yi, zi);
+    grid[k] = 1;
+    const h = (typeof p.hue === 'number') ? p.hue : hueForPos(xi, yi, zi);
+    const a = h * Math.PI / 180;
+    accCos[k] += Math.cos(a); accSin[k] += Math.sin(a); accCnt[k] += 1;
+  }
+  for (let k=0; k<grid.length; k++) {
+    if (grid[k] && accCnt[k] > 0) {
+      let d = Math.atan2(accSin[k], accCos[k]) * 180 / Math.PI;
+      if (d < 0) d += 360;
+      hue[k] = d;
+    }
+  }
+  if (typeof data.rule === 'string') { ruleInput.value = data.rule; applyRule(); }
+  if (typeof data.wrap === 'boolean') { wrap = data.wrap; wrapToggle.checked = wrap; }
+  generation = 0;
+  render();
+}
+
+exportJsonBtn.addEventListener('click', () => {
+  const points = [];
+  for (let z=0; z<N; z++) for (let y=0; y<N; y++) for (let x=0; x<N; x++) {
+    const k = idx(x,y,z);
+    if (grid[k]) points.push({ x, y, z, hue: hue[k] >= 0 ? +hue[k].toFixed(2) : null });
+  }
+  const data = {
+    grid: [N, N, N],
+    rule: ruleInput.value,
+    wrap,
+    generation,
+    points,
+  };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `gol3d_${N}_gen${generation}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+// ----- keyboard -----
+document.addEventListener('keydown', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+  switch (e.key.toLowerCase()) {
+    case ' ': e.preventDefault(); isRunning ? pause() : start(); break;
+    case 's': if (!isRunning) { step(); render(); } break;
+    case 'c': clearGrid(); break;
+    case 'r': randomize(); break;
+    case 'enter': start(); break;
+    case 'f':
+      if (!document.fullscreenElement) wrapEl.requestFullscreen && wrapEl.requestFullscreen();
+      else document.exitFullscreen && document.exitFullscreen();
+      break;
+  }
+});
+
+// ----- boot -----
+allocGrid(48);
+applyRule();
+fps = parseInt(fpsSlider.value,10);
+randomize();
+requestAnimationFrame(resizeCanvas);
+</script>
+</body>
+</html>
