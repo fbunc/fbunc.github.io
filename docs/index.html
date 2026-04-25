@@ -209,76 +209,84 @@
 
 <script>
 const DOCS = [
-  // ── START HERE ────────────────────────────────────────────────
-  { section: 'Start here' },
-  { slug: 'cleanest-intro',           file: '70-essay-cleanest-intro.md',           title: 'The cleanest intro to the construction', kind: 'essay', tag: '★' },
-  { slug: 'factorization-notation',   file: '71-essay-factorization-notation.md',   title: 'Notation — $s_n$, $\\dot s_n$, $\\ddot s_n$', kind: 'essay', tag: '§' },
-  { slug: 'sn-plotting-in-starthere', file: '10-sn-plotting-in-starthere.md',       title: 'How $s_n$ is plotted in StartHere',       kind: 'q',     tag: 'T1' },
-  { slug: 'lab-walkthrough',          file: '72-lab-walkthrough.md',                title: 'Factorization Lab — visual walkthrough',  kind: 'essay', tag: '▶' },
-
-  // ── NARRATIVE ESSAYS ──────────────────────────────────────────
-  { section: 'Essays & narratives' },
-  { slug: 'numbers-and-energy',           file: '40-essay-numbers-and-energy.md',           title: 'Numbers and Energy — $E=mc^2$ pun',       kind: 'essay', tag: 'E1' },
-  { slug: 'big-drum-manin',               file: '41-essay-big-drum-manin.md',               title: 'Irrational periods & the Big Drum',       kind: 'essay', tag: 'E2' },
-  { slug: 'math-is-poetry',               file: '42-essay-math-is-poetry.md',               title: 'Alpha, Omega, and the Big Drum (poem)',   kind: 'essay', tag: 'E3' },
-  { slug: 'numbers-live-in-space-and-time', file: '60-essay-numbers-live-in-space-and-time.md', title: 'Numbers live in space and time',      kind: 'essay', tag: 'E4' },
-  { slug: 'why-mod-10',                   file: '62-factorization-why-mod-10.md',           title: 'Why mod 10? — the factorization compass', kind: 'essay', tag: 'E5' },
-  { slug: 'periodic-table-for-numbers',   file: '63-periodic-table-for-numbers.md',         title: 'A periodic table for numbers',            kind: 'essay', tag: 'E6' },
-
-  // ── MSE — LIVE QUESTIONS ──────────────────────────────────────
-  { section: 'MSE — live questions' },
+  // ════════════════════════════════════════════════════════════════
+  // 1. MSE QUESTIONS
+  //    Everything that originated as a Math Stack Exchange post:
+  //    live questions, my answers, others' answers to my questions,
+  //    the deleted/archived snapshots, and the early drafts of the
+  //    "main question" that mutated through several MSE attempts.
+  // ════════════════════════════════════════════════════════════════
+  { section: 'MSE questions' },
+  // Live questions
   { slug: 'mobius-bloch',              file: '11-mobius-bloch.md',              title: 'Möbius band from the Bloch sphere',  kind: 'q', tag: 'Q6' },
   { slug: 'binary-tetrahedral-24cell', file: '12-binary-tetrahedral-24cell.md', title: 'Binary Tetrahedral group & 24-cell', kind: 'q', tag: 'Q7' },
   { slug: 'periodic-map-orbits',       file: '13-periodic-map-orbits.md',       title: 'Periodic map orbits of 2x mod 1',    kind: 'q', tag: 'Q8' },
   { slug: 'irrational-periods',        file: '14-irrational-periods.md',        title: 'Irrational numbers as periods',      kind: 'q', tag: 'Q9' },
-
-  // ── MSE — LIVE ANSWERS ────────────────────────────────────────
-  { section: 'MSE — live answers' },
+  // My live answers
   { slug: 'irrational-periods-self-answer',   file: '17-irrational-periods-self-answer.md',   title: 'Irrational periods — self-answer',       kind: 'a', tag: 'A9' },
   { slug: 'last-nonzero-digit-30-2345',       file: '18-last-nonzero-digit-30-2345.md',       title: 'Last non-zero digit of $30^{2345}$',     kind: 'a', tag: 'A10' },
   { slug: 'monty-hall-simulation',            file: '19-monty-hall-simulation.md',            title: 'Monty Hall simulation',                  kind: 'a', tag: 'A11' },
   { slug: 'mobius-transform-halfdisc',        file: '20-mobius-transform-halfdisc.md',        title: 'Möbius transform half-disc',             kind: 'a', tag: 'A12' },
   { slug: 'complex-exponents-eq',             file: '21-complex-exponents-eq.md',             title: 'Complex exponents equation',             kind: 'a', tag: 'A13' },
+  // Other authors' answers to my questions
   { slug: 'binary-tetrahedral-24cell-answer', file: '15-binary-tetrahedral-24cell-answer.md', title: '24-cell — answer by R. J. Mathar',       kind: 'a', tag: 'A7' },
   { slug: 'periodic-map-orbits-answer',       file: '16-periodic-map-orbits-answer.md',       title: '2x mod 1 orbits — answer by zwim',       kind: 'a', tag: 'A8' },
-
-  // ── MSE — ARCHIVED / DELETED ──────────────────────────────────
-  { section: 'MSE — archived (deleted)' },
-  { slug: 'archive-complex-sequences',      file: '30-archive-complex-sequences.md',      title: 'Complex sequences from initial rules',   kind: 'archive', tag: 'D1' },
-  { slug: 'archive-phi-gons',               file: '31-archive-phi-gons.md',               title: '$\\varphi$-gons & sampling rate',         kind: 'archive', tag: 'D2' },
-  { slug: 'archive-moire-pattern',          file: '32-archive-moire-pattern.md',          title: 'Moiré pattern in circular orbits',       kind: 'archive', tag: 'D3' },
-  { slug: 'archive-quaternions',            file: '33-archive-quaternions.md',            title: 'Quaternions from 3 complex numbers',     kind: 'archive', tag: 'D4' },
-  { slug: 'archive-energy-soft-question',   file: '34-archive-energy-soft-question.md',   title: 'Numbers associated with "energy"',       kind: 'archive', tag: 'D5' },
-  { slug: 'archive-prime-frequency-plots',  file: '35-archive-prime-frequency-plots.md',  title: 'Prime frequency plots (bi-linear log)',  kind: 'archive', tag: 'D6' },
-
-  // ── MAIN-QUESTION DRAFTS (RAW) ────────────────────────────────
-  { section: 'Main question — raw drafts' },
+  // Deleted / archived MSE questions (recovered from saved HTML)
+  { slug: 'archive-complex-sequences',        file: '30-archive-complex-sequences.md',        title: 'Complex sequences from initial rules (deleted)', kind: 'archive', tag: 'D1' },
+  { slug: 'archive-phi-gons',                 file: '31-archive-phi-gons.md',                 title: '$\\varphi$-gons & sampling rate (deleted)',      kind: 'archive', tag: 'D2' },
+  { slug: 'archive-moire-pattern',            file: '32-archive-moire-pattern.md',            title: 'Moiré pattern in circular orbits (deleted)',     kind: 'archive', tag: 'D3' },
+  { slug: 'archive-quaternions',              file: '33-archive-quaternions.md',              title: 'Quaternions from 3 complex numbers (deleted)',   kind: 'archive', tag: 'D4' },
+  { slug: 'archive-energy-soft-question',     file: '34-archive-energy-soft-question.md',     title: 'Numbers associated with "energy" (deleted)',     kind: 'archive', tag: 'D5' },
+  { slug: 'archive-prime-frequency-plots',    file: '35-archive-prime-frequency-plots.md',    title: 'Prime frequency plots (deleted)',                kind: 'archive', tag: 'D6' },
+  // Early drafts of the main question
   { slug: 'main-question',         file: '01-main-question.md',         title: 'Main MSE question — oldest draft',         kind: 'q', tag: 'Q1' },
   { slug: 'main-answer',           file: '02-main-answer.md',           title: 'Main MSE answer — oldest draft',           kind: 'a', tag: 'A1' },
   { slug: 'mse-2026',              file: '03-mse-2026.md',              title: 'Bounded logs & prime orbits (2026 draft)', kind: 'q', tag: 'Q3a' },
   { slug: 'mse-2026-copy',         file: '04-mse-2026-copy.md',         title: 'Bounded logs (variant)',                   kind: 'q', tag: 'Q3b' },
   { slug: 'last-version',          file: '05-last-version.md',          title: 'Last Version — long form',                 kind: 'q', tag: 'Q3c' },
-  { slug: 'euler-product',         file: '06-euler-product.md',         title: 'Euler product side-note',                  kind: 'essay', tag: '§6' },
-  { slug: 'dirichlet',             file: '07-dirichlet.md',             title: 'Dirichlet bridge side-note',               kind: 'essay', tag: '§7' },
   { slug: 'last-version-answer-1', file: '08-last-version-answer-1.md', title: 'Last Version — answer draft 1',            kind: 'a', tag: 'A3' },
   { slug: 'counting-and-geometry', file: '09-counting-and-geometry.md', title: 'Counting and Geometry (draft)',            kind: 'a', tag: 'A4' },
 
-  // ── EXPERIMENTS ───────────────────────────────────────────────
-  { section: 'Experiments' },
-  { slug: 'roulette',                file: '61-experiment-roulette.md',                title: 'Roulette experiments',             kind: 'essay', tag: 'X1' },
+  // ════════════════════════════════════════════════════════════════
+  // 2. ENERGY & NUMBERS
+  //    The thematic essays around the $E = mc^2$-for-numbers pun
+  //    and the Big Drum cosmology.
+  // ════════════════════════════════════════════════════════════════
+  { section: 'Energy & numbers' },
+  { slug: 'numbers-and-energy', file: '40-essay-numbers-and-energy.md', title: 'Numbers and Energy — the $E=mc^2$ pun', kind: 'essay', tag: 'E1' },
+  { slug: 'big-drum-manin',     file: '41-essay-big-drum-manin.md',     title: 'Irrational periods & the Big Drum',     kind: 'essay', tag: 'E2' },
+  { slug: 'math-is-poetry',     file: '42-essay-math-is-poetry.md',     title: 'Alpha, Omega, and the Big Drum (poem)', kind: 'essay', tag: 'E3' },
 
-  // ── INTERACTIVE LABS ──────────────────────────────────────────
-  // These live at the repo root; from docs/, paths are one level up.
+  // ════════════════════════════════════════════════════════════════
+  // 3. DRAFTS & REFERENCES
+  //    Everything else: the cleanest intro, strict notation reference,
+  //    Lab walkthroughs, notebook-essays, side-notes, experiments,
+  //    and the Tnarg conversation.
+  // ════════════════════════════════════════════════════════════════
+  { section: 'Drafts & references' },
+  { slug: 'cleanest-intro',                 file: '70-essay-cleanest-intro.md',                 title: 'The cleanest intro to the construction',  kind: 'essay', tag: '★' },
+  { slug: 'factorization-notation',         file: '71-essay-factorization-notation.md',         title: 'Notation — $s_n$, $\\dot s_n$, $\\ddot s_n$', kind: 'essay', tag: '§' },
+  { slug: 'sn-plotting-in-starthere',       file: '10-sn-plotting-in-starthere.md',             title: 'How $s_n$ is plotted in StartHere',       kind: 'q',     tag: 'T1' },
+  { slug: 'lab-walkthrough',                file: '72-lab-walkthrough.md',                      title: 'Factorization Lab — visual walkthrough',  kind: 'essay', tag: '▶' },
+  { slug: 'numbers-live-in-space-and-time', file: '60-essay-numbers-live-in-space-and-time.md', title: 'Numbers live in space and time',          kind: 'essay', tag: 'NB' },
+  { slug: 'why-mod-10',                     file: '62-factorization-why-mod-10.md',             title: 'Why mod 10? — the factorization compass', kind: 'essay', tag: 'NB' },
+  { slug: 'periodic-table-for-numbers',     file: '63-periodic-table-for-numbers.md',           title: 'A periodic table for numbers',            kind: 'essay', tag: 'NB' },
+  { slug: 'roulette',                       file: '61-experiment-roulette.md',                  title: 'Roulette experiments',                    kind: 'essay', tag: 'NB' },
+  { slug: 'euler-product',                  file: '06-euler-product.md',                        title: 'Euler product side-note',                 kind: 'essay', tag: '§6' },
+  { slug: 'dirichlet',                      file: '07-dirichlet.md',                            title: 'Dirichlet bridge side-note',              kind: 'essay', tag: '§7' },
+  { slug: 'tnarg-calculators',              file: '50-conversation-tnarg-calculators.md',       title: 'Tnarg explains how a calculator works',   kind: 'conv',  tag: '♪' },
+
+  // ════════════════════════════════════════════════════════════════
+  // INTERACTIVE LABS — apps, not docs; kept here for one-stop access.
+  //    URLs are relative to docs/, so the labs at the repo root are
+  //    one level up.
+  // ════════════════════════════════════════════════════════════════
   { section: 'Interactive labs' },
   { slug: 'curve-playground',        url: '../StartHere.html',             title: 'Curve Playground (StartHere)',        kind: 'lab', tag: '⚙' },
   { slug: 'factorization-in-2d',     url: '../FactorizationIn2D.html',     title: 'Factorization in 2D — the Lab',       kind: 'lab', tag: '⚙' },
   { slug: 'midi-playground',         url: '../midi_playground.html',       title: 'MIDI Playground — sonify any curve',  kind: 'lab', tag: '🎹' },
   { slug: 'game-of-life-radial',     url: '../game_of_life_radial.html',   title: "Conway's Game of Life (radial HSL)",  kind: 'lab', tag: '⚙' },
   { slug: 'game-of-life-3d',         url: '../game_of_life_3d.html',       title: 'Game of Life 3D (Bays B6/S5,6,7)',    kind: 'lab', tag: '⚙' },
-
-  // ── CONVERSATIONS ─────────────────────────────────────────────
-  { section: 'Conversations' },
-  { slug: 'tnarg-calculators',       file: '50-conversation-tnarg-calculators.md',     title: 'Tnarg explains how a calculator works', kind: 'conv', tag: '♪' },
 ];
 
 // Filter out section-marker entries to get a flat list of real docs for lookup.
