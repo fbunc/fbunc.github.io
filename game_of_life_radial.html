@@ -524,6 +524,12 @@
             updateStats();
         }
 
+        // Auto-fit semantics: while autoFit === true, any container resize
+        // re-fits the canvas to the visible area. The first interactive zoom
+        // (+/-, wheel, 1:1) clears the flag so we don't undo the user; the
+        // "Fit" button re-asserts it.
+        let autoFit = true;
+
         function applyZoom() {
             canvas.style.width  = (canvas.width  * zoom) + 'px';
             canvas.style.height = (canvas.height * zoom) + 'px';
@@ -547,12 +553,21 @@
                 applyZoom();
             }
         }
+        // User-initiated zoom: same as setZoom but exits auto-fit mode so
+        // subsequent container resizes don't override the choice.
+        function userZoom(z, cx, cy) { autoFit = false; setZoom(z, cx, cy); }
+
         function fitZoom() {
             const rect = canvasContainer.getBoundingClientRect();
+            // If we don't have layout yet (iframes / hidden tabs), skip — the
+            // ResizeObserver will fire fitZoom again once dimensions arrive.
+            if (rect.width < 4 || rect.height < 4) return;
             const pad = 4;
             const fx = (rect.width  - pad) / canvas.width;
             const fy = (rect.height - pad) / canvas.height;
-            setZoom(Math.max(0.05, Math.min(fx, fy)));
+            const z = Math.max(0.05, Math.min(fx, fy));
+            // Don't flip the autoFit flag — fitZoom is the auto-fit code path.
+            setZoom(z);
             canvasContainer.scrollLeft = 0;
             canvasContainer.scrollTop  = 0;
         }
@@ -1016,18 +1031,19 @@
             if (file) loadImageFile(file);
         });
 
-        // Zoom buttons
-        zoomInBtn.addEventListener('click',  () => setZoom(zoom * 1.25));
-        zoomOutBtn.addEventListener('click', () => setZoom(zoom / 1.25));
-        zoom1Btn.addEventListener('click',   () => setZoom(1));
-        zoomFitBtn.addEventListener('click', () => fitZoom());
+        // Zoom buttons — these are user actions, so they exit auto-fit mode.
+        // The "Fit" button re-enters auto-fit so resizes keep fitting.
+        zoomInBtn.addEventListener('click',  () => userZoom(zoom * 1.25));
+        zoomOutBtn.addEventListener('click', () => userZoom(zoom / 1.25));
+        zoom1Btn.addEventListener('click',   () => userZoom(1));
+        zoomFitBtn.addEventListener('click', () => { autoFit = true; fitZoom(); });
 
         // Wheel-zoom on the canvas container (Ctrl/Cmd+wheel, or plain wheel when Shift held)
         canvasContainer.addEventListener('wheel', (e) => {
             if (e.ctrlKey || e.metaKey || e.shiftKey) {
                 e.preventDefault();
                 const factor = Math.exp(-e.deltaY * 0.0015);
-                setZoom(zoom * factor, e.clientX, e.clientY);
+                userZoom(zoom * factor, e.clientX, e.clientY);
             }
         }, { passive: false });
 
@@ -1073,9 +1089,9 @@
             if (!overlay.classList.contains('hidden')) return;
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
             switch (e.key) {
-                case '+': case '=': setZoom(zoom * 1.25); break;
-                case '-': case '_': setZoom(zoom / 1.25); break;
-                case '0':           setZoom(1); break;
+                case '+': case '=': userZoom(zoom * 1.25); break;
+                case '-': case '_': userZoom(zoom / 1.25); break;
+                case '0':           userZoom(1); break;
                 case 'f': case 'F':
                     if (!document.fullscreenElement) canvasWrapper.requestFullscreen && canvasWrapper.requestFullscreen();
                     else document.exitFullscreen && document.exitFullscreen();
@@ -1083,8 +1099,15 @@
             }
         });
 
-        // Fit on first paint + on resize
-        window.addEventListener('resize', () => { /* layout only; user controls zoom */ });
+        // Auto-fit on container resize (handles iframe layout finalization,
+        // window resize, fullscreen toggle, sidebar collapse, etc.) until the
+        // user takes a manual zoom action.
+        const resizeObserver = new ResizeObserver(() => {
+            if (autoFit) fitZoom();
+        });
+        resizeObserver.observe(canvasContainer);
+        // Window resize re-asserts auto-fit — feels right because page is full-screen.
+        window.addEventListener('resize', () => { if (autoFit) fitZoom(); });
 
         // ============================================
         // Start
