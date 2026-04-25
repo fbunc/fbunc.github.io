@@ -125,6 +125,8 @@
                 </button>
                 <button type="button" class="btn w-100 mb-3" id="exportLife3dTopBtn" style="color:#4ed5a3;border:1px solid #4ed5a3;background:transparent;font-weight:600;" title="Export the current 3D plot as JSON for the Game of Life 3D tab. One voxel per point.">⬢ Export 3D → Life 3D
                 </button>
+                <button type="button" class="btn w-100 mb-3" id="sendToMidiTopBtn" style="color:#6dc0ff;border:1px solid #6dc0ff;background:transparent;font-weight:600;" title="Open the MIDI Playground in a new tab with this curve's heights as the sonification input.">🎹 Send to MIDI Playground
+                </button>
                 <input type="file" id="loadViewFileInput" accept=".json" style="display: none;">
                 <hr>
                 <div>
@@ -2801,6 +2803,71 @@ $$\\vec{\\omega_n}=(-v_n,-w_n,-u_n)$$
             if (factorizationExportLife3dBtn) {
                 factorizationExportLife3dBtn.addEventListener('click', () => {
                     downloadLife3dExport(setFactorizationExportStatus);
+                });
+            }
+
+            // ── Send to MIDI Playground ─────────────────────────────
+            // Packages fullCoordDataCache as a session payload, stashes it
+            // in localStorage, and opens midi_playground.html in a new tab.
+            function sendToMidiPlayground() {
+                try {
+                    const cache = fullCoordDataCache;
+                    if (!cache || !cache.w_base || !cache.w_base.length) {
+                        alert('No curve data cached yet. Hit "Update Plot" first.');
+                        return null;
+                    }
+                    const N = cache.w_base.length;
+                    const u = cache.u_base, v = cache.v_base, w = cache.w_base;
+                    // Build |Z| = sqrt(u² + v²) as a magnitude-like source.
+                    const mag = new Array(N);
+                    for (let i = 0; i < N; i++) {
+                        const ui = +u[i] || 0, vi = +v[i] || 0;
+                        mag[i] = Math.sqrt(ui * ui + vi * vi);
+                    }
+                    const label = (() => {
+                        const fs = (typeof currentParams !== 'undefined' && currentParams.formula_set) || 'Curve Playground';
+                        const preset = (typeof currentParams !== 'undefined' && currentParams.active_preset) || '';
+                        const To = (typeof currentParams !== 'undefined' && currentParams.T_o_period) || '?';
+                        return `${fs}${preset ? ' · ' + preset : ''} · N=${N} · T₀=${To}`;
+                    })();
+                    const payload = {
+                        source: 'curve_playground',
+                        label,
+                        N,
+                        To: (typeof currentParams !== 'undefined' && currentParams.T_o_period) || 1,
+                        sources: {
+                            // w_base (log₂ radius) is the natural pitch axis.
+                            primary: Array.from(w),
+                            // Also seed the six factorization-named slots so the
+                            // MIDI page's existing "Source" dropdown works:
+                            sn_re:   Array.from(u),
+                            sn_im:   Array.from(v),
+                            sn_mag:  mag,
+                            sdot_re: Array.from(u),
+                            sdot_im: Array.from(v),
+                            sdot_mag: mag,
+                        },
+                    };
+                    const key = 'curve_playground_' + Date.now();
+                    localStorage.setItem('pgm_midi_session_' + key, JSON.stringify(payload));
+                    window.open('midi_playground.html?session=' + encodeURIComponent(key), '_blank');
+                    return `Sent ${N} heights to MIDI Playground.`;
+                } catch (err) {
+                    console.error('sendToMidiPlayground failed:', err);
+                    alert('Could not open MIDI Playground: ' + err.message);
+                    return null;
+                }
+            }
+
+            const sendToMidiBtn = document.getElementById('sendToMidiTopBtn');
+            if (sendToMidiBtn) {
+                sendToMidiBtn.addEventListener('click', () => {
+                    const status = sendToMidiPlayground();
+                    if (status) {
+                        const old = sendToMidiBtn.textContent;
+                        sendToMidiBtn.textContent = '✓ Opened';
+                        setTimeout(() => { sendToMidiBtn.textContent = old; }, 1400);
+                    }
                 });
             }
 

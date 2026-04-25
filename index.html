@@ -17,6 +17,7 @@
     --docs:   #b48aff;
     --life:   #8ee36b;
     --life3d: #4ed5a3;
+    --midi:   #6dc0ff;
     --star:   #ffd24c;
     --border: #2a2f3a;
   }
@@ -52,6 +53,7 @@
   nav button.active.docs  { background: var(--docs);  border-color: var(--docs);  }
   nav button.active.life  { background: var(--life);  border-color: var(--life);  }
   nav button.active.life3d{ background: var(--life3d);border-color: var(--life3d);}
+  nav button.active.midi  { background: var(--midi);  border-color: var(--midi);  color: var(--bg-0); }
 
   .views-btn { margin-right: .4rem; color: var(--star); border-color: var(--star); }
   .views-btn:hover { background: rgba(255,210,76,.1); }
@@ -227,6 +229,7 @@
     <button id="tab-factor" class="prime"  data-target="frame-factor">Factorization in 2D</button>
     <button id="tab-life"   class="life"   data-target="frame-life">Game of Life</button>
     <button id="tab-life3d" class="life3d" data-target="frame-life3d">Game of Life 3D</button>
+    <button id="tab-midi"   class="midi"   data-target="frame-midi">🎹 MIDI Playground</button>
     <button id="tab-docs"   class="docs"   data-target="frame-docs">Math Docs</button>
   </nav>
 </header>
@@ -236,6 +239,7 @@
   <iframe id="frame-factor"                src="FactorizationIn2D.html" title="Factorization in 2D"></iframe>
   <iframe id="frame-life"                  src="game_of_life_radial.html" title="Radial Game of Life"></iframe>
   <iframe id="frame-life3d"                src="game_of_life_3d.html"     title="Game of Life 3D"></iframe>
+  <iframe id="frame-midi"                  src="midi_playground.html"     title="MIDI Playground"></iframe>
   <iframe id="frame-docs"                  src="docs/"                  title="Math Docs"></iframe>
 </main>
 
@@ -245,10 +249,11 @@
     <a href="FactorizationIn2D.html">FactorizationIn2D.html</a> ·
     <a href="game_of_life_radial.html">game_of_life_radial.html</a> ·
     <a href="game_of_life_3d.html">game_of_life_3d.html</a> ·
+    <a href="midi_playground.html">midi_playground.html</a> ·
     <a href="docs/">Math Docs</a> ·
     <a href="views/manifest.json">views manifest</a>
   </span>
-    <span style="margin-left:auto;">deep-link: <code>#curve</code> · <code>#factor</code> · <code>#life</code> · <code>#life3d</code> · <code>#docs</code></span>
+    <span style="margin-left:auto;">deep-link: <code>#curve</code> · <code>#factor</code> · <code>#life</code> · <code>#life3d</code> · <code>#midi</code> · <code>#docs</code></span>
 </footer>
 
 <div class="v-overlay" id="v-overlay" role="dialog" aria-modal="true" aria-labelledby="v-title">
@@ -284,6 +289,7 @@
     factor: { btn: document.getElementById('tab-factor'), frame: document.getElementById('frame-factor') },
     life:   { btn: document.getElementById('tab-life'),   frame: document.getElementById('frame-life')   },
     life3d: { btn: document.getElementById('tab-life3d'), frame: document.getElementById('frame-life3d') },
+    midi:   { btn: document.getElementById('tab-midi'),   frame: document.getElementById('frame-midi')   },
     docs:   { btn: document.getElementById('tab-docs'),   frame: document.getElementById('frame-docs')   },
   };
   function activate(key, pushHash) {

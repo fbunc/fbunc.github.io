@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Factorization in 2D </title>
+    <title>MIDI Playground — fbunc</title>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script>
@@ -214,6 +214,9 @@
         #sym-controls button:hover { background: #0b8; }
 
         /* MIDI Playground */
+        /* On midi_playground.html this overlay is always visible and acts as
+           the main panel. On FactorizationIn2D.html it's still a modal — the
+           `body.midi-page` scope switches between the two modes. */
         #midi-overlay {
             display: none;
             position: fixed;
@@ -224,6 +227,54 @@
             padding: 20px;
         }
         #midi-overlay.visible { display: block; }
+        body.midi-page #canvas-container { display: none !important; }
+        body.midi-page #midi-overlay {
+            display: block !important;
+            position: static;
+            background: #000;
+            padding: 16px;
+            z-index: auto;
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: auto;
+        }
+        body.midi-page #midi-content {
+            max-width: none;
+        }
+        body.midi-page #midi-close { display: none; }
+        body.midi-page #midi-back-link {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #6dc0ff;
+            text-decoration: none;
+            font-size: .92em;
+        }
+        body.midi-page #midi-back-link:hover { text-decoration: underline; }
+        body.midi-page #midi-session-banner {
+            background: #0f1a25;
+            border: 1px solid #2a4765;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 0 0 12px 0;
+            font-size: .88em;
+            color: #9fc5ea;
+        }
+        body.midi-page #midi-session-banner.empty {
+            background: #1a1a1a;
+            border-color: #333;
+            color: #888;
+        }
+        body.midi-page #midi-session-banner .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #204c74;
+            color: #cfe5fb;
+            margin-right: 8px;
+            font-size: .82em;
+        }
+        body:not(.midi-page) #midi-back-link,
+        body:not(.midi-page) #midi-session-banner { display: none; }
         #midi-content {
             background: #101010;
             border: 1px solid #444;
@@ -347,7 +398,7 @@
         }
     </style>
 </head>
-<body>
+<body class="midi-page">
 
 <div id="controls">
     <div style="width: 100%; border-bottom: 1px solid #333; margin-bottom: 10px; padding-bottom: 10px;">
@@ -420,8 +471,7 @@
     </div>
 
     <div class="control-group">
-        <button onclick="showMidiPlayground()" style="background:#3567b8;">🎹 MIDI Playground (modal)</button>
-        <button onclick="sendToMidiPlaygroundTab()" style="background:#2d8b7a;">🎹 Send to MIDI Playground (new tab)</button>
+        <button onclick="showMidiPlayground()" style="background:#3567b8;">🎹 MIDI Playground</button>
         <button onclick="openPrimeSpessaVersion()" style="background:#5a3fb3;">🧪 SpessaSynth Prime Version</button>
     </div>
     
@@ -459,7 +509,9 @@
 <!-- MIDI Playground Modal -->
 <div id="midi-overlay">
     <div id="midi-content">
+        <a id="midi-back-link" href="index.html">← Back to fbunc</a>
         <button id="midi-close" onclick="hideMidiPlayground()">&times;</button>
+        <div id="midi-session-banner" class="empty">No external session loaded — using the factorization engine (set N and T₀ in the sidebar).</div>
         <h2>MIDI Playground (Multi-Curve Note Roll)</h2>
         <p style="color:#99a; margin-top:0;">
             Unique plot heights are mapped to note lanes across your selected range. Time runs left-to-right over $n=1\ldots N$, with BPM/subdivision controls.
@@ -3611,40 +3663,6 @@ function hideMidiPlayground() {
     document.getElementById('midi-overlay').classList.remove('visible');
 }
 
-// Package the current factorization state as a session payload and open the
-// standalone MIDI Playground tab with it preloaded.
-function sendToMidiPlaygroundTab() {
-    try {
-        const N = Math.max(1, Math.min(params.N, MAX_N_SUPPORTED));
-        // Ensure snRe/…/isPrimeArr are up to date.
-        computeSequence(N);
-        const slice = (arr) => Array.prototype.slice.call(arr, 0, N + 1);
-        const srcSelect = document.getElementById('midi-source');
-        const activeSource = srcSelect ? srcSelect.value : 'sn_mag';
-        const payload = {
-            source: 'factorization',
-            label: `${activeSource} · N=${N} · T₀=${params.To}`,
-            N: N,
-            To: params.To,
-            sources: {
-                sn_re:    slice(snRe),
-                sn_im:    slice(snIm),
-                sn_mag:   slice(snMag),
-                sdot_re:  slice(sdotRe),
-                sdot_im:  slice(sdotIm),
-                sdot_mag: slice(sdotMag),
-            },
-            isPrime: slice(isPrimeArr),
-        };
-        const key = 'factorization_' + Date.now();
-        localStorage.setItem('pgm_midi_session_' + key, JSON.stringify(payload));
-        window.open('midi_playground.html?session=' + encodeURIComponent(key), '_blank');
-    } catch (err) {
-        console.error('sendToMidiPlaygroundTab failed:', err);
-        alert('Could not open MIDI Playground: ' + err.message);
-    }
-}
-
 window.addEventListener('resize', () => {
     if (document.getElementById('midi-overlay').classList.contains('visible')) {
         renderMidiRoll(midiState.isPlaying ? Math.max(0, midiState.playIndex - 1) : -1);
@@ -4297,6 +4315,111 @@ updateMidiSummary();
 // Initialize
 resize();
 recompute();
+
+// ─── MIDI Playground standalone bootstrap ────────────────────────────
+// Only runs when this file is served as midi_playground.html (body.midi-page).
+// Loads a session payload from localStorage if present, then opens the MIDI
+// panel as the main page content.
+(function bootstrapMidiPage() {
+    if (!document.body.classList.contains('midi-page')) return;
+
+    const PAYLOAD_PREFIX = 'pgm_midi_session_';
+    const urlParams = new URLSearchParams(location.search);
+    const sessionKey = urlParams.get('session');
+
+    function setBanner(html, cls) {
+        const el = document.getElementById('midi-session-banner');
+        if (!el) return;
+        el.innerHTML = html;
+        el.className = cls || '';
+    }
+
+    function copyArrayInto(target, source, N) {
+        if (!source || !target) return;
+        const len = Math.min(N + 1, target.length, source.length);
+        for (let i = 0; i < len; i++) target[i] = source[i];
+    }
+
+    function loadSession(payload) {
+        if (!payload || typeof payload !== 'object') return false;
+        const N = Math.min(Math.max(parseInt(payload.N, 10) || 0, 1), MAX_N_SUPPORTED);
+        const To = parseFloat(payload.To);
+        if (!N) return false;
+
+        params.N = N;
+        if (Number.isFinite(To) && To > 0) params.To = To;
+
+        // Sync sidebar inputs so the user sees the loaded values.
+        const nInput = document.getElementById('inp-n');
+        const tInput = document.getElementById('inp-to');
+        if (nInput) nInput.value = String(N);
+        if (tInput && Number.isFinite(To)) tInput.value = String(To);
+
+        // Populate the factorization arrays from the session.
+        const sources = payload.sources || {};
+        copyArrayInto(snRe,    sources.sn_re,    N);
+        copyArrayInto(snIm,    sources.sn_im,    N);
+        copyArrayInto(snMag,   sources.sn_mag,   N);
+        copyArrayInto(sdotRe,  sources.sdot_re,  N);
+        copyArrayInto(sdotIm,  sources.sdot_im,  N);
+        copyArrayInto(sdotMag, sources.sdot_mag, N);
+
+        // If the payload provides a single "primary" 1D curve (Curve Playground
+        // sends this), fan it out into all the source slots so the source
+        // dropdown still works.
+        if (sources.primary && Array.isArray(sources.primary)) {
+            const p = sources.primary;
+            for (let i = 0; i <= N && i < p.length; i++) {
+                const v = +p[i] || 0;
+                if (!sources.sn_re)    snRe[i]    = v;
+                if (!sources.sn_im)    snIm[i]    = v;
+                if (!sources.sn_mag)   snMag[i]   = Math.abs(v);
+                if (!sources.sdot_re)  sdotRe[i]  = v;
+                if (!sources.sdot_im)  sdotIm[i]  = v;
+                if (!sources.sdot_mag) sdotMag[i] = Math.abs(v);
+            }
+        }
+
+        if (Array.isArray(payload.isPrime)) {
+            const ip = payload.isPrime;
+            for (let i = 0; i <= N && i < ip.length; i++) isPrimeArr[i] = ip[i] ? 1 : 0;
+        }
+
+        // Skip computeSequence() — our external data already fills snRe/snIm/… .
+        currentComputedN = N;
+        midiState.needsRebuild = true;
+
+        const srcLabel = payload.source ? `<span class="badge">${payload.source}</span>` : '';
+        const info = payload.label ? `<strong>${payload.label}</strong>` : '(session loaded)';
+        setBanner(`${srcLabel}${info} · N=${N} · T₀=${params.To}`, '');
+        return true;
+    }
+
+    let loaded = false;
+    if (sessionKey) {
+        const raw = localStorage.getItem(PAYLOAD_PREFIX + sessionKey);
+        if (raw) {
+            try {
+                loaded = loadSession(JSON.parse(raw));
+            } catch (err) {
+                setBanner(`Failed to parse session <code>${sessionKey}</code>: ${err.message}`, 'empty');
+            }
+        } else {
+            setBanner(`Session <code>${sessionKey}</code> not found in localStorage — using defaults.`, 'empty');
+        }
+    }
+
+    // Open the MIDI panel as the main page content.
+    // (body.midi-page forces #midi-overlay to be visible via CSS; this call
+    // still does the rest: initWebMidi gated, buildMidiSequence, renderRoll.)
+    showMidiPlayground();
+
+    if (!loaded && !sessionKey) {
+        // Default state: computeSequence has already run for params.N from
+        // the `recompute()` call above, so buildMidiSequence (inside
+        // showMidiPlayground) will use those factorization values.
+    }
+})();
 
 </script>
 </body>
