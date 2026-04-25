@@ -31,7 +31,11 @@
     border-right: 1px solid var(--border);
     overflow-y: auto;
     padding: .9rem .7rem;
+    /* Column flex so admin-bar can sit at the bottom via margin-top:auto. */
+    display: flex;
+    flex-direction: column;
   }
+  aside h1, aside nav, aside .layout-status, aside .back { flex: 0 0 auto; }
   aside h1 {
     font-size: .8rem; font-weight: 600; letter-spacing: .08em;
     color: var(--fg-2); text-transform: uppercase;
@@ -181,6 +185,128 @@
   }
   .err { color: #ff6b6b; font-style: normal; }
 
+  /* ── Admin mode handles ───────────────────────────────────────────── */
+  aside .admin-bar {
+    display: flex; gap: .25rem; flex-wrap: wrap;
+    padding: .4rem .55rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-1);
+    margin-top: auto;
+    flex: 0 0 auto;
+  }
+  aside .admin-bar button {
+    background: transparent;
+    color: var(--fg-2);
+    border: 1px solid var(--border);
+    border-radius: .3rem;
+    padding: .25rem .5rem;
+    font-size: .78rem;
+    cursor: pointer;
+  }
+  aside .admin-bar button:hover { color: var(--accent); border-color: var(--accent); }
+  aside .admin-bar button.on { color: var(--bg-0); background: var(--accent); border-color: var(--accent); }
+
+  body.admin-mode aside nav a { padding-right: 6.5em; position: relative; }
+  body.admin-mode aside nav .section { padding-right: 6.5em; position: relative; }
+  .row-handles {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    display: none; gap: 1px;
+  }
+  body.admin-mode .row-handles { display: inline-flex; }
+  .row-handles button {
+    background: var(--bg-2);
+    color: var(--fg-1);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: .78rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .row-handles button:hover { color: var(--accent); border-color: var(--accent); }
+  .row-handles button.del:hover { color: #ff7a7a; border-color: #ff7a7a; }
+  aside nav .new-section-btn {
+    margin: .6rem .4rem;
+    padding: .3rem .6rem;
+    background: transparent;
+    color: var(--accent);
+    border: 1px dashed var(--accent);
+    border-radius: .3rem;
+    font-size: .82rem;
+    cursor: pointer;
+    display: none;
+  }
+  body.admin-mode aside nav .new-section-btn { display: inline-block; }
+
+  aside .layout-status {
+    font-size: .72rem;
+    color: var(--fg-2);
+    padding: .25rem .55rem 0;
+    line-height: 1.35;
+  }
+  aside .layout-status.local { color: var(--prime); }
+  aside .layout-status.repo  { color: var(--accent); }
+
+  /* ── View toggle (Reader / Graph) ─────────────────────────────────── */
+  .view-toggle {
+    position: sticky; top: 0; z-index: 20;
+    background: linear-gradient(to bottom, var(--bg-0) 60%, transparent);
+    padding: .6rem 0 .8rem; margin: -2rem -2.6rem .6rem; padding-left: 2.6rem; padding-right: 2.6rem;
+    display: flex; gap: .4rem;
+  }
+  .view-toggle button {
+    background: transparent;
+    color: var(--fg-2);
+    border: 1px solid var(--border);
+    border-radius: .3rem;
+    padding: .35rem .8rem;
+    font-size: .85rem;
+    cursor: pointer;
+  }
+  .view-toggle button:hover { color: var(--fg-0); border-color: var(--accent); }
+  .view-toggle button.on { color: var(--bg-0); background: var(--accent); border-color: var(--accent); }
+
+  /* ── Graph view ───────────────────────────────────────────────────── */
+  #graph-pane {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 80px);
+    background: var(--bg-0);
+    border: 1px solid var(--border);
+    border-radius: .4rem;
+    overflow: hidden;
+  }
+  body.graph-view #article { display: none; }
+  body.graph-view #graph-pane { display: block; }
+  #graph-svg { width: 100%; height: 100%; display: block; }
+  #graph-svg .node {
+    cursor: pointer;
+    transition: r .12s ease;
+  }
+  #graph-svg .node:hover { stroke-width: 3; }
+  #graph-svg .node.q       { fill: #6dd3c4; }
+  #graph-svg .node.a       { fill: #ffb547; }
+  #graph-svg .node.archive { fill: #888;    }
+  #graph-svg .node.essay   { fill: #9f8eff; }
+  #graph-svg .node.lab     { fill: #ff8fb9; }
+  #graph-svg .node.conv    { fill: #ffd467; }
+  #graph-svg .label {
+    fill: var(--fg-1);
+    font-size: 11px;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    pointer-events: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  #graph-svg .label.section {
+    fill: var(--fg-2);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  #graph-svg .edge { stroke: var(--border); stroke-opacity: .5; }
+
   @media (max-width: 720px) {
     body { flex-direction: column; }
     aside { flex: 0 0 auto; max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--border); }
@@ -193,13 +319,28 @@
 <aside>
   <h1>Math Docs</h1>
   <nav id="doc-nav"></nav>
+  <div class="layout-status" id="layout-status"></div>
+  <div class="admin-bar">
+    <button id="btn-admin"  title="Toggle admin mode (rename / move / delete)">🛠 Admin</button>
+    <button id="btn-export" title="Download layout as JSON (commit as docs/layout.json to make it the default for everyone)">⤴ Export</button>
+    <button id="btn-import" title="Load a layout JSON file">⤵ Import</button>
+    <button id="btn-reset"  title="Discard local edits and use the default / repo layout">↺ Reset</button>
+    <input id="import-file" type="file" accept=".json,application/json" style="display:none" />
+  </div>
   <a class="back" href="../index.html">← Back to fbunc</a>
 </aside>
 
 <main>
+  <div class="view-toggle">
+    <button id="btn-view-reader" class="on">📑 Reader</button>
+    <button id="btn-view-graph">🕸 Graph</button>
+  </div>
   <article id="article">
     <div class="loading">Loading…</div>
   </article>
+  <div id="graph-pane">
+    <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 </main>
 
 <!-- Libraries (defer so they run after the DOM is parsed) -->
@@ -289,28 +430,198 @@ const DOCS = [
   { slug: 'game-of-life-3d',         url: '../game_of_life_3d.html',       title: 'Game of Life 3D (Bays B6/S5,6,7)',    kind: 'lab', tag: '⚙' },
 ];
 
-// Filter out section-marker entries to get a flat list of real docs for lookup.
-const REAL_DOCS = DOCS.filter(d => d.slug);
+// ── Layout: default + persisted overrides ─────────────────────────────
+//
+// CURRENT_LAYOUT is the working copy used to render the sidebar. It can
+// come from three sources, in priority order:
+//   1. localStorage["pgm_docs_layout_v1"]  — admin's local edits, this browser only
+//   2. docs/layout.json                    — committed layout, applies to all visitors
+//   3. The DOCS array baked into this file — fallback default
+//
+// "Export" downloads the current layout as JSON; commit it as
+// docs/layout.json to make your edits the default for everyone.
+const LS_KEY = 'pgm_docs_layout_v1';
+const LAYOUT_FILE = 'layout.json';
+let CURRENT_LAYOUT = DOCS.slice();
+let LAYOUT_SOURCE = 'default';
 
-// ── Sidebar ────────────────────────────────────────────────────────────
-const nav = document.getElementById('doc-nav');
-for (const d of DOCS) {
-  if (d.section) {
-    const h = document.createElement('div');
-    h.className = 'section';
-    h.textContent = d.section;
-    nav.appendChild(h);
-    continue;
+async function resolveLayout() {
+  const local = localStorage.getItem(LS_KEY);
+  if (local) {
+    try { return { source: 'local', layout: JSON.parse(local) }; }
+    catch (_) { localStorage.removeItem(LS_KEY); }
   }
-  const a = document.createElement('a');
-  a.href = '#' + d.slug;
-  a.dataset.slug = d.slug;
-  const kindMap = { a: 'answer', archive: 'archive', essay: 'essay', lab: 'lab', conv: 'conv' };
-  if (kindMap[d.kind]) a.classList.add(kindMap[d.kind]);
-  // Render tag + title as text (titles are plain text; KaTeX will render any $...$ later)
-  a.innerHTML = `<span class="tag">${d.tag}</span>${d.title}`;
-  nav.appendChild(a);
+  try {
+    const res = await fetch(LAYOUT_FILE, { cache: 'no-cache' });
+    if (res.ok) {
+      const text = (await res.text()).trim();
+      if (text) return { source: 'repo', layout: JSON.parse(text) };
+    }
+  } catch (_) { /* layout.json absent — totally fine */ }
+  return { source: 'default', layout: DOCS.slice() };
 }
+
+function persistLayout() {
+  localStorage.setItem(LS_KEY, JSON.stringify(CURRENT_LAYOUT, null, 2));
+  LAYOUT_SOURCE = 'local';
+  updateLayoutStatus();
+}
+
+function exportLayout() {
+  const blob = new Blob([JSON.stringify(CURRENT_LAYOUT, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'layout.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
+}
+
+function importLayout(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!Array.isArray(parsed)) throw new Error('Expected a JSON array.');
+      CURRENT_LAYOUT = parsed;
+      persistLayout();
+      renderSidebar();
+    } catch (err) { alert('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function resetLayout() {
+  if (!confirm('Discard your local layout edits and use the default?')) return;
+  localStorage.removeItem(LS_KEY);
+  // Re-resolve so we pick up docs/layout.json if present, otherwise defaults.
+  resolveLayout().then(({ source, layout }) => {
+    CURRENT_LAYOUT = layout;
+    LAYOUT_SOURCE = source;
+    renderSidebar();
+    updateLayoutStatus();
+  });
+}
+
+function updateLayoutStatus() {
+  const el = document.getElementById('layout-status');
+  if (!el) return;
+  el.className = 'layout-status ' + LAYOUT_SOURCE;
+  if (LAYOUT_SOURCE === 'local') {
+    el.textContent = 'Local edits — Export to share with everyone.';
+  } else if (LAYOUT_SOURCE === 'repo') {
+    el.textContent = 'Layout from docs/layout.json (visible to all visitors).';
+  } else {
+    el.textContent = '';
+  }
+}
+
+// Helpers for working with the flat layout array.
+function realDocs() { return CURRENT_LAYOUT.filter(d => d.slug); }
+
+// ── Sidebar render ────────────────────────────────────────────────────
+const nav = document.getElementById('doc-nav');
+
+function renderSidebar() {
+  nav.innerHTML = '';
+  const adminMode = document.body.classList.contains('admin-mode');
+  const kindMap = { a: 'answer', archive: 'archive', essay: 'essay', lab: 'lab', conv: 'conv' };
+
+  CURRENT_LAYOUT.forEach((d, idx) => {
+    let row;
+    if (d.section) {
+      row = document.createElement('div');
+      row.className = 'section';
+      row.textContent = d.section;
+    } else {
+      row = document.createElement('a');
+      row.href = '#' + d.slug;
+      row.dataset.slug = d.slug;
+      if (kindMap[d.kind]) row.classList.add(kindMap[d.kind]);
+      row.innerHTML = `<span class="tag">${d.tag || ''}</span>${d.title || d.slug}`;
+    }
+    if (adminMode) attachAdminHandles(row, idx);
+    nav.appendChild(row);
+  });
+
+  // "+ New section" affordance shown only in admin mode (CSS-gated).
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'new-section-btn';
+  addBtn.textContent = '+ New section';
+  addBtn.addEventListener('click', () => {
+    const name = prompt('Section name:');
+    if (!name) return;
+    CURRENT_LAYOUT.push({ section: name });
+    persistLayout();
+    renderSidebar();
+  });
+  nav.appendChild(addBtn);
+
+  renderSidebarMath();
+  // Mark the active doc (if any) when the layout re-renders.
+  const cur = location.hash.replace('#', '');
+  if (cur) for (const a of nav.querySelectorAll('a')) {
+    a.classList.toggle('active', a.dataset.slug === cur);
+  }
+}
+
+function attachAdminHandles(row, idx) {
+  const handles = document.createElement('span');
+  handles.className = 'row-handles';
+  // Stop click bubbling so admin actions don't navigate to the doc.
+  handles.addEventListener('click', e => e.preventDefault());
+  const mk = (txt, title, fn, cls) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = txt;
+    b.title = title;
+    if (cls) b.className = cls;
+    b.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); fn(); });
+    handles.appendChild(b);
+  };
+  mk('↑', 'Move up',     () => moveItem(idx, -1));
+  mk('↓', 'Move down',   () => moveItem(idx, +1));
+  mk('✏︎', 'Rename',     () => renameItem(idx));
+  mk('✕', 'Delete',      () => deleteItem(idx), 'del');
+  row.appendChild(handles);
+}
+
+function moveItem(idx, delta) {
+  const j = idx + delta;
+  if (j < 0 || j >= CURRENT_LAYOUT.length) return;
+  const tmp = CURRENT_LAYOUT[idx];
+  CURRENT_LAYOUT[idx] = CURRENT_LAYOUT[j];
+  CURRENT_LAYOUT[j] = tmp;
+  persistLayout();
+  renderSidebar();
+}
+
+function renameItem(idx) {
+  const d = CURRENT_LAYOUT[idx];
+  if (d.section) {
+    const next = prompt('Rename section:', d.section);
+    if (next == null) return;
+    d.section = next.trim() || d.section;
+  } else {
+    const next = prompt('Rename entry:', d.title || '');
+    if (next == null) return;
+    d.title = next.trim() || d.title;
+  }
+  persistLayout();
+  renderSidebar();
+}
+
+function deleteItem(idx) {
+  const d = CURRENT_LAYOUT[idx];
+  const what = d.section ? `section "${d.section}"` : `entry "${d.title || d.slug}"`;
+  if (!confirm(`Delete ${what} from the sidebar?\n\n(The underlying file is not deleted; you can Reset to bring it back.)`)) return;
+  CURRENT_LAYOUT.splice(idx, 1);
+  persistLayout();
+  renderSidebar();
+}
+
 // Render any $...$ in sidebar titles with KaTeX once it's available
 function renderSidebarMath() {
   if (!window.renderMathInElement) return setTimeout(renderSidebarMath, 60);
@@ -319,7 +630,140 @@ function renderSidebarMath() {
     throwOnError: false, strict: 'ignore',
   });
 }
-renderSidebarMath();
+
+// ── Admin / view-toggle wiring ────────────────────────────────────────
+const btnAdmin  = document.getElementById('btn-admin');
+const btnExport = document.getElementById('btn-export');
+const btnImport = document.getElementById('btn-import');
+const btnReset  = document.getElementById('btn-reset');
+const importInput = document.getElementById('import-file');
+btnAdmin.addEventListener('click', () => {
+  document.body.classList.toggle('admin-mode');
+  btnAdmin.classList.toggle('on');
+  renderSidebar();
+});
+btnExport.addEventListener('click', exportLayout);
+btnImport.addEventListener('click', () => importInput.click());
+importInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) importLayout(f);
+  e.target.value = '';
+});
+btnReset.addEventListener('click', resetLayout);
+
+const btnViewReader = document.getElementById('btn-view-reader');
+const btnViewGraph  = document.getElementById('btn-view-graph');
+btnViewReader.addEventListener('click', () => setView('reader'));
+btnViewGraph .addEventListener('click', () => setView('graph'));
+
+function setView(kind) {
+  document.body.classList.toggle('graph-view', kind === 'graph');
+  btnViewReader.classList.toggle('on', kind !== 'graph');
+  btnViewGraph .classList.toggle('on', kind === 'graph');
+  if (kind === 'graph') renderGraph();
+}
+
+// ── Graph view (Obsidian-style, simple) ───────────────────────────────
+// Each section becomes a cluster; each doc becomes a node positioned
+// around its section's centroid. Edges are drawn from the section
+// header to each of its docs (and between adjacent sections), which
+// gives a readable network without needing to parse markdown links.
+function renderGraph() {
+  const svg = document.getElementById('graph-svg');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  const W = svg.clientWidth || 800;
+  const H = svg.clientHeight || 600;
+  const cx = W / 2, cy = H / 2;
+  const kindMap = { a: 'a', q: 'q', archive: 'archive', essay: 'essay', lab: 'lab', conv: 'conv' };
+
+  // Group docs into sections preserving CURRENT_LAYOUT order.
+  const groups = [];
+  let cur = null;
+  for (const d of CURRENT_LAYOUT) {
+    if (d.section) { cur = { name: d.section, items: [] }; groups.push(cur); }
+    else if (cur) cur.items.push(d);
+  }
+  if (groups.length === 0) return;
+
+  const N = groups.length;
+  const ringR = Math.min(W, H) * 0.36;
+  const groupCenters = groups.map((_, i) => {
+    const a = (-Math.PI / 2) + (2 * Math.PI * i / N);
+    return { x: cx + ringR * Math.cos(a), y: cy + ringR * Math.sin(a) };
+  });
+
+  // Edges between adjacent section centroids (a soft outer ring).
+  for (let i = 0; i < N; i++) {
+    const a = groupCenters[i];
+    const b = groupCenters[(i + 1) % N];
+    const e = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    e.setAttribute('class', 'edge');
+    e.setAttribute('x1', a.x); e.setAttribute('y1', a.y);
+    e.setAttribute('x2', b.x); e.setAttribute('y2', b.y);
+    svg.appendChild(e);
+  }
+
+  groups.forEach((g, gi) => {
+    const center = groupCenters[gi];
+    // Section label
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('class', 'label section');
+    label.setAttribute('x', center.x);
+    label.setAttribute('y', center.y - 8);
+    label.setAttribute('text-anchor', 'middle');
+    label.textContent = g.name;
+    svg.appendChild(label);
+
+    // Nodes around the section center
+    const m = g.items.length;
+    const localR = Math.min(80, 28 + m * 6);
+    g.items.forEach((d, di) => {
+      const a = (2 * Math.PI * di / Math.max(m, 1)) - Math.PI / 2;
+      const x = center.x + localR * Math.cos(a);
+      const y = center.y + localR * Math.sin(a);
+
+      // Edge from section center to node
+      const edge = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      edge.setAttribute('class', 'edge');
+      edge.setAttribute('x1', center.x); edge.setAttribute('y1', center.y);
+      edge.setAttribute('x2', x); edge.setAttribute('y2', y);
+      svg.appendChild(edge);
+
+      const node = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const cls = kindMap[d.kind] || 'q';
+      node.setAttribute('class', 'node ' + cls);
+      node.setAttribute('cx', x);
+      node.setAttribute('cy', y);
+      node.setAttribute('r', 8);
+      node.setAttribute('stroke', '#0a0c11');
+      node.setAttribute('stroke-width', 2);
+      node.setAttribute('data-slug', d.slug);
+      const titleEl = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      titleEl.textContent = (d.title || d.slug) + (d.tag ? ` [${d.tag}]` : '');
+      node.appendChild(titleEl);
+      node.addEventListener('click', () => {
+        location.hash = '#' + d.slug;
+        setView('reader');
+      });
+      svg.appendChild(node);
+
+      // Per-node label
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('class', 'label');
+      text.setAttribute('x', x);
+      text.setAttribute('y', y + 22);
+      text.setAttribute('text-anchor', 'middle');
+      const t = (d.title || d.slug || '').replace(/\$/g, '');
+      text.textContent = t.length > 22 ? t.slice(0, 21) + '…' : t;
+      svg.appendChild(text);
+    });
+  });
+}
+
+// Re-render the graph if the window changes size while it's visible.
+window.addEventListener('resize', () => {
+  if (document.body.classList.contains('graph-view')) renderGraph();
+});
 
 // ── Protect $…$ / $$…$$ from marked (incl. $...|...$ in pipe-tables) ──
 // Marked's GFM pipe-table parser splits cells on raw `|`, which breaks math
@@ -363,7 +807,12 @@ function renderMarkdown(raw) {
 
 // ── Load + render a doc (markdown) or embed a lab (html) ──────────────
 async function loadDoc(slug) {
-  const doc = REAL_DOCS.find(d => d.slug === slug) || REAL_DOCS[0];
+  // Always switch back to reader view when a doc is loaded.
+  if (document.body.classList.contains('graph-view')) setView('reader');
+
+  const docs = realDocs();
+  if (!docs.length) return;
+  const doc = docs.find(d => d.slug === slug) || docs[0];
 
   for (const a of nav.querySelectorAll('a')) {
     a.classList.toggle('active', a.dataset.slug === doc.slug);
@@ -419,7 +868,19 @@ async function loadDoc(slug) {
 }
 
 window.addEventListener('hashchange', () => loadDoc(location.hash.replace('#', '')));
-loadDoc(location.hash.replace('#', '') || REAL_DOCS[0].slug);
+
+// Bootstrap: resolve the layout (localStorage > docs/layout.json > defaults),
+// then render the sidebar and load the requested (or first) doc.
+(async function bootstrap() {
+  const { source, layout } = await resolveLayout();
+  CURRENT_LAYOUT = layout;
+  LAYOUT_SOURCE = source;
+  renderSidebar();
+  updateLayoutStatus();
+  const requested = location.hash.replace('#', '');
+  const docs = realDocs();
+  loadDoc(requested || (docs[0] && docs[0].slug));
+})();
 </script>
 
 </body>
